@@ -10,6 +10,9 @@
 **/dist/
 **/debug/
 
+# Kicad
+kicad/**/*.pdf
+
 # Node artifact files
 node_modules/
 dist/
