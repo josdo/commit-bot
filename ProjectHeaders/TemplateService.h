@@ -5,8 +5,8 @@
 
  ****************************************************************************/
 
-#ifndef ServTemplate_H
-#define ServTemplate_H
+#ifndef TemplateService_H
+#define TemplateService_H
 
 #include "ES_Types.h"
 
@@ -43,5 +43,5 @@ Description:
 */
 ES_Event_t RunTemplateService(ES_Event_t ThisEvent);
 
-#endif /* ServTemplate_H */
+#endif /* TemplateService_H */
 
