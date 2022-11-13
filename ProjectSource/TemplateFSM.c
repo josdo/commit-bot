@@ -16,7 +16,7 @@
 /*---------------------------- Module Variables ---------------------------*/
 // everybody needs a state variable, you may need others as well.
 // type of state variable should match htat of enum in header file
-static TemplateState_t CurrentState;
+static TemplateFSMState_t CurrentState;
 
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
@@ -66,7 +66,7 @@ ES_Event_t RunTemplateFSM(ES_Event_t ThisEvent)
   return ReturnEvent;
 }
 
-TemplateState_t QueryTemplateFSM(void)
+TemplateFSMState_t QueryTemplateFSM(void)
 {
   return CurrentState;
 }

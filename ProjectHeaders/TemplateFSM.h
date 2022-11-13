@@ -1,5 +1,5 @@
-#ifndef FSMTemplate_H
-#define FSMTemplate_H
+#ifndef TemplateFSM_H
+#define TemplateFSM_H
 
 // Event Definitions
 #include "ES_Configure.h" /* gets us event definitions */
@@ -9,8 +9,8 @@
 // State definitions for use with the query function
 typedef enum
 {
-  InitPState_FSMTemplate
-}TemplateState_t;
+  InitPState_TemplateFSM
+}TemplateFSMState_t;
 
 // Public Function Prototypes
 
@@ -55,5 +55,5 @@ Description:
 */
 TemplateState_t QueryTemplateFSM(void);
 
-#endif /* FSMTemplate_H */
+#endif /* TemplateFSM_H */
 
