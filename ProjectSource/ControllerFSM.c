@@ -4,7 +4,11 @@
 */
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "Controller.h"
+// #include "../ProjectSource/ControllerFSM.h"
+#include "ControllerFSM.h"
+#include "../FrameworkHeaders/dbprintf.h"
+#include "../PIC32_AD_Lib/PIC32_AD_Lib.h"
+// #include "pc32mx170f256b.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 
@@ -21,6 +25,13 @@ static uint32_t MinPiezoOutput;
 static uint32_t MaxPiezoOutput;
 static uint32_t NumPiezoBuckets;
 
+// Analog pins for drum piezos
+// TODO: update NumANxPins as more added and modify how ADC_MultiRead result is used.
+static uint32_t LeftDrumANx = 4;
+static uint32_t BottomDrumANx = 5;
+static uint32_t RightDrumANx = 12;
+static uint32_t NumANxPins = 3;
+
 /*------------------------------ Module Code ------------------------------*/
 bool InitController(uint8_t Priority)
 {
@@ -28,10 +39,17 @@ bool InitController(uint8_t Priority)
 
   // Init module level variables
   MyPriority = Priority;
-  CurrentState = InitPState;
-  MinPiezoOutput  = 0;
-  MaxPiezoOutput  = 250;
+  CurrentState = InitPState_Controller;
+
+  // Set piezo buckets in mV
+  // TODO: verify AD_lib reads in mV
+  MinPiezoOutput  = 800;
+  MaxPiezoOutput  = 2400;
   NumPiezoBuckets = 10;
+
+  // Initialize analog read library
+  uint16_t ANxPins = 1 << LeftDrumANx| 1 << BottomDrumANx | 1 << RightDrumANx;
+  ADC_ConfigAutoScan(ANxPins, NumANxPins);
 
   // Post successful initialization
   ThisEvent.EventType = ES_INIT;
@@ -57,7 +75,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
 
   switch (CurrentState)
   {
-    case InitPState:
+    case InitPState_Controller:
     {
       if (ThisEvent.EventType = ES_INIT)
       {
@@ -76,11 +94,18 @@ ControllerState_t QueryController(void)
 
 bool DrumIsHit(void)
 {
-  // TODO fill in using A/D library
+  uint32_t CurrPiezoReading[3];
+  ADC_MultiRead(CurrPiezoReading);
+  DB_printf("\n%u %u %u\n", CurrPiezoReading[0], CurrPiezoReading[1], CurrPiezoReading[2]);
   return true;
 }
 
 /***************************************************************************
  private functions
  ***************************************************************************/
+static uint32_t PiezoReadingToIntensity(uint32_t PiezoReading)
+{
+  // TODO: after mV reading is confirmed, do bucketing via for loop
+  return 0;
+}
 

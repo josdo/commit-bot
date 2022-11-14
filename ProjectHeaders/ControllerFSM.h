@@ -14,13 +14,14 @@ typedef enum
 
 typedef union
 {
-  char,
+  char FullByte;
   struct
   {
-    bool Drum1;
-    bool Drum2;
-    bool Drum3;
-  }
+    uint16_t Filler : 5;
+    bool Drum1 : 1;
+    bool Drum2 : 1;
+    bool Drum3 : 1;
+  };
 }IsHit_t;
 
 // Public Function Prototypes
@@ -64,7 +65,7 @@ Return:
 Description:
   Returns the current state of the Template state machine
 */
-TemplateState_t QueryController(void);
+ControllerState_t QueryController(void);
 
 /*
 Params
