@@ -98,7 +98,7 @@ bool DrumIsHit(void)
   uint32_t CurrPiezoReading[3];
   ADC_MultiRead(CurrPiezoReading);
   DB_printf("\n%u %u %u\n", CurrPiezoReading[0], CurrPiezoReading[1], CurrPiezoReading[2]);
-  return true;
+  return false;
 }
 
 /***************************************************************************
