@@ -4,10 +4,9 @@
 */
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-// #include "../ProjectSource/ControllerFSM.h"
-#include "ControllerFSM.h"
-#include "../FrameworkHeaders/dbprintf.h"
-#include "../PIC32_AD_Lib/PIC32_AD_Lib.h"
+#include "Controller.h"
+#include "dbprintf.h"
+#include "PIC32_AD_Lib.h"
 // #include "pc32mx170f256b.h"
 
 /*----------------------------- Module Defines ----------------------------*/
@@ -36,6 +35,8 @@ static uint32_t NumANxPins = 3;
 bool InitController(uint8_t Priority)
 {
   ES_Event_t ThisEvent;
+
+  DB_printf("\nInitializing Controller\n");
 
   // Init module level variables
   MyPriority = Priority;
