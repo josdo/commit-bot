@@ -1,5 +1,5 @@
-#ifndef Controller_H
-#define Controller_H
+#ifndef LEDFSM_H
+#define LEDFSM_H
 
 // Event Definitions
 #include "ES_Configure.h" /* gets us event definitions */
@@ -9,19 +9,9 @@
 // State definitions for use with the query function
 typedef enum
 {
-  InitPState_Controller, IRCoveredState, WelcomingState, PlayingState
-}ControllerState_t;
-
-//typedef union
-//{
-//  char,
-//  struct
-//  {
-//    bool Drum1;
-//    bool Drum2;
-//    bool Drum3;
-//  }
-//}IsHit_t;
+  InitLEDPState, WelcomingLEDState, IRCoveredLEDState, IRUncoveredLEDState, 
+  PlayingLEDState
+}LEDFSMState_t;
 
 // Public Function Prototypes
 
@@ -34,7 +24,7 @@ Description:
      Saves away the priority, sets up the initial transition and does any
      other required initialization for this state machine
 */
-bool InitController(uint8_t Priority);
+bool InitLEDFSM(uint8_t Priority);
 
 /*
 Params: 
@@ -44,7 +34,7 @@ Return:
 Description:
   Posts an event to this state machine's queue
 */
-bool PostController(ES_Event_t ThisEvent);
+bool PostLEDFSM(ES_Event_t ThisEvent);
 
 /*
 Params: 
@@ -54,7 +44,7 @@ Return:
 Description:
   returns the current state of the Template state machine
 */
-ES_Event_t RunController(ES_Event_t ThisEvent);
+ES_Event_t RunLEDFSM(ES_Event_t ThisEvent);
 
 /*
 Params:
@@ -64,19 +54,7 @@ Return:
 Description:
   Returns the current state of the Template state machine
 */
-ControllerState_t QueryController(void);
+LEDFSMState_t QueryLEDFSM(void);
 
-/*
-Params
-  None
-Return
-  bool: true if above minimum voltage threshold, false otherwise
-Description
-  When true, posts to the Controller service with a IsHit param
-*/
-bool DrumIsHit(void);
-
-bool checkIRSensor(void);
-
-#endif /* Controller_H */
+#endif /* TemplateFSM_H */
 
