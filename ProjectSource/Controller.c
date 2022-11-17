@@ -20,16 +20,22 @@
 static ControllerState_t CurrentState;
 static uint8_t MyPriority;
 
-static uint32_t MinPiezoOutput;
-static uint32_t MaxPiezoOutput;
-static uint32_t NumPiezoBuckets;
+// TODO specify in mV
+// static float analog_to_mV = 1024.0 / 3300;
+// static uint32_t MinPiezoVoltage_mV = 100;
+// static uint32_t MaxPiezoVoltage_mV = 1000;
+static uint32_t MinPiezoAnalog = 0;
+static uint32_t MaxPiezoAnalog = 300;
+static uint32_t NumPiezoVoltageBuckets = 9;
 
 // Analog pins for drum piezos
 // TODO: update NumANxPins as more added and modify how ADC_MultiRead result is used.
-static uint32_t LeftDrumANx = 4;
-static uint32_t BottomDrumANx = 5;
-static uint32_t RightDrumANx = 12;
+static uint32_t LeftDrumANx = 4; // RB2
+static uint32_t BottomDrumANx = 5; // RB3
+static uint32_t RightDrumANx = 12; // RB12
 static uint32_t NumANxPins = 3;
+
+static uint16_t LastPiezoReadTime;
 
 /*------------------------------ Module Code ------------------------------*/
 bool InitController(uint8_t Priority)
@@ -42,11 +48,7 @@ bool InitController(uint8_t Priority)
   MyPriority = Priority;
   CurrentState = InitPState_Controller;
 
-  // Set piezo buckets in mV
-  // TODO: verify AD_lib reads in mV
-  MinPiezoOutput  = 800;
-  MaxPiezoOutput  = 2400;
-  NumPiezoBuckets = 10;
+  LastPiezoReadTime = ES_Timer_GetTime();
 
   // Initialize analog read library
   uint16_t ANxPins = 1 << LeftDrumANx| 1 << BottomDrumANx | 1 << RightDrumANx;
@@ -95,9 +97,26 @@ ControllerState_t QueryController(void)
 
 bool DrumIsHit(void)
 {
-  uint32_t CurrPiezoReading[3];
-  ADC_MultiRead(CurrPiezoReading);
-  DB_printf("\n%u %u %u\n", CurrPiezoReading[0], CurrPiezoReading[1], CurrPiezoReading[2]);
+  static uint32_t LastMaxReading = 0;
+  uint16_t CurrPiezoReadTime = ES_Timer_GetTime();
+  // if (ES_Timer_GetTime() - LastPiezoReadTime > 1000 * ES_Timer_RATE_1mS)
+  if (CurrPiezoReadTime - LastPiezoReadTime > 0)
+  {
+    uint32_t CurrPiezoReading[3];
+    ADC_MultiRead(CurrPiezoReading);
+    uint32_t LeftPiezoReading = CurrPiezoReading[0];
+    if (LeftPiezoReading >= LastMaxReading)
+    {
+      LastMaxReading = LeftPiezoReading;
+      DB_printf("\n%u\n", LastMaxReading);
+    }
+    // uint32_t threshold = 20;
+    // if (LeftPiezoReading <= threshold)
+    // {
+    //   LastMaxReading = threshold;
+    // }
+    LastPiezoReadTime = CurrPiezoReadTime;
+  }
   return false;
 }
 

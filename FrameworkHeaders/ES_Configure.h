@@ -254,15 +254,15 @@
 typedef enum
 {
   ES_NO_EVENT = 0,
-  ES_ERROR,                 /* used to indicate an error from the service */
-  ES_INIT,                  /* used to transition from initial pseudo-state */
-  ES_TIMEOUT,               /* signals that the timer has expired */
-  ES_SHORT_TIMEOUT,         /* signals that a short timer has expired */
+  ES_ERROR,         /* used to indicate an error from the service */
+  ES_INIT,          /* used to transition from initial pseudo-state */
+  ES_TIMEOUT,       /* signals that the timer has expired */
+  ES_SHORT_TIMEOUT, /* signals that a short timer has expired */
   /* User-defined events start here */
-  ES_NEW_KEY,               /* signals a new key received from terminal */
+  ES_NEW_KEY, /* signals a new key received from terminal */
   ES_LOCK,
   ES_UNLOCK
-}ES_EventType_t;
+} ES_EventType_t;
 
 /****************************************************************************/
 // These are the definitions for the Distribution lists. Each definition
@@ -330,6 +330,5 @@ typedef enum
 // These symbolic names should be changed to be relevant to your application
 
 #define SERVICE0_TIMER 15
-
 
 #endif /* ES_CONFIGURE_H */
