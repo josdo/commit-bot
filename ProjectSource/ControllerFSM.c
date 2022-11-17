@@ -12,6 +12,8 @@
 #include "LED_Strip.h"
 
 #include "LEDFSM.h"
+#include "PointServoService.h"
+
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000 // 1 sec timer
 #define HALF_SEC (ONE_SEC/2) // 1/2 sec timer
@@ -128,9 +130,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
       break;
     
       case PlayingState: {
-          // begin the 30 second interaction timer
-          
-          
           switch(ThisEvent.EventType){
               case ES_NEW_KEY: {
                   // get a point
@@ -138,6 +137,11 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                       // reset the interaction timer
                       ES_Timer_StopTimer(INTERACTION_TIMER);
                       ES_Timer_InitTimer(INTERACTION_TIMER, THIRTY_SEC);
+                      
+                      ES_Event_t NewEvent;
+                      NewEvent.EventType = ES_VALID_HIT;
+                      NewEvent.EventParam = 0;                   
+                      PostPointServoService(NewEvent);
                       // post to the LED point
                   }
               }

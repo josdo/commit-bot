@@ -74,20 +74,33 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
 
   // TODO write service code
   switch(ThisEvent.EventType){
-      case ES_VALID_HIT:
-      case ES_NEW_KEY: {
-          if ('p' == ThisEvent.EventParam){
-              TotalPoints++;
+      case ES_INIT: {
+          TotalPoints = 0;
+          uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
+          PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
+      }
+      break;
+      
+      case ES_VALID_HIT: {
+          TotalPoints++;
               
-              if (11 == TotalPoints){
-                  TotalPoints = 0;
-              }
+          if (11 == TotalPoints){
+              TotalPoints = 0;
+          }
               
-              printf("Total points = %d\r\n", TotalPoints);
+          printf("Total points = %d\r\n", TotalPoints);
  
+          uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
+          PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
+
+      }
+      break;
+      
+      case ES_TIMEOUT: {
+          if (INTERACTION_TIMER == ThisEvent.EventParam){
+              TotalPoints = 0;
               uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
               PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
-
           }
       }
       break;

@@ -346,7 +346,7 @@ bool TakeDisplayUpdateStep(LED_Types_t WhichStrip)
       WhichLED = 0; // set up for next update
     }
     
-    for (uint32_t i=0; i< 50000; i++){};
+    for (uint32_t i=0; i< 500; i++){};
     
     return ReturnVal;
 }
