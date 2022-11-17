@@ -3,7 +3,7 @@
 
 typedef enum
 {
-    Drums = 0, Timer, Intensity, None
+    LeftDrum = 0, RightDrum, BottomDrum, Clock
 }LED_MUX_t;
 
 void InitMUXPins(void);

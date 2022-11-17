@@ -10,93 +10,58 @@
 
 // ################# Module Vars #################
 typedef enum {
-    Drum_LEDs = 0, Timer_LEDs, Intensity_LEDs
+    LeftDrum_LEDs = 0, RightDrum_LEDs, BottomDrum_LEDs, Clock_LEDs
 } LED_Types_t;
 
 typedef enum {
     Red = 1, Green, Blue, Purple, White, Yellow, Turquoise, Pink
 } Colors_t;
 
-/****************************************************************************
- Function
-  Clear_Strip
-
- Parameter
-  None
-
- Returns
-  bool: true when there are no more LEDs to clear; false
-        while there still more LEDs
-
- Description
-  
-   
-Example
-   while ( false == Clear_LEDs() )
-   {} // note this example is for non-event-driven code
-****************************************************************************/
+//****************************************************************************
+// Sets all the colors to 0 in the chosen LEDs array, intensity is set to 1
+//****************************************************************************/
 bool Clear_Strip( LED_Types_t WhichStrip);
 
+
+// ****************************************************************************
+// Set the intensity values of all LEDs in the chosen strip
+// Intensity must be between 0 - 31 (i.e. 5 bit number)
+// ****************************************************************************
 bool Set_Intensity(LED_Types_t WhichStrip, uint8_t intensity);
-void DefaultLED(void);
 
 
-/****************************************************************************
- Function
-  Set_Single_Color
 
- Parameter
-  LED_Types_t: Which LED strip to set the color of
-  Colors_t: One of the predefined colors
-  WhichLED: Which LED in the strip
-
- Returns
-  bool: true if successful, else false
-
- Description
-   Sets the value of a single LED in the chosen strip to a predefined color
-
-Example
-   
-****************************************************************************/
+//****************************************************************************
+// Set a single LED in a chosen strip to a certain color
+//****************************************************************************/
 bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t WhichLED);
 
 
-/****************************************************************************
- Function
-  Set_All_Color
 
- Parameter
-  LED_Types_t: Which LED strip to set the color of
-  Colors_t: One of the predefined colors
-
- Returns
-  bool: true if successful, else false
-
- Description
-   Sets all the LEDs in the chosen strup to a predefined color
-
-Example
-
-****************************************************************************/
+//****************************************************************************
+// Set all the LEDs in a certain LED strip to a certain color
+//****************************************************************************/
 bool Set_All_Color(LED_Types_t WhichStrip, Colors_t WhichColor);
 
-/****************************************************************************
- Function
-  Write_Buffer_To_Strip
 
- Parameter
-  LED_Types_t: Which LED strip to write
 
- Description
-   Writes the contents of the buffer to the input LED strip
-
-Example
-
-****************************************************************************/
+//****************************************************************************
+//Copies the contents of the display buffer to the LED strip 1 LED per call.
+//****************************************************************************/
 bool TakeDisplayUpdateStep(LED_Types_t WhichStrip);
 
-void selectLEDStrip(LED_Types_t WhichLED);
 
-#endif	/* DM_DISPLAY_H */
+// PRIVATE FUNCTIONS
+// ****************************************************************************
+// Helper function used to set pointers to the chosen LED strip
+// ****************************************************************************
+static void selectLEDStrip(LED_Types_t WhichLED);
+
+
+// ****************************************************************************
+// Helper function used to create the default blank LED array
+// ****************************************************************************
+static void DefaultLED(void);
+
+#endif
 

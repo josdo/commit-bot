@@ -9,8 +9,8 @@
 // State definitions for use with the query function
 typedef enum
 {
-  InitLEDPState, WelcomingLEDState, IRCoveredLEDState, IRUncoveredLEDState, 
-  PlayingLEDState
+  InitPState_Drums, WelcomingState_Drums, IRCoveredState_Drums, 
+  IRUncoveredState_Drums, PlayingState_Drums
 }LEDFSMState_t;
 
 // Public Function Prototypes

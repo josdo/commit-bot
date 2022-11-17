@@ -21,6 +21,7 @@
 #define HALF_SEC (ONE_SEC/2) // 1/2 sec timer
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
 #define THIRTY_SEC (ONE_SEC * 30) // 30 sec timer
+#define ONE_MIN (ONE_SEC * 60) // 30 sec timer
 #define INTERACTION_SEC (ONE_SEC * 15) // interaction timer
 
 // IR defines
@@ -61,9 +62,7 @@ bool InitController(uint8_t Priority)
   ADC_ConfigAutoScan( IR_PIN, 1);
   ADC_MultiRead(AnalogReadings);
   PrevReadings[0] = 0;
-  
-  SetMuxOutput(Timer); // default to have none of the LEDs selected
-  
+    
   
   // Post successful initialization
   ThisEvent.EventType = ES_INIT;
@@ -92,14 +91,14 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
       {
         if (ThisEvent.EventType = ES_INIT)
         {
-            CurrentState = WelcomingState;
+            CurrentState = WelcomingState_Controller;
         }
       } break;
     
-      case WelcomingState:{
+      case WelcomingState_Controller:{
           switch(ThisEvent.EventType){
               case ES_IR_COVERED: {
-                  CurrentState = IRCoveredState;
+                  CurrentState = IRCoveredState_Controller;
                   
                   // start the IR covered timer
                   ES_Timer_InitTimer(IR_COVERED_TIMER, TWO_SEC);
@@ -110,17 +109,17 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
       }
       break;
     
-      case IRCoveredState: {
+      case IRCoveredState_Controller: {
             switch(ThisEvent.EventType){
               case ES_IR_UNCOVERED: {
-                  CurrentState = WelcomingState;
+                  CurrentState = WelcomingState_Controller;
                   printf("Timer was stopped!\r\n");
                   ES_Timer_StopTimer(IR_COVERED_TIMER);
               }
               break;
               
               case ES_TIMEOUT: {
-                  CurrentState = PlayingState;
+                  CurrentState = PlayingState_Controller;
                   printf("Now playing the game!\r\n");
                   
                   // Let the LEDs know the game has started
@@ -129,15 +128,18 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   PostDRUM_LEDFSM(NewEvent);
                   PostClockFSM(NewEvent);
                   
-                  printf("Being interaction timer\r\n");
+                  printf("Begin interaction timer: 15 SECONDS\r\n");
                   ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
+                  
+                  printf("Begin zen timer: ONE MINUTE \r\n");
+                  ES_Timer_InitTimer(ZEN_TIMER, ONE_MIN);
               }
               break;
           }
       }
       break;
     
-      case PlayingState: {
+      case PlayingState_Controller: {
           switch(ThisEvent.EventType){
               case ES_NEW_KEY: {
                   // get a point
@@ -158,13 +160,21 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
               case ES_TIMEOUT: {
                   if (INTERACTION_TIMER == ThisEvent.EventParam){
                       printf("Interaction timeout controller\r\n");
-                      CurrentState = WelcomingState;
+                      CurrentState = WelcomingState_Controller;
+                      
+                      // stop zen timer
+                      ES_Timer_StopTimer(ZEN_TIMER);
                   }
               }
               break;
           }
       }
-      break;     
+      break;   
+      
+      case ZenState_Controller: {
+          
+      }
+      break;
   }
 
   return ReturnEvent;
@@ -199,22 +209,25 @@ bool checkIRSensor(void){
         PrevReadings[0] = currVal;
         
         // IR covered and in the welcoming state
-        if ((currVal < 500) && (WelcomingState == CurrentState)){ 
+        if ((currVal < 500) && (WelcomingState_Controller == CurrentState)){ 
 
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_COVERED;
             ThisEvent.EventParam = Green;
-            PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
-            PostClockFSM(ThisEvent); 
+            
+            PostDRUM_LEDFSM(ThisEvent); // post to drum FSM
             PostController(ThisEvent); // post to this FSM
+            PostClockFSM(ThisEvent); // post to the clock FSM
+            
             returnVal = true;
         }
         
-        else if ((currVal >= 500) && (IRCoveredState == CurrentState)){
+        else if ((currVal >= 500) && (IRCoveredState_Controller == CurrentState)){
             
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_UNCOVERED;
             ThisEvent.EventParam = Green;
+            
             PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
             PostClockFSM(ThisEvent); 
             PostController(ThisEvent); // post to this FSM

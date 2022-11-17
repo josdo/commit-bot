@@ -12,7 +12,9 @@
 
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000
-#define TWO_SEC 2000
+#define TWO_SEC (2 * ONE_SEC)
+#define SIX_SEC (6 * ONE_SEC)
+#define TEN_SEC (10 * ONE_SEC)
 
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
@@ -33,6 +35,9 @@ static uint8_t LEDIntensity = 1;
 // next color in welcoming state
 static Colors_t NextWelcomingColor;
 
+// index of clock while playing the game
+static uint8_t Clock_idx = 1;
+
 /*------------------------------ Module Code ------------------------------*/
 bool InitClockFSM(uint8_t Priority)
 {
@@ -49,7 +54,7 @@ bool InitClockFSM(uint8_t Priority)
   SPISetup_BasicConfig(SPI_SPI1);
   SPISetup_SetLeader(SPI_SPI1, SPI_SMP_MID); // make pic332 leader  
   //  SPISetup_SetBitTime(SPI_SPI1, 10000); // 1000 kHz clock
-  SPISetup_SetBitTime(SPI_SPI1, 10000/5);
+  SPISetup_SetBitTime(SPI_SPI1, 10000/10);
   SPISetup_MapSSOutput(SPI_SPI1, SPI_RPA0); // set SS to pin 2
   SPISetup_MapSDOutput(SPI_SPI1, SPI_RPA1); // set SDO to pin 3
   SPISetup_SetXferWidth(SPI_SPI1, SPI_32BIT); // 16 bit datawidth
@@ -61,9 +66,9 @@ bool InitClockFSM(uint8_t Priority)
    
   // set up the MUX pins
   InitMUXPins();
-  SetMuxOutput(Timer_LEDs);
-  Clear_Strip(Timer_LEDs); // clear the LEDs
-  Set_Intensity(Timer_LEDs, LEDIntensity); // min intensity
+  SetMuxOutput(Clock);
+  Clear_Strip(Clock_LEDs); // clear the LEDs
+  Set_Intensity(Clock_LEDs, LEDIntensity); // min intensity
   
   // set the next color
   NextWelcomingColor = Turquoise;
@@ -99,9 +104,9 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           CurrentState = WelcomeState_ClockFSM;
           
           // always make the LEDs turquoise when entering WelcomingState
-          SetMuxOutput(Timer_LEDs);
-          Set_All_Color(Timer_LEDs, NextWelcomingColor);
-          Set_Intensity(Timer_LEDs, LEDIntensity);
+          SetMuxOutput(Clock);
+          Set_All_Color(Clock_LEDs, NextWelcomingColor);
+          Set_Intensity(Clock_LEDs, LEDIntensity);
           NextWelcomingColor = Purple;
           
           ES_Event_t NewEvent;
@@ -112,11 +117,13 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
     } break;
     
       case WelcomeState_ClockFSM: {
+          Clock_idx = 1;
           switch (ThisEvent.EventType){
             case ES_TIMEOUT: {
               // write the next color
-                  SetMuxOutput(Timer_LEDs);
-                  Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                  SetMuxOutput(Clock);
+                  Set_All_Color(Clock_LEDs, NextWelcomingColor);
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
@@ -136,8 +143,8 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           
             case ES_UPDATING_LED: {
                   // still updating the LEDs
-                  SetMuxOutput(Timer_LEDs);
-                  if (false == TakeDisplayUpdateStep(Timer_LEDs)){
+                  SetMuxOutput(Clock);
+                  if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = ThisEvent.EventParam;
@@ -157,9 +164,9 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   CurrentState = IRCovered_ClockFSM; // advance the state
                   
                   // set the new color
-                  SetMuxOutput(Timer_LEDs);
-                  Set_All_Color(Timer_LEDs, ThisEvent.EventParam);
-                  Set_Intensity(Timer_LEDs, LEDIntensity);
+                  SetMuxOutput(Clock);
+                  Set_All_Color(Clock_LEDs, ThisEvent.EventParam);
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
                   
                   // start updating the LEDs
                   ES_Event_t NewEvent;
@@ -175,9 +182,9 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
       case IRCovered_ClockFSM: {
           switch(ThisEvent.EventType){
               case ES_UPDATING_LED: { 
-                  SetMuxOutput(Timer_LEDs);
+                  SetMuxOutput(Clock);
                   // update LED display
-                  if (false == TakeDisplayUpdateStep(Timer_LEDs)){
+                  if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = ThisEvent.EventParam;
@@ -193,8 +200,9 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   CurrentState = WelcomeState_ClockFSM; 
                   
                   // write the next welcoming color
-                  SetMuxOutput(Timer_LEDs);
-                  Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                  SetMuxOutput(Clock);
+                  Set_All_Color(Clock_LEDs, NextWelcomingColor);
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
@@ -204,26 +212,71 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               
               case ES_ENTER_GAME: {
                   CurrentState = PlayingGameState_ClockFSM;
+                  Clear_Strip(Clock_LEDs); // turn off Timer LEDs for now
+                  
+                  ES_Event_t NewEvent;
+                  NewEvent.EventType = ES_UPDATING_LED;
+                  NewEvent.EventParam = ThisEvent.EventParam; 
+                  PostClockFSM(NewEvent);
+                  
+                  printf("6 second clock init\r\n");
+                  ES_Timer_InitTimer(TIME_ELAPSED_TIMER, SIX_SEC);
               }
               break;
           }
       }
       break;
       
-      case PlayingGameState_ClockFSM: {
-          printf("playing game clock\r\n");
+      case PlayingGameState_ClockFSM: { 
           switch(ThisEvent.EventType){
+              case ES_UPDATING_LED: { 
+                  SetMuxOutput(Clock);
+                  // update LED display
+                  if (false == TakeDisplayUpdateStep(Clock_LEDs)){
+                    ES_Event_t NewEvent;
+                    NewEvent.EventType = ES_UPDATING_LED;
+                    NewEvent.EventParam = ThisEvent.EventParam;
+                    
+                    PostClockFSM(NewEvent);
+                  }
+              }
+              break;
+              
               case ES_TIMEOUT: {
                   if (INTERACTION_TIMER == ThisEvent.EventParam){
                     // go back to welcoming state
                     CurrentState = WelcomeState_ClockFSM; 
                   
                     // write the next welcoming color
-                    Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                    Set_All_Color(Clock_LEDs, NextWelcomingColor);
+                    Set_Intensity(Clock_LEDs, LEDIntensity);
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = 0;
                     PostClockFSM(NewEvent);
+                  }
+                  
+                  else if (TIME_ELAPSED_TIMER == ThisEvent.EventParam){
+                    CurrentState = PlayingGameState_ClockFSM;
+                    printf("6 sec clock timeout\r\n");
+                    SetMuxOutput(Clock);
+                    
+                    // Light the next LED for the timer
+                    Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
+                    Set_Intensity(Clock_LEDs, LEDIntensity);
+                    Clock_idx++;
+                    
+                    if (Clock_idx > 10){
+                        Clock_idx = 10;
+                    }
+                    
+                    ES_Event_t NewEvent;
+                    NewEvent.EventType = ES_UPDATING_LED;
+                    NewEvent.EventParam = 0;
+                    PostClockFSM(NewEvent);
+                    
+                    // restart the timer
+                    ES_Timer_InitTimer(TIME_ELAPSED_TIMER, SIX_SEC);
                   }
               }
               break;

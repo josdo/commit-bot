@@ -21,25 +21,25 @@ void InitMUXPins(void){
 
 void SetMuxOutput(LED_MUX_t WhichOutput){
     switch(WhichOutput){
-        case Drums: { // 0
+        case LeftDrum: { // 0
             MUX_A_PIN = 0;
             MUX_B_PIN = 0;
         }
         break;
         
-        case Timer: { // 1
+        case RightDrum: { // 1
             MUX_A_PIN = 1;
             MUX_B_PIN = 0;
         }
         break;
         
-        case Intensity: { // 2
+        case BottomDrum: { // 2
             MUX_A_PIN = 0;
             MUX_B_PIN = 1;
         }
         break;
         
-        case None: { // 3
+        case Clock: { // 3
             MUX_A_PIN = 1;
             MUX_B_PIN = 1;
         }

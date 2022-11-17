@@ -18,14 +18,11 @@
 #include "LED_Strip.h"
 
 /*----------------------------- Module Defines ----------------------------*/
-#define NUMDrum 27
-#define NumIntensity 3
-#define NumTimer 10
-#define NumModules 4
+#define NUMDrum 9 // LEDs in each drum strip
+#define NUMClock 10 // LEDs in the timer
+#define NumModules 4 // num of 8 bit words for each LED
 
 #define LED_Start 0b11100000
-uint32_t EndFrame = 0x11111111;
-
 
 /*------------------------------ Module Types -----------------------------*/
 // this union definition assumes that the display is made up of 4 modules
@@ -45,10 +42,12 @@ typedef enum { LED_StartFrame = 0, LED_Middle, LED_EndFrame
 /*---------------------------- Module Variables ---------------------------*/
 // We make the display buffer from an array of these unions, one for each 
 // row in the display
-static LED_t Drum_Strip[NUMDrum];
-static LED_t Intensity_Strip[NumIntensity];
-static LED_t Timer_Strip[NumTimer];
+static LED_t LeftDrum_Strip[NUMDrum];
+static LED_t RightDrum_Strip[NUMDrum];
+static LED_t BottomDrum_Strip[NUMDrum];
+static LED_t Clock_Strip[NUMClock];
 
+// pointers to the arrays above
 static volatile LED_t * pLEDStrip; // pointer to the LED strip array
 static volatile uint8_t NumLEDs; // pointer to the number of LEDs in the array
 static volatile uint8_t Idx = 0; 
@@ -56,36 +55,22 @@ static volatile uint8_t Idx = 0;
 // this is the state variable for tracking init steps
 static Clear_Steps_t CurrentInitStep =  LED_StartFrame;
 
+// just zeros for clearing LEDs
 static const uint32_t ZEROS = 0; // all 0's
+uint32_t EndFrame = 0x11111111;
 
 static LED_t ClearLEDs;
 
-static uint8_t Drum_idx = 0;
-static uint8_t Timer_idx = 0;
-static uint8_t Intensity_idx = 0;
+// not used right now
+static uint8_t RightDrum_idx = 0;
+static uint8_t LeftDrum_idx = 0;
+static uint8_t BottomDrum_idx = 0;
+static uint8_t Clock_idx = 0;
 
-/*------------------------------ Module Code ------------------------------*/
-void DefaultLED(void){
-    ClearLEDs.ByBytes[3] = 0b11100000;
-    ClearLEDs.ByBytes[2] = 0;
-    ClearLEDs.ByBytes[1] = 0;
-    ClearLEDs.ByBytes[0] = 0;
-}
+//------------------------------ Module Code ------------------------------*/
 
-/****************************************************************************
- Function
-  DM_TakeInitDisplayStep
 
-  Description
-  Initializes the MAX7219 4-module display performing 1 step for each call:
-    First, bring put it in shutdown to disable all displays, return false
-    Next fill the display RAM with Zeros to insure blanked, return false
-    Then Disable Code B decoding for all digits, return false
-    Then, enable scanning for all digits, return false
-    The next setup step is to set the brightness to minimum, return false
-    Copy our display buffer to the display, return false
-    Finally, bring it out of shutdown and return true
-****************************************************************************/
+//****************************************************************************
 bool Clear_Strip(LED_Types_t WhichStrip)
 {
     bool returnVal = true;
@@ -98,40 +83,12 @@ bool Clear_Strip(LED_Types_t WhichStrip)
     }
     
     return returnVal;
-//    static uint8_t LEDIndex = 1;
-//    bool ReturnVal = false;
-//
-//    selectLEDStrip(WhichStrip);
-//
-//    switch (CurrentInitStep) {
-//    case LED_StartFrame: // send the init frame
-//        SPIOperate_SPI1_Send32(ZEROS);
-//        CurrentInitStep++;
-//        break;
-//
-//    case LED_Middle:
-//        if (LEDIndex > 10) { // have cleared all the LEDs
-//            CurrentInitStep++;
-//        }
-//
-//        else {
-//            SPIOperate_SPI1_Send32(ClearLEDs.FullRow);
-//            LEDIndex++;
-//        }
-//        break;
-//
-//    case LED_EndFrame: // end frame is just another zero frame
-//        SPIOperate_SPI1_Send32Wait(ZEROS);
-//        CurrentInitStep = LED_StartFrame;
-//        LEDIndex = 1;
-//        ReturnVal = true;
-//        break;
-//    }
-//    
-//    for (uint32_t i = 0; i < 40000; i++) {}; // need small delay between sending data
-//    return ReturnVal;
 }
+//****************************************************************************
 
+
+
+//****************************************************************************
 bool Set_Intensity(LED_Types_t WhichStrip, uint8_t intensity) {
     selectLEDStrip(WhichStrip);
 
@@ -140,18 +97,21 @@ bool Set_Intensity(LED_Types_t WhichStrip, uint8_t intensity) {
     }
     for (uint8_t i = 0; i < NumLEDs; i++) { // go through all the LEDs and set their brightness
         pLEDStrip[i].ByBytes[3] = (LED_Start | intensity);
-//        pLEDStrip[i].ByBytes[3] = 0b11100001;
     }
 
     return true;
 }
+// ****************************************************************************
 
+
+
+// ****************************************************************************
 bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t WhichLED) {
     bool ReturnVal = true;
 
     selectLEDStrip(WhichStrip);
 
-    if (WhichLED > NumLEDs) {
+    if (WhichLED > NumLEDs || WhichLED < 1) {
         ReturnVal = false;
     }
 
@@ -222,7 +182,11 @@ bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t Which
     
     return ReturnVal;
 }
+// ****************************************************************************
 
+
+
+// ****************************************************************************
 bool Set_All_Color(LED_Types_t WhichStrip, Colors_t WhichColor){
     bool ReturnVal = true;
 
@@ -296,38 +260,13 @@ bool Set_All_Color(LED_Types_t WhichStrip, Colors_t WhichColor){
     
     return ReturnVal;
 }
- // *************************************************************************
-void selectLEDStrip(LED_Types_t WhichLED) {
-    if (Drum_LEDs == WhichLED) {
-        pLEDStrip = Drum_Strip;
-        NumLEDs = NUMDrum;
-        Idx = Drum_idx;
-    }
-
-    else if (Timer_LEDs == WhichLED) {
-        pLEDStrip = Timer_Strip;
-        NumLEDs = NumTimer;
-        Idx = Timer_idx;
-    }
-
-    else if (Intensity_LEDs == WhichLED) {
-        pLEDStrip = Intensity_Strip;
-        NumLEDs = NumIntensity;
-        Idx = Intensity_idx;
-    }
-}
+// ****************************************************************************
 
 
-// *************************************************************************
 
-/****************************************************************************
- Function
-  DM_TakeDisplayUpdateStep
 
- Description
-  Copies the contents of the display buffer to the MAX7219 controllers 1 row
-  per call.
-****************************************************************************/
+//****************************************************************************
+
 bool TakeDisplayUpdateStep(LED_Types_t WhichStrip)
 {
     bool ReturnVal = false;
@@ -345,9 +284,8 @@ bool TakeDisplayUpdateStep(LED_Types_t WhichStrip)
     // your code  to check when we are done sending rows goes here 
     if (NumLEDs == WhichLED)
     {
-//      SPIOperate_SPI1_Send32(ZEROS);
-      SPIOperate_SPI1_Send32Wait(EndFrame);
-//      SPIOperate_SPI1_Send32Wait(EndFrame); // end frame is also all 0's
+//      SPIOperate_SPI1_Send32Wait(ZEROS); // same as the start frame
+      SPIOperate_SPI1_Send32Wait(EndFrame); // end frame is all 1s
       ReturnVal = true; // show we are done
       WhichLED = 0; // set up for next update
     }
@@ -356,8 +294,44 @@ bool TakeDisplayUpdateStep(LED_Types_t WhichStrip)
     
     return ReturnVal;
 }
+ // *************************************************************************
 
 
 
+// PRIVATE FUNCTIONS
+// *************************************************************************
+static void selectLEDStrip(LED_Types_t WhichLED) {
+    if (LeftDrum_LEDs == WhichLED) {
+        pLEDStrip = LeftDrum_Strip;
+        NumLEDs = NUMDrum;
+        Idx = LeftDrum_idx;
+    }
+    
+    else if (RightDrum_LEDs == WhichLED) {
+        pLEDStrip = RightDrum_Strip;
+        NumLEDs = NUMDrum;
+        Idx = RightDrum_idx;
+    }
 
+    else if (BottomDrum_LEDs == WhichLED) {
+        pLEDStrip = BottomDrum_Strip;
+        NumLEDs = NUMDrum;
+        Idx = BottomDrum_idx;
+    }
 
+    else if (Clock_LEDs == WhichLED) {
+        pLEDStrip = Clock_Strip;
+        NumLEDs = NUMClock;
+        Idx = Clock_idx;
+    }
+}
+// *************************************************************************
+
+// *************************************************************************
+static void DefaultLED(void){
+    ClearLEDs.ByBytes[3] = 0b11100001;
+    ClearLEDs.ByBytes[2] = 0;
+    ClearLEDs.ByBytes[1] = 0;
+    ClearLEDs.ByBytes[0] = 0;
+}
+// *************************************************************************

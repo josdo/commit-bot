@@ -9,7 +9,8 @@
 // State definitions for use with the query function
 typedef enum
 {
-  InitPState_Controller, IRCoveredState, WelcomingState, PlayingState
+  InitPState_Controller, IRCoveredState_Controller, WelcomingState_Controller,
+  PlayingState_Controller, ZenState_Controller
 }ControllerState_t;
 
 

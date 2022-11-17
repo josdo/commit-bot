@@ -323,8 +323,8 @@ typedef enum
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
-#define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER13_RESP_FUNC PostClockFSM
+#define TIMER14_RESP_FUNC PostController
 #define TIMER15_RESP_FUNC ES_PostList00
 
 /****************************************************************************/
@@ -339,6 +339,8 @@ typedef enum
 #define LED_REFRESH_TIMER 0
 #define IR_COVERED_TIMER 1
 
+#define TIME_ELAPSED_TIMER 13
+#define ZEN_TIMER 14
 #define INTERACTION_TIMER 15
 
 
