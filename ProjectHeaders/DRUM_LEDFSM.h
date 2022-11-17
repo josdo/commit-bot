@@ -1,5 +1,5 @@
-#ifndef LEDFSM_H
-#define LEDFSM_H
+#ifndef DRUM_LEDFSM_H
+#define DRUM_LEDFSM_H
 
 // Event Definitions
 #include "ES_Configure.h" /* gets us event definitions */
@@ -24,7 +24,7 @@ Description:
      Saves away the priority, sets up the initial transition and does any
      other required initialization for this state machine
 */
-bool InitLEDFSM(uint8_t Priority);
+bool InitDRUM_LEDFSM(uint8_t Priority);
 
 /*
 Params: 
@@ -34,7 +34,7 @@ Return:
 Description:
   Posts an event to this state machine's queue
 */
-bool PostLEDFSM(ES_Event_t ThisEvent);
+bool PostDRUM_LEDFSM(ES_Event_t ThisEvent);
 
 /*
 Params: 
@@ -44,7 +44,7 @@ Return:
 Description:
   returns the current state of the Template state machine
 */
-ES_Event_t RunLEDFSM(ES_Event_t ThisEvent);
+ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent);
 
 /*
 Params:

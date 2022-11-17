@@ -12,6 +12,11 @@ typedef enum
   InitPState_Controller, IRCoveredState, WelcomingState, PlayingState
 }ControllerState_t;
 
+typedef enum
+{
+    Drums = 0, Timer, Intensity, None
+}LED_MUX_t;
+
 //typedef union
 //{
 //  char,
@@ -77,6 +82,8 @@ Description
 bool DrumIsHit(void);
 
 bool checkIRSensor(void);
+
+void SetMuxOutput(LED_MUX_t WhichOutput);
 
 #endif /* Controller_H */
 

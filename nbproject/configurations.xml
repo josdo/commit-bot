@@ -50,8 +50,8 @@
       <itemPath>ProjectHeaders/LED_Strip.h</itemPath>
       <itemPath>ProjectHeaders/PIC32_AD_Lib.h</itemPath>
       <itemPath>ProjectHeaders/PIC32_SPI_HAL.h</itemPath>
-      <itemPath>ProjectHeaders/LEDFSM.h</itemPath>
       <itemPath>ProjectHeaders/LEDTimerService.h</itemPath>
+      <itemPath>ProjectHeaders/DRUM_LEDFSM.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -69,8 +69,8 @@
       <itemPath>ProjectSource/LED_Strip.c</itemPath>
       <itemPath>ProjectSource/PIC32_AD_Lib.c</itemPath>
       <itemPath>ProjectSource/PIC32_SPI_HAL.c</itemPath>
-      <itemPath>ProjectSource/LEDFSM.c</itemPath>
       <itemPath>ProjectSource/LEDTimerService.c</itemPath>
+      <itemPath>ProjectSource/DRUM_LEDFSM.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

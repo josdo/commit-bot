@@ -11,7 +11,7 @@
 #include "PIC32_SPI_HAL.h"
 #include "LED_Strip.h"
 
-#include "LEDFSM.h"
+#include "DRUM_LEDFSM.h"
 #include "PointServoService.h"
 
 /*----------------------------- Module Defines ----------------------------*/
@@ -20,6 +20,18 @@
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
 #define THIRTY_SEC (ONE_SEC * 30) // interaction timer
 
+// MUX defines
+//#define MUX_A_PIN PORTBbits.RB8
+//#define MUX_B_PIN PORTBbits.RB9
+#define MUX_A_PIN LATBbits.LATB8
+#define MUX_B_PIN LATBbits.LATB9
+
+
+#define MUX_A_TRIS TRISBbits.TRISB8
+#define MUX_B_TRIS TRISBbits.TRISB9
+
+
+// IR defines
 #define IR_PIN (1<<11) // AN11
 
 /*---------------------------- Module Functions ---------------------------*/
@@ -57,7 +69,14 @@ bool InitController(uint8_t Priority)
   ADC_ConfigAutoScan( IR_PIN, 1);
   ADC_MultiRead(AnalogReadings);
   PrevReadings[0] = 0;
-
+  
+  // Set up the MUX outputs from the PIC
+  MUX_A_TRIS = 0;
+  MUX_B_TRIS = 0;
+  
+  SetMuxOutput(Intensity); // default to have none of the LEDs selected
+  
+  
   // Post successful initialization
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
@@ -119,7 +138,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   // Let the LEDs know the game has started
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_ENTER_GAME;
-                  PostLEDFSM(NewEvent);
+                  PostDRUM_LEDFSM(NewEvent);
                   
                   printf("Being interaction timer\r\n");
                   ES_Timer_InitTimer(INTERACTION_TIMER, THIRTY_SEC);
@@ -196,7 +215,7 @@ bool checkIRSensor(void){
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_COVERED;
             ThisEvent.EventParam = Green;
-            PostLEDFSM(ThisEvent); // post to LED FSM
+            PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
             PostController(ThisEvent); // post to this FSM
             returnVal = true;
         }
@@ -206,7 +225,7 @@ bool checkIRSensor(void){
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_UNCOVERED;
             ThisEvent.EventParam = Green;
-            PostLEDFSM(ThisEvent); // post to LED FSM
+            PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
             PostController(ThisEvent); // post to this FSM
             returnVal = true;
             
@@ -214,4 +233,32 @@ bool checkIRSensor(void){
     }
     
     return returnVal;
+}
+
+void SetMuxOutput(LED_MUX_t WhichOutput){
+    switch(WhichOutput){
+        case Drums: { // 0
+            MUX_A_PIN = 0;
+            MUX_B_PIN = 0;
+        }
+        break;
+        
+        case Timer: { // 1
+            MUX_A_PIN = 1;
+            MUX_B_PIN = 0;
+        }
+        break;
+        
+        case Intensity: { // 2
+            MUX_A_PIN = 0;
+            MUX_B_PIN = 1;
+        }
+        break;
+        
+        case None: { // 3
+            MUX_A_PIN = 1;
+            MUX_B_PIN = 1;
+        }
+        break;
+    }
 }

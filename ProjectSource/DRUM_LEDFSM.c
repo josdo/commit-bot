@@ -4,7 +4,7 @@
 */
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "LEDFSM.h"
+#include "DRUM_LEDFSM.h"
 
 #include "LED_Strip.h"
 #include "PIC32_SPI_HAL.h"
@@ -33,7 +33,7 @@ static uint8_t LEDIntensity = 1;
 Colors_t NextWelcomingColor;
 
 /*------------------------------ Module Code ------------------------------*/
-bool InitLEDFSM(uint8_t Priority)
+bool InitDRUM_LEDFSM(uint8_t Priority)
 {
   ES_Event_t ThisEvent;
 
@@ -75,12 +75,12 @@ bool InitLEDFSM(uint8_t Priority)
   }
 }
 
-bool PostLEDFSM(ES_Event_t ThisEvent)
+bool PostDRUM_LEDFSM(ES_Event_t ThisEvent)
 {
   return ES_PostToService(MyPriority, ThisEvent);
 }
 
-ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
+ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
 {
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -94,14 +94,14 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
           CurrentState = WelcomingLEDState;
           
           // always make the LEDs turquoise when entering WelcomingState
-          Set_All_Color(Timer_LEDs, NextWelcomingColor);
-          Set_Intensity(Timer_LEDs, LEDIntensity);
+          Set_All_Color(Drum_LEDs, NextWelcomingColor);
+          Set_Intensity(Drum_LEDs, LEDIntensity);
           NextWelcomingColor = Purple;
           
           ES_Event_t NewEvent;
           NewEvent.EventType = ES_UPDATING_LED;
           NewEvent.EventParam = 0;
-          PostLEDFSM(NewEvent);
+          PostDRUM_LEDFSM(NewEvent);
       }
     } break;
     
@@ -109,11 +109,11 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
           switch(ThisEvent.EventType){
               case ES_TIMEOUT: {
                   // write the next color
-                  Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                  Set_All_Color(Drum_LEDs, NextWelcomingColor);
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
-                  PostLEDFSM(NewEvent);
+                  PostDRUM_LEDFSM(NewEvent);
                   
                   if (LED_REFRESH_TIMER == ThisEvent.EventParam){
                       if (Purple == NextWelcomingColor){
@@ -127,12 +127,12 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
               }
               case ES_UPDATING_LED: {
                   // still updating the LEDs
-                  if (false == TakeDisplayUpdateStep(Timer_LEDs)){
+                  if (false == TakeDisplayUpdateStep(Drum_LEDs)){
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = ThisEvent.EventParam;
                     
-                    PostLEDFSM(NewEvent);
+                    PostDRUM_LEDFSM(NewEvent);
                   }
                   
                   // done updating the LEDs, now start timer for next color
@@ -147,14 +147,14 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
                   CurrentState = IRCoveredLEDState; // advance the state
                   
                   // set the new color
-                  Set_All_Color(Timer_LEDs, ThisEvent.EventParam);
-                  Set_Intensity(Timer_LEDs, LEDIntensity);
+                  Set_All_Color(Drum_LEDs, ThisEvent.EventParam);
+                  Set_Intensity(Drum_LEDs, LEDIntensity);
                   
                   // start updating the LEDs
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
-                  PostLEDFSM(NewEvent);
+                  PostDRUM_LEDFSM(NewEvent);
               }
               break;
           }
@@ -165,12 +165,12 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
           switch(ThisEvent.EventType){
               case ES_UPDATING_LED: { 
                   // update LED display
-                  if (false == TakeDisplayUpdateStep(Timer_LEDs)){
+                  if (false == TakeDisplayUpdateStep(Drum_LEDs)){
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = ThisEvent.EventParam;
                     
-                    PostLEDFSM(NewEvent);
+                    PostDRUM_LEDFSM(NewEvent);
                   }
               }
               break;
@@ -180,11 +180,11 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
                   CurrentState = WelcomingLEDState; 
                   
                   // write the next welcoming color
-                  Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                  Set_All_Color(Drum_LEDs, NextWelcomingColor);
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
-                  PostLEDFSM(NewEvent);
+                  PostDRUM_LEDFSM(NewEvent);
               }
               break;
               
@@ -206,11 +206,11 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
                     CurrentState = WelcomingLEDState; 
                   
                     // write the next welcoming color
-                    Set_All_Color(Timer_LEDs, NextWelcomingColor);
+                    Set_All_Color(Drum_LEDs, NextWelcomingColor);
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = 0;
-                    PostLEDFSM(NewEvent);
+                    PostDRUM_LEDFSM(NewEvent);
                   }
               }
               break;
@@ -222,7 +222,7 @@ ES_Event_t RunLEDFSM(ES_Event_t ThisEvent)
   return ReturnEvent;
 }
 
-LEDFSMState_t QueryLEDFSM(void)
+LEDFSMState_t QueryDRUM_LEDFSM(void)
 {
   return CurrentState;
 }

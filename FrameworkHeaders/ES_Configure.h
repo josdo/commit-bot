@@ -70,11 +70,11 @@
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "LEDFSM.h"
+#define SERV_2_HEADER "DRUM_LEDFSM.h"
 // the name of the Init function
-#define SERV_2_INIT InitLEDFSM
+#define SERV_2_INIT InitDRUM_LEDFSM
 // the name of the run function
-#define SERV_2_RUN RunLEDFSM
+#define SERV_2_RUN RunDRUM_LEDFSM
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif
@@ -275,7 +275,7 @@ typedef enum
 // services are on that distribution list.
 #define NUM_DIST_LISTS 1
 #if NUM_DIST_LISTS > 0
-#define DIST_LIST0 PostController, PostLEDFSM, PostPointServoService
+#define DIST_LIST0 PostController, PostDRUM_LEDFSM, PostPointServoService
 #endif
 #if NUM_DIST_LISTS > 1
 #define DIST_LIST1 PostTestHarnessService1, PostTestHarnessService1
@@ -310,7 +310,7 @@ typedef enum
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC PostLEDFSM
+#define TIMER0_RESP_FUNC PostDRUM_LEDFSM
 #define TIMER1_RESP_FUNC PostController
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
