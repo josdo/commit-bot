@@ -55,6 +55,7 @@
 #define ENTER_TIMEOUT  ((MyPriority<<3)|2)
 
 #define TEST_INT_POST
+// #define ENABLE_SERVICE0
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this service.They should be functions
    relevant to the behavior of this service
@@ -175,6 +176,7 @@ bool PostTestHarnessService0(ES_Event_t ThisEvent)
 ****************************************************************************/
 ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 {
+#ifdef ENABLE_SERVICE0
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
   static char DeferredChar = '1';
@@ -238,6 +240,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   }
 
   return ReturnEvent;
+#endif // ENABLE_SERVICE0
 }
 
 /***************************************************************************
