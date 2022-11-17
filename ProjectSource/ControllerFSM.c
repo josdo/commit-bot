@@ -238,3 +238,5 @@ bool checkIRSensor(void){
     
     return returnVal;
 }
+
+bool checkButton(void);

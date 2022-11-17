@@ -56,5 +56,7 @@ Description:
 */
 LEDFSMState_t QueryLEDFSM(void);
 
+bool Update_DrumIntensity(uint8_t NewIntensity);
+
 #endif /* TemplateFSM_H */
 

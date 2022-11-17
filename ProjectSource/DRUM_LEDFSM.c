@@ -228,6 +228,19 @@ LEDFSMState_t QueryDRUM_LEDFSM(void)
   return CurrentState;
 }
 
+bool Update_DrumIntensity(uint8_t NewIntensity){
+    bool returnVal = true;
+    
+    if (NewIntensity < 0 || NewIntensity > 31){ // invalid intensity
+        returnVal = false;
+    }
+    
+    else { // valid intensity
+        LEDIntensity = NewIntensity;
+    }
+    
+    return returnVal;
+}
 /***************************************************************************
  private functions
  ***************************************************************************/

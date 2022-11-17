@@ -54,7 +54,7 @@ bool InitClockFSM(uint8_t Priority)
   SPISetup_BasicConfig(SPI_SPI1);
   SPISetup_SetLeader(SPI_SPI1, SPI_SMP_MID); // make pic332 leader  
   //  SPISetup_SetBitTime(SPI_SPI1, 10000); // 1000 kHz clock
-  SPISetup_SetBitTime(SPI_SPI1, 10000/10);
+  SPISetup_SetBitTime(SPI_SPI1, 10000/4);
   SPISetup_MapSSOutput(SPI_SPI1, SPI_RPA0); // set SS to pin 2
   SPISetup_MapSDOutput(SPI_SPI1, SPI_RPA1); // set SDO to pin 3
   SPISetup_SetXferWidth(SPI_SPI1, SPI_32BIT); // 16 bit datawidth

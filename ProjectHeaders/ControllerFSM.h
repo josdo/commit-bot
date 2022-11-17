@@ -81,5 +81,6 @@ bool DrumIsHit(void);
 
 bool checkIRSensor(void);
 
+bool checkButton(void);
 #endif /* Controller_H */
 
