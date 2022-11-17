@@ -12,17 +12,19 @@ typedef enum
   InitPState_Controller
 }ControllerState_t;
 
+// Stores the drum intensities for event parameters
+// BIG assumption: num_intensities <= 15 (i.e. 4 bits)
 typedef union
 {
-  char FullByte;
   struct
   {
-    uint16_t Filler : 5;
-    bool Drum1 : 1;
-    bool Drum2 : 1;
-    bool Drum3 : 1;
+    uint16_t Left : 4;
+    uint16_t Bottom : 4;
+    uint16_t Right : 4;
+    uint16_t Filler : 4;
   };
-}IsHit_t;
+  uint16_t All;
+}Intensities_t;
 
 // Public Function Prototypes
 
@@ -73,9 +75,21 @@ Params
 Return
   bool: true if above minimum voltage threshold, false otherwise
 Description
-  When true, posts to the Controller service with a IsHit param
+  Reads analog pins connected to drum piezos. If any drum is above the minimum analog threshold,
+  this event checker returns true, updates the module's intensities, and posts ES_DrumsHit to 
+  the Controller service.
 */
-bool DrumIsHit(void);
+bool DrumsAreHit(void);
+
+/*
+Params
+  uint32_t analog value (0-1023)
+Return
+  uint32_t: intensity level
+Description
+  Returns hit intensity level corresponding to analog input.
+*/
+static uint32_t AnalogToIntensity(uint32_t Analog);
 
 #endif /* Controller_H */
 
