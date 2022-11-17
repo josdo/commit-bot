@@ -13,23 +13,15 @@
 
 #include "DRUM_LEDFSM.h"
 #include "PointServoService.h"
+#include "ClockFSM.h"
+#include "Utils.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000 // 1 sec timer
 #define HALF_SEC (ONE_SEC/2) // 1/2 sec timer
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
-#define THIRTY_SEC (ONE_SEC * 30) // interaction timer
-
-// MUX defines
-//#define MUX_A_PIN PORTBbits.RB8
-//#define MUX_B_PIN PORTBbits.RB9
-#define MUX_A_PIN LATBbits.LATB8
-#define MUX_B_PIN LATBbits.LATB9
-
-
-#define MUX_A_TRIS TRISBbits.TRISB8
-#define MUX_B_TRIS TRISBbits.TRISB9
-
+#define THIRTY_SEC (ONE_SEC * 30) // 30 sec timer
+#define INTERACTION_SEC (ONE_SEC * 15) // interaction timer
 
 // IR defines
 #define IR_PIN (1<<11) // AN11
@@ -62,7 +54,7 @@ bool InitController(uint8_t Priority)
   MaxPiezoOutput  = 250;
   NumPiezoBuckets = 10;
   
-  clrScrn();
+//  clrScrn();
   printf("In Controller Initialization\r\n");
   
   // Set up analog read for IR sensor
@@ -70,11 +62,7 @@ bool InitController(uint8_t Priority)
   ADC_MultiRead(AnalogReadings);
   PrevReadings[0] = 0;
   
-  // Set up the MUX outputs from the PIC
-  MUX_A_TRIS = 0;
-  MUX_B_TRIS = 0;
-  
-  SetMuxOutput(Intensity); // default to have none of the LEDs selected
+  SetMuxOutput(Timer); // default to have none of the LEDs selected
   
   
   // Post successful initialization
@@ -139,9 +127,10 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_ENTER_GAME;
                   PostDRUM_LEDFSM(NewEvent);
+                  PostClockFSM(NewEvent);
                   
                   printf("Being interaction timer\r\n");
-                  ES_Timer_InitTimer(INTERACTION_TIMER, THIRTY_SEC);
+                  ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
               }
               break;
           }
@@ -155,7 +144,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   if ('p' == ThisEvent.EventParam){
                       // reset the interaction timer
                       ES_Timer_StopTimer(INTERACTION_TIMER);
-                      ES_Timer_InitTimer(INTERACTION_TIMER, THIRTY_SEC);
+                      ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
                       
                       ES_Event_t NewEvent;
                       NewEvent.EventType = ES_VALID_HIT;
@@ -168,7 +157,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
               
               case ES_TIMEOUT: {
                   if (INTERACTION_TIMER == ThisEvent.EventParam){
-                      printf("interaction timeout controller\r\n");
+                      printf("Interaction timeout controller\r\n");
                       CurrentState = WelcomingState;
                   }
               }
@@ -195,7 +184,7 @@ ControllerState_t QueryController(void)
 bool DrumIsHit(void)
 {
   // TODO fill in using A/D library
-  return true;
+  return false;
 }
 
 bool checkIRSensor(void){
@@ -216,6 +205,7 @@ bool checkIRSensor(void){
             ThisEvent.EventType = ES_IR_COVERED;
             ThisEvent.EventParam = Green;
             PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
+            PostClockFSM(ThisEvent); 
             PostController(ThisEvent); // post to this FSM
             returnVal = true;
         }
@@ -226,6 +216,7 @@ bool checkIRSensor(void){
             ThisEvent.EventType = ES_IR_UNCOVERED;
             ThisEvent.EventParam = Green;
             PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
+            PostClockFSM(ThisEvent); 
             PostController(ThisEvent); // post to this FSM
             returnVal = true;
             
@@ -233,32 +224,4 @@ bool checkIRSensor(void){
     }
     
     return returnVal;
-}
-
-void SetMuxOutput(LED_MUX_t WhichOutput){
-    switch(WhichOutput){
-        case Drums: { // 0
-            MUX_A_PIN = 0;
-            MUX_B_PIN = 0;
-        }
-        break;
-        
-        case Timer: { // 1
-            MUX_A_PIN = 1;
-            MUX_B_PIN = 0;
-        }
-        break;
-        
-        case Intensity: { // 2
-            MUX_A_PIN = 0;
-            MUX_B_PIN = 1;
-        }
-        break;
-        
-        case None: { // 3
-            MUX_A_PIN = 1;
-            MUX_B_PIN = 1;
-        }
-        break;
-    }
 }

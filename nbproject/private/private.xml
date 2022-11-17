@@ -5,9 +5,11 @@
         <group>
             <file>file:/U:/vkackar/Drum_Hero/ProjectSource/DRUM_LEDFSM.c</file>
             <file>file:/U:/vkackar/Drum_Hero/FrameworkHeaders/ES_Configure.h</file>
-            <file>file:/U:/vkackar/Drum_Hero/ProjectHeaders/PointServoService.h</file>
+            <file>file:/U:/vkackar/Drum_Hero/FrameworkHeaders/Utils.c</file>
             <file>file:/U:/vkackar/Drum_Hero/ProjectHeaders/ControllerFSM.h</file>
             <file>file:/U:/vkackar/Drum_Hero/ProjectHeaders/DRUM_LEDFSM.h</file>
+            <file>file:/U:/vkackar/Drum_Hero/ProjectSource/ClockFSM.c</file>
+            <file>file:/U:/vkackar/Drum_Hero/ProjectHeaders/ClockFSM.h</file>
             <file>file:/U:/vkackar/Drum_Hero/ProjectSource/LED_Strip.c</file>
             <file>file:/U:/vkackar/Drum_Hero/ProjectSource/ControllerFSM.c</file>
         </group>

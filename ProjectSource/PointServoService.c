@@ -104,6 +104,11 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
           }
       }
       break;
+      
+      case ES_ENTER_ZEN: {
+          
+      }
+      break;
   }
 
   return ReturnEvent;

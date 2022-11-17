@@ -51,6 +51,7 @@ static LED_t Timer_Strip[NumTimer];
 
 static volatile LED_t * pLEDStrip; // pointer to the LED strip array
 static volatile uint8_t NumLEDs; // pointer to the number of LEDs in the array
+static volatile uint8_t Idx = 0; 
 
 // this is the state variable for tracking init steps
 static Clear_Steps_t CurrentInitStep =  LED_StartFrame;
@@ -59,7 +60,9 @@ static const uint32_t ZEROS = 0; // all 0's
 
 static LED_t ClearLEDs;
 
-
+static uint8_t Drum_idx = 0;
+static uint8_t Timer_idx = 0;
+static uint8_t Intensity_idx = 0;
 
 /*------------------------------ Module Code ------------------------------*/
 void DefaultLED(void){
@@ -298,16 +301,19 @@ void selectLEDStrip(LED_Types_t WhichLED) {
     if (Drum_LEDs == WhichLED) {
         pLEDStrip = Drum_Strip;
         NumLEDs = NUMDrum;
+        Idx = Drum_idx;
     }
 
     else if (Timer_LEDs == WhichLED) {
         pLEDStrip = Timer_Strip;
         NumLEDs = NumTimer;
+        Idx = Timer_idx;
     }
 
     else if (Intensity_LEDs == WhichLED) {
         pLEDStrip = Intensity_Strip;
         NumLEDs = NumIntensity;
+        Idx = Intensity_idx;
     }
 }
 
@@ -340,7 +346,7 @@ bool TakeDisplayUpdateStep(LED_Types_t WhichStrip)
     if (NumLEDs == WhichLED)
     {
 //      SPIOperate_SPI1_Send32(ZEROS);
-      SPIOperate_SPI1_Send32Wait(ZEROS);
+      SPIOperate_SPI1_Send32Wait(EndFrame);
 //      SPIOperate_SPI1_Send32Wait(EndFrame); // end frame is also all 0's
       ReturnVal = true; // show we are done
       WhichLED = 0; // set up for next update
