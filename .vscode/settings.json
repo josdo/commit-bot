@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "controllerfsm.h": "c"
+        "controllerfsm.h": "c",
+        "stdint.h": "c"
     }
 }
