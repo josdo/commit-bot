@@ -81,6 +81,9 @@ Description
 */
 bool DrumsAreHit(void);
 
+// TODO add comment
+bool ButtonPressed(void);
+
 /*
 Params
   uint32_t analog value (0-1023)
