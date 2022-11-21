@@ -9,7 +9,8 @@
 // State definitions for use with the query function
 typedef enum
 {
-  InitPState_Controller
+  InitPState_Controller, IRCoveredState_Controller, WelcomingState_Controller,
+  PlayingState_Controller, ZenState_Controller
 }ControllerState_t;
 
 // Stores the drum intensities for event parameters
@@ -83,6 +84,8 @@ bool DrumsAreHit(void);
 
 // TODO add comment
 bool ButtonPressed(void);
+void ReadAnalogIR(uint32_t *Buffer);
+void ReadAnalogPiezos(uint32_t *Buffer);
 
 /*
 Params
@@ -93,6 +96,8 @@ Description
   Returns hit intensity level corresponding to analog input.
 */
 static uint32_t AnalogToIntensity(uint32_t Analog);
+
+bool checkIRSensor(void);
 
 #endif /* Controller_H */
 

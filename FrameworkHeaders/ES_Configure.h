@@ -33,7 +33,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 2
+#define NUM_SERVICES 4
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -41,11 +41,11 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
-#define SERV_0_HEADER "TestHarnessService0.h"
+#define SERV_0_HEADER "PointServoService.h"
 // the name of the Init function
-#define SERV_0_INIT InitTestHarnessService0
+#define SERV_0_INIT InitPointServoService
 // the name of the run function
-#define SERV_0_RUN RunTestHarnessService0
+#define SERV_0_RUN RunPointServoService
 // How big should this services Queue be?
 #define SERV_0_QUEUE_SIZE 5
 
@@ -70,11 +70,11 @@
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "TestHarnessService2.h"
+#define SERV_2_HEADER "DRUM_LEDFSM.h"
 // the name of the Init function
-#define SERV_2_INIT InitTestHarnessService2
+#define SERV_2_INIT InitDRUM_LEDFSM
 // the name of the run function
-#define SERV_2_RUN RunTestHarnessService2
+#define SERV_2_RUN RunDRUM_LEDFSM
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif
@@ -83,11 +83,11 @@
 // These are the definitions for Service 3
 #if NUM_SERVICES > 3
 // the header file with the public function prototypes
-#define SERV_3_HEADER "TestHarnessService3.h"
+#define SERV_3_HEADER "ClockFSM.h"
 // the name of the Init function
-#define SERV_3_INIT InitTestHarnessService3
+#define SERV_3_INIT InitClockFSM
 // the name of the run function
-#define SERV_3_RUN RunTestHarnessService3
+#define SERV_3_RUN RunClockFSM
 // How big should this services Queue be?
 #define SERV_3_QUEUE_SIZE 3
 #endif
@@ -260,8 +260,13 @@ typedef enum
   ES_SHORT_TIMEOUT, /* signals that a short timer has expired */
   /* User-defined events start here */
   ES_NEW_KEY, /* signals a new key received from terminal */
-  ES_LOCK,
-  ES_UNLOCK,
+  ES_ENTER_WELCOME,
+  ES_IR_COVERED,
+  ES_IR_UNCOVERED,
+  ES_ENTER_GAME,
+  ES_ENTER_ZEN,
+  ES_VALID_HIT,
+  ES_UPDATING_LED,
   ES_DRUMS_HIT
 } ES_EventType_t;
 
@@ -269,12 +274,12 @@ typedef enum
 // These are the definitions for the Distribution lists. Each definition
 // should be a comma separated list of post functions to indicate which
 // services are on that distribution list.
-#define NUM_DIST_LISTS 0
+#define NUM_DIST_LISTS 2
 #if NUM_DIST_LISTS > 0
-#define DIST_LIST0 PostTestHarnessService0, PostTestHarnessService0
+#define DIST_LIST0 PostController, PostDRUM_LEDFSM, PostPointServoService, PostClockFSM
 #endif
 #if NUM_DIST_LISTS > 1
-#define DIST_LIST1 PostTestHarnessService1, PostTestHarnessService1
+#define DIST_LIST1 PostDRUM_LEDFSM, PostClockFSM
 #endif
 #if NUM_DIST_LISTS > 2
 #define DIST_LIST2 PostTemplateFSM
@@ -297,7 +302,7 @@ typedef enum
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, DrumsAreHit, ButtonPressed
+#define EVENT_CHECK_LIST Check4Keystroke, DrumsAreHit, ButtonPressed, checkIRSensor
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -306,8 +311,8 @@ typedef enum
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC TIMER_UNUSED
-#define TIMER1_RESP_FUNC TIMER_UNUSED
+#define TIMER0_RESP_FUNC ES_PostList01
+#define TIMER1_RESP_FUNC PostController
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -319,9 +324,9 @@ typedef enum
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
-#define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC TIMER_UNUSED
-#define TIMER15_RESP_FUNC PostTestHarnessService0
+#define TIMER13_RESP_FUNC PostClockFSM
+#define TIMER14_RESP_FUNC PostController
+#define TIMER15_RESP_FUNC ES_PostList00
 
 /****************************************************************************/
 // Give the timer numbers symbolc names to make it easier to move them
@@ -331,5 +336,13 @@ typedef enum
 // These symbolic names should be changed to be relevant to your application
 
 #define SERVICE0_TIMER 15
+
+#define LED_REFRESH_TIMER 0
+#define IR_COVERED_TIMER 1
+
+#define TIME_ELAPSED_TIMER 13
+#define ZEN_TIMER 14
+#define INTERACTION_TIMER 15
+
 
 #endif /* ES_CONFIGURE_H */
