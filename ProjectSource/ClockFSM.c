@@ -242,6 +242,19 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               }
               break;
               
+              case ES_ENTER_ZEN: {
+                  CurrentState = ZenState_ClockFSM;
+                  
+                  Set_All_Color(Clock_LEDs, White);
+                  Set_Intensity(Clock_LEDs, 1);
+                    
+                  ES_Event_t NewEvent;
+                  NewEvent.EventType = ES_UPDATING_LED;
+                  NewEvent.EventParam = 0;
+                  PostClockFSM(NewEvent);
+              }
+              break;
+              
               case ES_TIMEOUT: {
                   if (INTERACTION_TIMER == ThisEvent.EventParam){
                     // go back to welcoming state
@@ -250,6 +263,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     // write the next welcoming color
                     Set_All_Color(Clock_LEDs, NextWelcomingColor);
                     Set_Intensity(Clock_LEDs, LEDIntensity);
+                    
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
                     NewEvent.EventParam = 0;
@@ -263,7 +277,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     
                     // Light the next LED for the timer
                     Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
-                    Set_Intensity(Clock_LEDs, LEDIntensity);
+                    Set_Intensity(Clock_LEDs, 1);
                     Clock_idx++;
                     
                     if (Clock_idx > 10){
@@ -285,7 +299,36 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
       break;
       
       case ZenState_ClockFSM: {
-          
+          switch(ThisEvent.EventType){
+              
+              case ES_UPDATING_LED: {
+                  SetMuxOutput(Clock);
+                  // update LED display
+                  if (false == TakeDisplayUpdateStep(Clock_LEDs)){
+                    ES_Event_t NewEvent;
+                    NewEvent.EventType = ES_UPDATING_LED;
+                    NewEvent.EventParam = ThisEvent.EventParam;
+                    
+                    PostClockFSM(NewEvent);
+                  }
+              }
+              break;
+              
+              case ES_TIMEOUT: {
+                  // go back to welcoming state
+                  CurrentState = WelcomeState_ClockFSM; 
+                  
+                  // write the next welcoming color
+                  Set_All_Color(Clock_LEDs, NextWelcomingColor);
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
+                    
+                  ES_Event_t NewEvent;
+                  NewEvent.EventType = ES_UPDATING_LED;
+                  NewEvent.EventParam = 0;
+                  PostClockFSM(NewEvent);
+              }
+              break;
+          }
       }
       break;
   }

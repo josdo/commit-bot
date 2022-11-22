@@ -10,8 +10,10 @@
 typedef enum
 {
   InitPState_Controller, IRCoveredState_Controller, WelcomingState_Controller,
-  PlayingState_Controller, ZenState_Controller
+  PlayingState_Controller, PlayedCorrectNoteState_Controller, ZenState_Controller
 }ControllerState_t;
+
+
 
 // Stores the drum intensities for event parameters
 // BIG assumption: num_intensities <= 15 (i.e. 4 bits)
@@ -87,6 +89,8 @@ bool ButtonPressed(void);
 void ReadAnalogIR(uint32_t *Buffer);
 void ReadAnalogPiezos(uint32_t *Buffer);
 
+bool checkIRSensor(void);
+
 /*
 Params
   uint32_t analog value (0-1023)
@@ -97,7 +101,9 @@ Description
 */
 static uint32_t AnalogToIntensity(uint32_t Analog);
 
-bool checkIRSensor(void);
+
+static void StartNextNoteWindow(void);
+
 
 #endif /* Controller_H */
 

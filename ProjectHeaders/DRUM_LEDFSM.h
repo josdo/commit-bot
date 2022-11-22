@@ -10,8 +10,9 @@
 typedef enum
 {
   InitPState_Drums, WelcomingState_Drums, IRCoveredState_Drums, 
-  IRUncoveredState_Drums, PlayingState_Drums
+  IRUncoveredState_Drums, PlayingState_Drums, ZenState_Drums
 }LEDFSMState_t;
+
 
 // Public Function Prototypes
 
