@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name "Project_Lib")(type "KiCad")(uri "C:/Users/visha/Documents/Stanford/Fall_2022/ME_218A/ME218_KiCad_Lib/Project_Lib.kicad_sym")(options "")(descr ""))
+  (lib (name "Project_Lib")(type "KiCad")(uri "C:/Users/visha/Documents/Stanford/Fall_2022/ME_218A/ME218_KiCad_Lib/Project_Lib.kicad_sym")(options "")(descr "")(disabled))
+  (lib (name "Project_Lib_2")(type "KiCad")(uri "U:/kindled/drumhero/kicad/Project_Lib.kicad_sym")(options "")(descr ""))
 )
