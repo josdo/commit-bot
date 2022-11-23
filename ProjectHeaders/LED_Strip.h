@@ -8,11 +8,9 @@
 #ifndef LED_Strip_H
 #define	LED_Strip_H
 
-// ################# Module Vars #################
-typedef enum {
-    LeftDrum_LEDs = 0, RightDrum_LEDs, BottomDrum_LEDs, Clock_LEDs
-} LED_Types_t;
+#include "Utils.h"
 
+// ################# Module Vars #################
 typedef enum {
     Red = 1, Green, Blue, Purple, White, Yellow, Turquoise, Pink
 } Colors_t;

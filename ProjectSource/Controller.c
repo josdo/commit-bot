@@ -30,21 +30,31 @@
 #define NOTE_WINDOW (uint32_t)(1.5 * ONE_SEC) // 1.5 seconds between notes for now
 //#define HIT_WINDOW (ONE_SEC) // have 1 second to hit the drum
 
-#define TOTAL_NOTES 12
-
+// Define pins
 #define BUTTON_PORT PORTBbits.RB5
+#define LEFT_MOTOR_LATCH LATBbits.LATB15
+#define RIGHT_MOTOR_LATCH LATBbits.LATB11
+#define BOTTOM_MOTOR_LATCH LATBbits.LATB10
 
 // define all the notes
 typedef enum
 {
-    note0, note1, note2, note3, note4, note5, note6, note7, note8, note9 
-}Notes_t;
+    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9 
+}Note_t;
+
+// map note to drum
+static LED_Types_t NoteToDrum[10] = {
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs
+};
 
 // stores the notes and the corresponding active drum
 typedef struct{
-    Notes_t ThisNote;
-    LED_Types_t ActiveDrum;
-}Drums_Notes_t;
+    Note_t Note;
+    uint16_t Duration;
+}Drum_Note_t;
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
    relevant to the behavior of this state machine
@@ -62,7 +72,7 @@ static uint32_t MinPiezoAnalogRange[3] = {25, 50, 100};
 static uint32_t MinPiezoAnalogIdx = 0;
 static uint32_t MinPiezoAnalog = 50;
 static uint32_t MaxPiezoAnalog = 300;
-static uint32_t NumPiezoIntensities = 9;
+uint32_t NumPiezoIntensities = 9;
 
 // IR readings
 static uint32_t IRReadings[1]; 
@@ -81,51 +91,83 @@ static uint16_t LastPiezoReadTime;
 static bool LastButtonState;
 static uint16_t ButtonDebounceCooldown = 100; // in ms for debounce
 
-static uint16_t CurrentNoteIdx = 0; // index in note array
+static int32_t CurrentNoteIdx = -1; // index in note array
+static const int32_t NumNotes = 12;
 // notes to be played for the song
-static Drums_Notes_t Song[TOTAL_NOTES] = {
-    {note0,LeftDrum}, {note0,LeftDrum}, {note2,RightDrum}, {note4,BottomDrum}, 
-    {note1,RightDrum}, {note4,LeftDrum}, {note1,RightDrum}, {note1,BottomDrum},
-    {note0,RightDrum}, {note0,LeftDrum}, {note2,BottomDrum}, {note4,LeftDrum}
+// TODO: remove hardcoded magic
+static Drum_Note_t Song[12] = {
+    {note2, 5 * NOTE_WINDOW},
+    {note0, 5 * NOTE_WINDOW},
+    {note0, 5 * NOTE_WINDOW},
+    {note0, 5 * NOTE_WINDOW},
+    {note0, 5 * NOTE_WINDOW}
+    // {note1, 5 * NOTE_WINDOW},
+    // {note2, 5 * NOTE_WINDOW},
+    // {note0, 5 * NOTE_WINDOW},
+    // {note1, 5 * NOTE_WINDOW},
+    // {note2, 5 * NOTE_WINDOW},
+    // {note0, 5 * NOTE_WINDOW},
+    // {note1, 5 * NOTE_WINDOW},
+    // {note2, 5 * NOTE_WINDOW},
+    // {note0, 5 * NOTE_WINDOW},
+    // {note1, 5 * NOTE_WINDOW},
+    // {note2, 5 * NOTE_WINDOW},
 };
 
+static bool IsLeftDrumHit = 0;
+static bool IsBottomDrumHit = 0;
+static bool IsRightDrumHit = 0;
+
 /*------------------------------ Module Code ------------------------------*/
+
+static bool InitMotors()
+{
+    // TODO don't use magic numbers
+    PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_15);
+    PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_11);
+    PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_10);
+    LEFT_MOTOR_LATCH = 0;
+    BOTTOM_MOTOR_LATCH = 0;
+    RIGHT_MOTOR_LATCH = 0;
+}
+
 bool InitController(uint8_t Priority)
 {
-  ES_Event_t ThisEvent;
+    ES_Event_t ThisEvent;
 
-  // DB_printf("\nInitializing Controller\n");
-  printf("\nInitializing Controller\n");
+    // DB_printf("\nInitializing Controller\n");
+    printf("\nInitializing Controller\n");
 
-  // Init module level variables
-  MyPriority = Priority;
-  CurrentState = InitPState_Controller;
+    // Init module level variables
+    MyPriority = Priority;
+    CurrentState = InitPState_Controller;
 
-  LastPiezoReadTime = ES_Timer_GetTime();
-  LastButtonState = BUTTON_PORT;
+    LastPiezoReadTime = ES_Timer_GetTime();
+    LastButtonState = BUTTON_PORT;
 
-  // Configure button pin
-  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_5);
+    // Configure button pin
+    PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_5);
+    InitMotors();
 
-  // Set up analog read for IR sensor
-  ADC_MultiRead(IRReadings);
-  IRPrevReadings[0] = 0;
+    // Set up analog read for IR sensor
+    ADC_MultiRead(IRReadings);
+    IRPrevReadings[0] = 0;
 
-  // Initialize analog read library
-  uint16_t ANxPins = 1 << LeftDrumANx | 1 << BottomDrumANx 
-                   | 1 << RightDrumANx | 1 << IRDetectorANx;
-  ADC_ConfigAutoScan(ANxPins, NumANxPins);
+    // Initialize analog read library
+    uint16_t ANxPins = 1 << LeftDrumANx | 1 << BottomDrumANx 
+                     | 1 << RightDrumANx | 1 << IRDetectorANx;
+    ADC_ConfigAutoScan(ANxPins, NumANxPins);
 
-  // Post successful initialization
-  ThisEvent.EventType = ES_INIT;
-  if (ES_PostToService(MyPriority, ThisEvent) == true)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+    // Post successful initialization
+    ThisEvent.EventType = ES_INIT;
+    if (ES_PostToService(MyPriority, ThisEvent) == true)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool PostController(ES_Event_t ThisEvent)
@@ -174,7 +216,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   if (IR_COVERED_TIMER == ThisEvent.EventParam){
                     CurrentState = PlayingState_Controller;
                     printf("Now playing the game!\r\n");
-                    StartNextNoteWindow(); // start the next note window
                   
                     // Let the LEDs know the game has started
                     ES_Event_t NewEvent;
@@ -182,11 +223,14 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     PostDRUM_LEDFSM(NewEvent);
                     PostClockFSM(NewEvent);
                   
+                    printf("IN IR COVERED STATE: Start next note window");
+                    StartNextNoteWindow(); // start the next note window
+
                     printf("Begin interaction timer: 15 SECONDS\r\n");
                     ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
                   
-                    printf("Begin zen timer: ONE MINUTE \r\n");
-                    ES_Timer_InitTimer(ZEN_TIMER, ONE_MIN);
+                    // printf("Begin zen timer: ONE MINUTE \r\n");
+                    // ES_Timer_InitTimer(ZEN_TIMER, ONE_MIN);
                   }
                   
               }
@@ -206,8 +250,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                       ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
                       
                       ES_Event_t NewEvent;
-                      NewEvent.EventType = ES_VALID_HIT;
-                      NewEvent.EventParam = 0;                   
+                      NewEvent.EventType = ES_CORRECT_HIT;
                       PostPointServoService(NewEvent);  // post to the servo   
                   }
                   
@@ -215,44 +258,78 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                       CurrentState = ZenState_Controller; // ente zen state
                   }
                   
-                  // register a correct hit
-                  else if ('h' == ThisEvent.EventParam){
-                      printf("\tHIT registered\r\n");
+                //   // register a correct hit
+                //   else if ('h' == ThisEvent.EventParam){
+                //       printf("\tHIT registered\r\n");
                       
-                      // reset the interaction timer
-                      ES_Timer_StopTimer(INTERACTION_TIMER);
-                      ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
+                //       // reset the interaction timer
+                //       ES_Timer_StopTimer(INTERACTION_TIMER);
+                //       ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
                       
-                      // post to the drums
-                      ES_Event_t DrumEvent;
-                      DrumEvent.EventType = ES_DRUMS_HIT;
-                      DrumEvent.EventParam = Song[CurrentNoteIdx-1].ActiveDrum;
-                      PostDRUM_LEDFSM(DrumEvent);
+                //       // post to the drums
+                //       ES_Event_t DrumEvent;
+                //       DrumEvent.EventType = ES_DRUMS_HIT;
+                //       DrumEvent.EventParam = NoteToDrum[Song[CurrentNoteIdx].Note];
+                //       PostDRUM_LEDFSM(DrumEvent);
                       
-                      // post to the servo 
-                      ES_Event_t ServoEvent;
-                      ServoEvent.EventType = ES_VALID_HIT;
-                      ServoEvent.EventParam = 0;                   
-                      PostPointServoService(ServoEvent);   
-                  }
+                //       // post to the servo 
+                //       ES_Event_t ServoEvent;
+                //       ServoEvent.EventType = ES_CORRECT_HIT;
+                //       ServoEvent.EventParam = 0;                   
+                //       PostPointServoService(ServoEvent);   
+                //   }
               }
               break;
+
+              case ES_DRUMS_HIT: {
+                printf("\tHIT registered in Controller\r\n");
+                RestartInteractionTimer();
+
+                // Update hit intensities
+                Intensities_t HitIntensities = (Intensities_t) ThisEvent.EventParam;
+                UpdateWhichDrumsHit(HitIntensities);
+
+                // Brighten drums with new hit intensities,
+                // zeroing out intensities of all the wrong drums
+                ES_Event_t DrumEvent = {ES_DRUMS_HIT, ThisEvent.EventParam};
+                PostDRUM_LEDFSM(DrumEvent);
+
+                // Detect if correct drums hit
+                if (IsCorrectHit()) {
+                    printf("\r\nCorrect hit! Posting from Controller to self\r\n");
+                    ES_Event_t CorrectHitEvent = {ES_CORRECT_HIT};
+                    PostController(CorrectHitEvent);
+                }
+
+              }
+              break;
+
+              case ES_CORRECT_HIT: {
+                CurrentState = PlayedCorrectNoteState_Controller;
+
+                ES_Event_t ServoEvent = {ES_CORRECT_HIT};
+                PostPointServoService(ServoEvent);   
+
+                ES_Event_t DrumEvent = {ES_CORRECT_HIT, NoteToDrum[Song[CurrentNoteIdx].Note]};
+                PostDRUM_LEDFSM(DrumEvent);
+              }
               
               case ES_TIMEOUT: {
-                  // interaction timeout
-                  if (INTERACTION_TIMER == ThisEvent.EventParam){
-                      printf("Interaction timeout controller\r\n");
-                      CurrentState = WelcomingState_Controller;
-                      CurrentNoteIdx = 0;
-                      
-                      // stop zen timer
-                      ES_Timer_StopTimer(ZEN_TIMER);
-                  }
-                  
-                  // note window timeout
-                  else if (NOTE_WINDOW_TIMER == ThisEvent.EventParam){
-                      StartNextNoteWindow(); // start the next note window
-                  }
+                    // interaction timeout
+                    if (INTERACTION_TIMER == ThisEvent.EventParam){
+                        printf("Interaction timeout controller\r\n");
+                        CurrentState = WelcomingState_Controller;
+                        CurrentNoteIdx = -1;
+                        
+                        // stop zen timer
+                        ES_Timer_StopTimer(ZEN_TIMER);
+                    }
+                    
+                    // note window timeout
+                    else if (NOTE_WINDOW_TIMER == ThisEvent.EventParam){
+                        printf("IN PLAYING STATE: Start next note window");
+                        StartNextNoteWindow(); // start the next note window
+                    }
               }
               break;
               
@@ -266,7 +343,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
           
                   printf("Begin zen mode timer\r\n");
                   ES_Timer_InitTimer(ZEN_TIMER, FIVE_SEC);
-                  CurrentNoteIdx = 0;
+                  CurrentNoteIdx = -1;
               }
               break;
           }
@@ -277,7 +354,9 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
           
           switch(ThisEvent.EventType){
               case ES_TIMEOUT: {
-                  
+                CurrentState = PlayingState_Controller;
+                printf("IN PLAYED CORRECT STATE: Start next note window");
+                StartNextNoteWindow();
               }
               break;
           }
@@ -342,6 +421,7 @@ bool DrumsAreHit(void)
     Intensities_t DrumIntensities = {{LeftIntensity, BottomIntensity, RightIntensity}};
     ES_Event_t DrumsHit = {ES_DRUMS_HIT, DrumIntensities.All};
     PostController(DrumsHit);
+    PostDRUM_LEDFSM(DrumsHit);
     return true;
   }
   return false;
@@ -452,26 +532,72 @@ static uint32_t AnalogToIntensity(uint32_t Analog)
 
 static void StartNextNoteWindow(void) {
     
-    if (CurrentNoteIdx >= TOTAL_NOTES){
+    if (CurrentNoteIdx >= NumNotes){
         printf("Done with playing all the notes\r\n");
         
         ES_Event_t NewEvent;
         NewEvent.EventType = ES_ENTER_ZEN;
-        NewEvent.EventParam = LeftDrum;
+        NewEvent.EventParam = LeftDrum_LEDs;
         ES_PostAll(NewEvent);
     }
     
     else {
         // begin the note window timer
-//        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
-        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, TWO_SEC); 
+        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
+
+        // Go to the next note. If the first time called, this will increment
+        // from -1 to 0
+        CurrentNoteIdx++;
+        printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
         
         // post the note to the drums
         ES_Event_t NewEvent;
         NewEvent.EventType = ES_NOTE_WINDOW;
-        NewEvent.EventParam = Song[CurrentNoteIdx].ActiveDrum; // get which drum
+        NewEvent.EventParam = NoteToDrum[Song[CurrentNoteIdx].Note]; // get which drum
         PostDRUM_LEDFSM(NewEvent);
-        
-        CurrentNoteIdx++; // increment the note index    
     }
+
+    ClearWhichDrumsHit();
+}
+
+static void RestartInteractionTimer(void) {
+    ES_Timer_StopTimer(INTERACTION_TIMER);
+    ES_Timer_InitTimer(INTERACTION_TIMER, INTERACTION_SEC);
+}
+
+static void UpdateWhichDrumsHit(Intensities_t NewDrumIntensities) {
+    IsLeftDrumHit = IsLeftDrumHit || (NewDrumIntensities.Left > 0);
+    IsRightDrumHit = IsRightDrumHit || (NewDrumIntensities.Right > 0);
+    IsBottomDrumHit = IsBottomDrumHit || (NewDrumIntensities.Bottom > 0);
+    printf("\r\nDrums hit so far (LBR): %u, %u, %u\r\n", IsLeftDrumHit, IsBottomDrumHit, IsRightDrumHit);
+}
+
+static void ClearWhichDrumsHit(void) {
+    IsLeftDrumHit = 0;
+    IsRightDrumHit = 0;
+    IsBottomDrumHit = 0;
+}
+
+static bool IsCorrectHit(void) {
+    uint32_t DrumsHit = 0;
+    if (IsLeftDrumHit) {
+        DrumsHit += 1 << LeftDrum_LEDs;
+    }
+    if (IsRightDrumHit) {
+        DrumsHit += 1 << RightDrum_LEDs;
+    }
+    if (IsBottomDrumHit) {
+        DrumsHit += 1 << BottomDrum_LEDs;
+    }
+
+    // L 0, R 1, B 2
+    printf("\r\nCorrect drum: %u", NoteToDrum[Song[CurrentNoteIdx].Note]);
+
+    uint32_t CorrectDrums = 1 << NoteToDrum[Song[CurrentNoteIdx].Note];
+    printf("\r\nIsCorrectHit: %u vs %u\r\n", DrumsHit, CorrectDrums);
+
+    if (CorrectDrums == DrumsHit) {
+        return true;
+    }
+    return false;
 }

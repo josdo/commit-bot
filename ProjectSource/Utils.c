@@ -19,27 +19,27 @@ void InitMUXPins(void){
   MUX_B_TRIS = 0;
 }
 
-void SetMuxOutput(LED_MUX_t WhichOutput){
+void SetMuxOutput(LED_Types_t WhichOutput){
     switch(WhichOutput){
-        case LeftDrum: { // 0
+        case LeftDrum_LEDs: { // 0
             MUX_A_PIN = 0;
             MUX_B_PIN = 0;
         }
         break;
         
-        case RightDrum: { // 1
+        case RightDrum_LEDs: { // 1
             MUX_A_PIN = 1;
             MUX_B_PIN = 0;
         }
         break;
         
-        case BottomDrum: { // 2
+        case BottomDrum_LEDs: { // 2
             MUX_A_PIN = 0;
             MUX_B_PIN = 1;
         }
         break;
         
-        case Clock: { // 3
+        case Clock_LEDs: { // 3
             MUX_A_PIN = 1;
             MUX_B_PIN = 1;
         }

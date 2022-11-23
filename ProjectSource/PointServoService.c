@@ -81,7 +81,7 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
       }
       break;
       
-      case ES_VALID_HIT: {
+      case ES_CORRECT_HIT: {
           TotalPoints++;
               
           if (11 == TotalPoints){

@@ -66,7 +66,7 @@ bool InitClockFSM(uint8_t Priority)
    
   // set up the MUX pins
   InitMUXPins();
-  SetMuxOutput(Clock);
+  SetMuxOutput(Clock_LEDs);
   Clear_Strip(Clock_LEDs); // clear the LEDs
   Set_Intensity(Clock_LEDs, LEDIntensity); // min intensity
   
@@ -104,7 +104,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           CurrentState = WelcomeState_ClockFSM;
           
           // always make the LEDs turquoise when entering WelcomingState
-          SetMuxOutput(Clock);
+          SetMuxOutput(Clock_LEDs);
           Set_All_Color(Clock_LEDs, NextWelcomingColor);
           Set_Intensity(Clock_LEDs, LEDIntensity);
           NextWelcomingColor = Purple;
@@ -121,7 +121,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           switch (ThisEvent.EventType){
             case ES_TIMEOUT: {
               // write the next color
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, NextWelcomingColor);
                   Set_Intensity(Clock_LEDs, LEDIntensity);
                   ES_Event_t NewEvent;
@@ -143,7 +143,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           
             case ES_UPDATING_LED: {
                   // still updating the LEDs
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
@@ -164,7 +164,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   CurrentState = IRCovered_ClockFSM; // advance the state
                   
                   // set the new color
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, ThisEvent.EventParam);
                   Set_Intensity(Clock_LEDs, LEDIntensity);
                   
@@ -182,7 +182,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
       case IRCovered_ClockFSM: {
           switch(ThisEvent.EventType){
               case ES_UPDATING_LED: { 
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   // update LED display
                   if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;
@@ -200,7 +200,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   CurrentState = WelcomeState_ClockFSM; 
                   
                   // write the next welcoming color
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, NextWelcomingColor);
                   Set_Intensity(Clock_LEDs, LEDIntensity);
                   ES_Event_t NewEvent;
@@ -230,7 +230,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
       case PlayingGameState_ClockFSM: { 
           switch(ThisEvent.EventType){
               case ES_UPDATING_LED: { 
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   // update LED display
                   if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;
@@ -273,7 +273,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   else if (TIME_ELAPSED_TIMER == ThisEvent.EventParam){
                     CurrentState = PlayingGameState_ClockFSM;
                     printf("6 sec clock timeout\r\n");
-                    SetMuxOutput(Clock);
+                    SetMuxOutput(Clock_LEDs);
                     
                     // Light the next LED for the timer
                     Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
@@ -302,7 +302,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
           switch(ThisEvent.EventType){
               
               case ES_UPDATING_LED: {
-                  SetMuxOutput(Clock);
+                  SetMuxOutput(Clock_LEDs);
                   // update LED display
                   if (false == TakeDisplayUpdateStep(Clock_LEDs)){
                     ES_Event_t NewEvent;

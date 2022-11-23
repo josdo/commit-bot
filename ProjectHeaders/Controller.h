@@ -5,6 +5,8 @@
 #include "ES_Configure.h" /* gets us event definitions */
 #include "ES_Types.h"     /* gets bool type for returns */
 
+#include "Utils.h"
+
 // typedefs for the states
 // State definitions for use with the query function
 typedef enum
@@ -12,22 +14,6 @@ typedef enum
   InitPState_Controller, IRCoveredState_Controller, WelcomingState_Controller,
   PlayingState_Controller, PlayedCorrectNoteState_Controller, ZenState_Controller
 }ControllerState_t;
-
-
-
-// Stores the drum intensities for event parameters
-// BIG assumption: num_intensities <= 15 (i.e. 4 bits)
-typedef union
-{
-  struct
-  {
-    uint16_t Left : 4;
-    uint16_t Bottom : 4;
-    uint16_t Right : 4;
-    uint16_t Filler : 4;
-  };
-  uint16_t All;
-}Intensities_t;
 
 // Public Function Prototypes
 
@@ -91,6 +77,9 @@ void ReadAnalogPiezos(uint32_t *Buffer);
 
 bool checkIRSensor(void);
 
+// Initialize motor pins to digital output
+static bool InitMotors();
+
 /*
 Params
   uint32_t analog value (0-1023)
@@ -104,6 +93,43 @@ static uint32_t AnalogToIntensity(uint32_t Analog);
 
 static void StartNextNoteWindow(void);
 
+/*
+Params
+Return
+Description
+    Resets interaction timer.
+*/
+static void RestartInteractionTimer(void);
+
+/*
+Params
+    Intensities, from the ES_DRUMS_HIT event param
+Return
+Description
+    Updates the module level variables tracking the drums hit in
+    the current note window.
+*/
+static void UpdateWhichDrumsHit(Intensities_t NewDrumIntensities);
+
+/*
+Params
+Return
+Description
+    Clears to false the module level variables tracking the drums hit.
+*/
+static void ClearWhichDrumsHit(void);
+
+
+/*
+Params
+Return
+    bool
+Description
+    Returns if all the correct drums and only the correct drums are hit
+    in this note window.
+    TODO: generalize to multiple drums
+*/
+static bool IsCorrectHit(void);
 
 #endif /* Controller_H */
 
