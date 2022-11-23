@@ -106,7 +106,7 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
       break;
       
       case ES_ENTER_ZEN: {
-          
+          PWMOperate_SetPulseWidthOnChannel((uint16_t)(2*TICS_PER_MS), SERVO_CHANNEL);
       }
       break;
   }

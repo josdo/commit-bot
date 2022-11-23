@@ -50,11 +50,13 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent);
 Params:
   None
 Return:
-  TemplateState_t The current state of the Template state machine
+  ClockFSMState_t The current state of the Clock state machine
 Description:
-  Returns the current state of the Template state machine
+  Returns the current state of the Clock state machine
 */
 ClockFSMState_t QueryClockFSM(void);
+
+
 
 #endif /* TemplateFSM_H */
 

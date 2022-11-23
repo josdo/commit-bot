@@ -365,14 +365,14 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                 case ES_ENTER_ZEN: {
                     CurrentState = ZenState_Drums;
                     
-                    Set_All_Color(LeftDrum_LEDs, Blue);
-                    Set_Intensity(LeftDrum_LEDs, 1);
+                    Set_All_Color(LeftDrum_LEDs, White);
+                    Set_Intensity(LeftDrum_LEDs, 5);
                         
-                    Set_All_Color(RightDrum_LEDs, Green);
-                    Set_Intensity(RightDrum_LEDs, 1);
+                    Set_All_Color(RightDrum_LEDs, White);
+                    Set_Intensity(RightDrum_LEDs, 5);
                         
-                    Set_All_Color(BottomDrum_LEDs, Red);
-                    Set_Intensity(BottomDrum_LEDs, 1);
+                    Set_All_Color(BottomDrum_LEDs, White);
+                    Set_Intensity(BottomDrum_LEDs, 5);
                     
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
