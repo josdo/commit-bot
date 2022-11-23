@@ -333,7 +333,7 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                     
                     // light up the correct drum
                     Set_All_Color(ThisEvent.EventParam, Pink); 
-                    Set_Intensity(ThisEvent.EventParam, 1);  
+                    Set_Intensity(ThisEvent.EventParam, 5);  
                     
                     ES_Event_t NewEvent;
                     NewEvent.EventType = ES_UPDATING_LED;
