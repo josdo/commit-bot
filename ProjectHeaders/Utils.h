@@ -5,7 +5,7 @@
 #include "ES_Framework.h"
 
 typedef enum {
-    LeftDrum_LEDs = 0, RightDrum_LEDs, BottomDrum_LEDs, Clock_LEDs
+    LeftDrum_LEDs = 0, RightDrum_LEDs, BottomDrum_LEDs, Clock_LEDs, NoDrum_LEDs
 } LED_Types_t;
 
 // typedef enum

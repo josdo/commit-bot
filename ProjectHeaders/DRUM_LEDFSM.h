@@ -4,6 +4,7 @@
 // Event Definitions
 #include "ES_Configure.h" /* gets us event definitions */
 #include "ES_Types.h"     /* gets bool type for returns */
+#include "Utils.h"
 
 // typedefs for the states
 // State definitions for use with the query function
@@ -57,7 +58,18 @@ Description:
 */
 LEDFSMState_t QueryLEDFSM(void);
 
+/*
+Update MinBrightness module variable.
+*/
 bool Update_DrumIntensity(uint8_t NewIntensity);
+
+
+/*
+Description:
+  Posts a ES_UPDATING_LED event back to DRUM_LEDFSM with the new color and brightness 
+  for the specified drum.
+*/
+static void LightDrum(LED_Types_t Drum, uint32_t Color, uint32_t Brightness);
 
 #endif /* TemplateFSM_H */
 

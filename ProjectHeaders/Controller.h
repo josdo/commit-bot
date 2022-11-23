@@ -131,5 +131,18 @@ Description
 */
 static bool IsCorrectHit(void);
 
+
+/*
+Params
+    Intensities_t
+Return
+    Intensities_t
+Description
+    Return the original hit intensities with zeroed out the hit intensities 
+    for incorrect drums.
+    TODO: generalize to multiple drums
+*/
+static Intensities_t KeepCorrectDrumIntensities(Intensities_t HitIntensities);
+
 #endif /* Controller_H */
 

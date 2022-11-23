@@ -39,15 +39,15 @@
 // define all the notes
 typedef enum
 {
-    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9 
+    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9, note10
 }Note_t;
 
 // map note to drum
 static LED_Types_t NoteToDrum[10] = {
+    NoDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs
 };
 
 // stores the notes and the corresponding active drum
@@ -96,22 +96,17 @@ static const int32_t NumNotes = 12;
 // notes to be played for the song
 // TODO: remove hardcoded magic
 static Drum_Note_t Song[12] = {
+    {note1, 5 * NOTE_WINDOW},
     {note2, 5 * NOTE_WINDOW},
-    {note0, 5 * NOTE_WINDOW},
-    {note0, 5 * NOTE_WINDOW},
-    {note0, 5 * NOTE_WINDOW},
-    {note0, 5 * NOTE_WINDOW}
-    // {note1, 5 * NOTE_WINDOW},
-    // {note2, 5 * NOTE_WINDOW},
-    // {note0, 5 * NOTE_WINDOW},
-    // {note1, 5 * NOTE_WINDOW},
-    // {note2, 5 * NOTE_WINDOW},
-    // {note0, 5 * NOTE_WINDOW},
-    // {note1, 5 * NOTE_WINDOW},
-    // {note2, 5 * NOTE_WINDOW},
-    // {note0, 5 * NOTE_WINDOW},
-    // {note1, 5 * NOTE_WINDOW},
-    // {note2, 5 * NOTE_WINDOW},
+    {note3, 5 * NOTE_WINDOW},
+    {note1, 5 * NOTE_WINDOW},
+    {note2, 5 * NOTE_WINDOW},
+    {note3, 5 * NOTE_WINDOW},
+    {note1, 5 * NOTE_WINDOW},
+    {note2, 5 * NOTE_WINDOW},
+    {note3, 5 * NOTE_WINDOW},
+    {note1, 5 * NOTE_WINDOW},
+    {note2, 5 * NOTE_WINDOW},
 };
 
 static bool IsLeftDrumHit = 0;
@@ -223,7 +218,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     PostDRUM_LEDFSM(NewEvent);
                     PostClockFSM(NewEvent);
                   
-                    printf("IN IR COVERED STATE: Start next note window");
                     StartNextNoteWindow(); // start the next note window
 
                     printf("Begin interaction timer: 15 SECONDS\r\n");
@@ -282,7 +276,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
               break;
 
               case ES_DRUMS_HIT: {
-                printf("\tHIT registered in Controller\r\n");
                 RestartInteractionTimer();
 
                 // Update hit intensities
@@ -291,7 +284,10 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
 
                 // Brighten drums with new hit intensities,
                 // zeroing out intensities of all the wrong drums
-                ES_Event_t DrumEvent = {ES_DRUMS_HIT, ThisEvent.EventParam};
+                Intensities_t HitIntensitiesCorrectOnly = KeepCorrectDrumIntensities(HitIntensities);
+                printf("\r\nHit intensities: %u, %u, %u \r\n", HitIntensities.Left, HitIntensities.Bottom, HitIntensities.Right);
+                printf("\r\nCorrect intensities: %u, %u, %u \r\n", HitIntensitiesCorrectOnly.Left, HitIntensitiesCorrectOnly.Bottom, HitIntensitiesCorrectOnly.Right);
+                ES_Event_t DrumEvent = {ES_HIT_INTENSITY_CORRECT_ONLY, HitIntensitiesCorrectOnly.All};
                 PostDRUM_LEDFSM(DrumEvent);
 
                 // Detect if correct drums hit
@@ -327,7 +323,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     
                     // note window timeout
                     else if (NOTE_WINDOW_TIMER == ThisEvent.EventParam){
-                        printf("IN PLAYING STATE: Start next note window");
                         StartNextNoteWindow(); // start the next note window
                     }
               }
@@ -355,7 +350,6 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
           switch(ThisEvent.EventType){
               case ES_TIMEOUT: {
                 CurrentState = PlayingState_Controller;
-                printf("IN PLAYED CORRECT STATE: Start next note window");
                 StartNextNoteWindow();
               }
               break;
@@ -402,8 +396,7 @@ void ReadAnalogIR(uint32_t *Buffer)
   Buffer[0] = AnalogReadings[2];
 }
 
-bool DrumsAreHit(void)
-{
+bool DrumsAreHit(void) {
   uint32_t PiezosAnalog[3];
   ReadAnalogPiezos(PiezosAnalog);
   // Stop if no drums hit
@@ -415,7 +408,7 @@ bool DrumsAreHit(void)
   uint32_t LeftIntensity = AnalogToIntensity(PiezosAnalog[0]);
   uint32_t BottomIntensity = AnalogToIntensity(PiezosAnalog[1]);
   uint32_t RightIntensity = AnalogToIntensity(PiezosAnalog[2]);
-  printf("\r\nL %u, B %u, R %u\r\n", LeftIntensity, BottomIntensity, RightIntensity);
+//   printf("\r\nL %u, B %u, R %u\r\n", LeftIntensity, BottomIntensity, RightIntensity);
   if (1 <= LeftIntensity || 1 <= BottomIntensity || 1 <= RightIntensity)
   {
     Intensities_t DrumIntensities = {{LeftIntensity, BottomIntensity, RightIntensity}};
@@ -569,7 +562,6 @@ static void UpdateWhichDrumsHit(Intensities_t NewDrumIntensities) {
     IsLeftDrumHit = IsLeftDrumHit || (NewDrumIntensities.Left > 0);
     IsRightDrumHit = IsRightDrumHit || (NewDrumIntensities.Right > 0);
     IsBottomDrumHit = IsBottomDrumHit || (NewDrumIntensities.Bottom > 0);
-    printf("\r\nDrums hit so far (LBR): %u, %u, %u\r\n", IsLeftDrumHit, IsBottomDrumHit, IsRightDrumHit);
 }
 
 static void ClearWhichDrumsHit(void) {
@@ -590,14 +582,31 @@ static bool IsCorrectHit(void) {
         DrumsHit += 1 << BottomDrum_LEDs;
     }
 
-    // L 0, R 1, B 2
-    printf("\r\nCorrect drum: %u", NoteToDrum[Song[CurrentNoteIdx].Note]);
+    // // L 0, R 1, B 2
+    // printf("\r\nCorrect drum: %u", NoteToDrum[Song[CurrentNoteIdx].Note]);
 
     uint32_t CorrectDrums = 1 << NoteToDrum[Song[CurrentNoteIdx].Note];
-    printf("\r\nIsCorrectHit: %u vs %u\r\n", DrumsHit, CorrectDrums);
 
     if (CorrectDrums == DrumsHit) {
         return true;
     }
     return false;
+}
+
+static Intensities_t KeepCorrectDrumIntensities(Intensities_t HitIntensities) {
+    // Must initialize, or garbage values will persist inside
+    Intensities_t CorrectIntensities = {0,0,0};
+
+    LED_Types_t CorrectDrum = NoteToDrum[Song[CurrentNoteIdx].Note];
+    if (CorrectDrum == LeftDrum_LEDs) {
+        CorrectIntensities.Left = HitIntensities.Left;
+    }
+    if (CorrectDrum == BottomDrum_LEDs) {
+        CorrectIntensities.Bottom = HitIntensities.Bottom;
+    }
+    if (CorrectDrum == RightDrum_LEDs) {
+        CorrectIntensities.Right = HitIntensities.Right;
+    }
+
+    return CorrectIntensities;
 }

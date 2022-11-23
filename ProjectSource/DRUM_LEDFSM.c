@@ -36,15 +36,15 @@ extern uint32_t NumPiezoIntensities;
 // TODO remove hard coded NumPiezoIntensities
 static uint32_t HitIntensityToBrightness[9+1] = {
     0,
-    1,
-    4,
-    7,
-    10,
-    13,
-    16,
+    15,
+    17,
     19,
     22,
-    25 // 9th intensity
+    24,
+    26,
+    28,
+    30,
+    31 // 9th intensity
 };
 
 // next color in welcoming state
@@ -332,7 +332,7 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                     CurrentState = PlayingState_Drums; // stay in curr state
                     
                     // light up the correct drum
-                    Set_All_Color(ThisEvent.EventParam, Yellow); 
+                    Set_All_Color(ThisEvent.EventParam, Pink); 
                     Set_Intensity(ThisEvent.EventParam, 1);  
                     
                     ES_Event_t NewEvent;
@@ -342,11 +342,18 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                 }
                 break;
                 
-                case ES_DRUMS_HIT: {
+                case ES_HIT_INTENSITY_CORRECT_ONLY: {
                     // Only brighten correct drums
-                    Intensities_t HitIntensities = (Intensities_t) ThisEvent.EventParam;
-                    // TODO finish
-                    // LightDrum(drum, color, brightness);
+                    Intensities_t HitIntensitiesCorrectOnly = (Intensities_t) ThisEvent.EventParam;
+                    if (HitIntensitiesCorrectOnly.Left > 0) {
+                        LightDrum(LeftDrum_LEDs, Pink, HitIntensityToBrightness[HitIntensitiesCorrectOnly.Left]);
+                    }
+                    if (HitIntensitiesCorrectOnly.Bottom > 0) {
+                        LightDrum(BottomDrum_LEDs, Pink, HitIntensityToBrightness[HitIntensitiesCorrectOnly.Bottom]);
+                    }
+                    if (HitIntensitiesCorrectOnly.Right > 0) {
+                        LightDrum(RightDrum_LEDs, Pink, HitIntensityToBrightness[HitIntensitiesCorrectOnly.Right]);
+                    }
                 }
                 break;
 
@@ -483,21 +490,6 @@ bool Update_DrumIntensity(uint8_t NewIntensity){
 static void LightDrum(LED_Types_t Drum, uint32_t Color, uint32_t Brightness) {
     Set_All_Color(Drum, Color);
     Set_Intensity(Drum, Brightness);
-
-    // Map LED drum enum to MUX drum enum
-    // LED_MUX_t Drum;
-    // if (Drum == LeftDrum_LEDs) {
-    //     Drum = LeftDrum_LEDs;
-    // }
-    // else if (Drum == RightDrum_LEDs) {
-    //     Drum = RightDrum;
-    // }
-    // else if (Drum == BottomDrum_LEDs) {
-    //     Drum = BottomDrum;
-    // }
-    // else {
-    //     printf("Error in argument to LightDrum of DRUM_LEDFSM.c");
-    // }
 
     ES_Event_t NewEvent = {ES_UPDATING_LED, Drum};
     PostDRUM_LEDFSM(NewEvent);
