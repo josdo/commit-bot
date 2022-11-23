@@ -16,10 +16,13 @@
 #define SIX_SEC (6 * ONE_SEC)
 #define TEN_SEC (10 * ONE_SEC)
 
+#define NUM_TIMER_LED 10
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
    relevant to the behavior of this state machine
 */
+
+static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor);
 
 /*---------------------------- Module Variables ---------------------------*/
 // everybody needs a state variable, you may need others as well.
@@ -242,11 +245,23 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               }
               break;
               
+              case ES_CORRECT_HIT: {
+                  SetLEDs(Clock_idx, Green);
+                  Set_Intensity(Clock_LEDs, 1);
+                  
+                  ES_Event_t NewEvent;
+                  NewEvent.EventType = ES_UPDATING_LED;
+                  NewEvent.EventParam = 0;
+                  PostClockFSM(NewEvent);
+              }
+              break;
+              
               case ES_ENTER_ZEN: {
+                  printf("Zen in the timer module\r\n");
                   CurrentState = ZenState_ClockFSM;
                   
                   Set_All_Color(Clock_LEDs, White);
-                  Set_Intensity(Clock_LEDs, 1);
+                  Set_Intensity(Clock_LEDs, 10);
                     
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
@@ -270,13 +285,24 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     PostClockFSM(NewEvent);
                   }
                   
+                  else if (MOTOR_TIMER == ThisEvent.EventParam){
+                      SetLEDs(Clock_idx, Pink);
+                      Set_Intensity(Clock_LEDs, 1);
+                  
+                      ES_Event_t NewEvent;
+                      NewEvent.EventType = ES_UPDATING_LED;
+                      NewEvent.EventParam = 0;
+                      PostClockFSM(NewEvent);
+                  }
+                  
                   else if (TIME_ELAPSED_TIMER == ThisEvent.EventParam){
                     CurrentState = PlayingGameState_ClockFSM;
                     printf("6 sec clock timeout\r\n");
                     SetMuxOutput(Clock_LEDs);
                     
                     // Light the next LED for the timer
-                    Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
+//                    Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
+                    SetLEDs(Clock_idx, Pink);
                     Set_Intensity(Clock_LEDs, 1);
                     Clock_idx++;
                     
@@ -344,4 +370,10 @@ ClockFSMState_t QueryClockFSM(void)
 /***************************************************************************
  private functions
  ***************************************************************************/
-
+static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor){
+    if (NumLEDs >= 1 && NumLEDs <= NUM_TIMER_LED){
+        for (uint8_t i=1; i<=NumLEDs; i++){
+            Set_Single_Color(Clock_LEDs, WhichColor, i);
+        }
+    }
+}

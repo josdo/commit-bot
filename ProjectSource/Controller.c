@@ -19,6 +19,7 @@
 
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000 // 1 sec timer
+#define QUARTER_SEC (ONE_SEC/4) // 1/4 sec timer
 #define HALF_SEC (ONE_SEC/2) // 1/2 sec timer
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
 #define FIVE_SEC (ONE_SEC * 5) // 5 sec timer
@@ -33,8 +34,8 @@
 // Define pins
 #define BUTTON_PORT PORTBbits.RB5
 #define LEFT_MOTOR_LATCH LATBbits.LATB15
-#define RIGHT_MOTOR_LATCH LATBbits.LATB11
-#define BOTTOM_MOTOR_LATCH LATBbits.LATB10
+#define RIGHT_MOTOR_LATCH LATBbits.LATB10
+#define BOTTOM_MOTOR_LATCH LATBbits.LATB11
 
 // define all the notes
 typedef enum
@@ -55,6 +56,7 @@ typedef struct{
     Note_t Note;
     uint16_t Duration;
 }Drum_Note_t;
+
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
    relevant to the behavior of this state machine
@@ -88,6 +90,7 @@ static uint32_t NumANxPins = 4;
 static uint32_t AnalogReadings[4];
 
 static uint16_t LastPiezoReadTime;
+static bool MotorsOn = true; // button controls vibration motors
 static bool LastButtonState;
 static uint16_t ButtonDebounceCooldown = 100; // in ms for debounce
 
@@ -228,6 +231,10 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     // ES_Timer_InitTimer(ZEN_TIMER, ONE_MIN);
                   }
                   
+                  else if (MOTOR_TIMER == ThisEvent.EventParam){
+                    StopMotors();
+                  }
+                  
               }
               break;
           }
@@ -309,6 +316,11 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
 
                 ES_Event_t DrumEvent = {ES_CORRECT_HIT, NoteToDrum[Song[CurrentNoteIdx].Note]};
                 PostDRUM_LEDFSM(DrumEvent);
+                
+                ES_Event_t ClockEvent = {ES_CORRECT_HIT};
+                PostClockFSM(ClockEvent);
+                
+                StartMotor(NoteToDrum[Song[CurrentNoteIdx].Note]);
               }
               
               case ES_TIMEOUT: {
@@ -320,6 +332,11 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                         
                         // stop zen timer
                         ES_Timer_StopTimer(ZEN_TIMER);
+                    }
+                    
+                    // turn off any motors
+                    else if (MOTOR_TIMER == ThisEvent.EventParam){
+                        StopMotors();
                     }
                     
                     // note window timeout
@@ -337,8 +354,8 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   ES_Timer_StopTimer(TIME_ELAPSED_TIMER);
                   ES_Timer_StopTimer(NOTE_WINDOW_TIMER);
           
-                  printf("Begin zen mode timer\r\n");
-                  ES_Timer_InitTimer(ZEN_TIMER, FIVE_SEC);
+                  printf("Begin zen mode timer: 15 sec\r\n");
+                  ES_Timer_InitTimer(ZEN_TIMER, FIFTEEN_SEC);
                   CurrentNoteIdx = -1;
               }
               break;
@@ -350,8 +367,14 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
           
           switch(ThisEvent.EventType){
               case ES_TIMEOUT: {
-                CurrentState = PlayingState_Controller;
-                StartNextNoteWindow();
+                  if (NOTE_WINDOW_TIMER == ThisEvent.EventParam){
+                      CurrentState = PlayingState_Controller;
+                      StartNextNoteWindow();
+                  }
+                  
+                  else if (MOTOR_TIMER == ThisEvent.EventParam){
+                      StopMotors();
+                  }
               }
               break;
           }
@@ -437,14 +460,15 @@ bool ButtonPressed(void)
   {
     // printf("\r\nButton state changed to %i\r\n", CurrButtonState);
     // Change minimum smack intensity
-    MinPiezoAnalogIdx++;
-    uint32_t RangeLength = sizeof(MinPiezoAnalogRange) / sizeof(MinPiezoAnalogRange[0]);
-    if (MinPiezoAnalogIdx == RangeLength)
-    {
-      MinPiezoAnalogIdx = 0;
-    }
-    MinPiezoAnalog = MinPiezoAnalogRange[MinPiezoAnalogIdx];
-    printf("\r\nMinimum analog threshold now %u\r\n", MinPiezoAnalog);
+//    MinPiezoAnalogIdx++;
+//    uint32_t RangeLength = sizeof(MinPiezoAnalogRange) / sizeof(MinPiezoAnalogRange[0]);
+//    if (MinPiezoAnalogIdx == RangeLength)
+//    {
+//      MinPiezoAnalogIdx = 0;
+//    }
+//    MinPiezoAnalog = MinPiezoAnalogRange[MinPiezoAnalogIdx];
+//    printf("\r\nMinimum analog threshold now %u\r\n", MinPiezoAnalog);
+      MotorsOn = !MotorsOn; // switch if the motors are on
     ReturnVal = true;
   }
 
@@ -610,4 +634,45 @@ static Intensities_t KeepCorrectDrumIntensities(Intensities_t HitIntensities) {
     }
 
     return CorrectIntensities;
+}
+
+static void StartMotor(LED_Types_t WhichDrum){
+    ES_Timer_InitTimer(MOTOR_TIMER, QUARTER_SEC);
+    printf("Turning on a motor\r\n");
+    
+    switch(WhichDrum){
+        case LeftDrum_LEDs: {
+            LEFT_MOTOR_LATCH = 1;
+            BOTTOM_MOTOR_LATCH = 0;
+            RIGHT_MOTOR_LATCH = 0;
+        }
+        break;
+        
+        case RightDrum_LEDs: {
+            LEFT_MOTOR_LATCH = 0;
+            BOTTOM_MOTOR_LATCH = 0;
+            RIGHT_MOTOR_LATCH = 1;
+        }
+        break;
+        
+        case BottomDrum_LEDs: {
+            LEFT_MOTOR_LATCH = 0;
+            BOTTOM_MOTOR_LATCH = 1;
+            RIGHT_MOTOR_LATCH = 0;
+        }
+        break;
+        
+        case NoDrum_LEDs: {
+            LEFT_MOTOR_LATCH = 0;
+            BOTTOM_MOTOR_LATCH = 0;
+            RIGHT_MOTOR_LATCH = 0;
+        }
+        break;
+    }
+}
+
+static void StopMotors(void){
+    LEFT_MOTOR_LATCH = 0;
+    BOTTOM_MOTOR_LATCH = 0;
+    RIGHT_MOTOR_LATCH = 0;
 }

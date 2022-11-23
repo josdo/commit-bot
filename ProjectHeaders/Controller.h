@@ -144,5 +144,27 @@ Description
 */
 static Intensities_t KeepCorrectDrumIntensities(Intensities_t HitIntensities);
 
+
+/*
+Params
+   LED_Types_t
+Return
+   void
+Description
+   Turn on the specified drum motor and start a 1/4 second timer
+*/
+static void StartMotor(LED_Types_t WhichDrum);
+
+
+/*
+Params
+   void
+Return
+   void
+Description
+   Turn off all the drum motors
+*/
+static void StopMotors(void);
+
 #endif /* Controller_H */
 
