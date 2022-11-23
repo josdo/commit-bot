@@ -33,7 +33,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 4
+#define NUM_SERVICES 5
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -92,15 +92,16 @@
 #define SERV_3_QUEUE_SIZE 3
 #endif
 
+
 /****************************************************************************/
 // These are the definitions for Service 4
 #if NUM_SERVICES > 4
 // the header file with the public function prototypes
-#define SERV_4_HEADER "TestHarnessService4.h"
+#define SERV_4_HEADER "communication_pwm_service.h"
 // the name of the Init function
-#define SERV_4_INIT InitTestHarnessService4
+#define SERV_4_INIT Initcommunication_pwm_service
 // the name of the run function
-#define SERV_4_RUN RunTestHarnessService4
+#define SERV_4_RUN Runcommunication_pwm_service
 // How big should this services Queue be?
 #define SERV_4_QUEUE_SIZE 3
 #endif
@@ -324,7 +325,7 @@ typedef enum
 #define TIMER8_RESP_FUNC TIMER_UNUSED
 #define TIMER9_RESP_FUNC TIMER_UNUSED
 #define TIMER10_RESP_FUNC TIMER_UNUSED
-#define TIMER11_RESP_FUNC TIMER_UNUSED
+#define TIMER11_RESP_FUNC Postcommunication_pwm_service
 #define TIMER12_RESP_FUNC ES_PostList02
 #define TIMER13_RESP_FUNC PostClockFSM
 #define TIMER14_RESP_FUNC ES_PostList00
@@ -341,6 +342,7 @@ typedef enum
 
 #define LED_REFRESH_TIMER 0
 #define IR_COVERED_TIMER 1
+#define COMMUNICATION_PULSE_TIMER 11
 #define NOTE_WINDOW_TIMER 12
 #define TIME_ELAPSED_TIMER 13
 #define ZEN_TIMER 14

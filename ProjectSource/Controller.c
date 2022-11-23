@@ -96,17 +96,18 @@ static const int32_t NumNotes = 12;
 // notes to be played for the song
 // TODO: remove hardcoded magic
 static Drum_Note_t Song[12] = {
-    {note1, 5 * NOTE_WINDOW},
-    {note2, 5 * NOTE_WINDOW},
-    {note3, 5 * NOTE_WINDOW},
-    {note1, 5 * NOTE_WINDOW},
-    {note2, 5 * NOTE_WINDOW},
-    {note3, 5 * NOTE_WINDOW},
-    {note1, 5 * NOTE_WINDOW},
-    {note2, 5 * NOTE_WINDOW},
-    {note3, 5 * NOTE_WINDOW},
-    {note1, 5 * NOTE_WINDOW},
-    {note2, 5 * NOTE_WINDOW},
+    {note0, 2.588},
+    {note1, 0.346},          // Tutorial slow start
+    {note2, 0.309},
+    {note3, 0.389},
+    {note4, 0.666},
+    {note5, 0.702},
+    {note0, 5.548},
+    {note6, 0.252},
+    {note7, 0.318},
+    {note8, 0.498},
+    {note9, 0.366},
+    {note10, 0.718}    // Tutorial slow ends
 };
 
 static bool IsLeftDrumHit = 0;
@@ -217,7 +218,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     NewEvent.EventType = ES_ENTER_GAME;
                     PostDRUM_LEDFSM(NewEvent);
                     PostClockFSM(NewEvent);
-                  
+                    Postcommunication_pwm_service(NewEvent);
                     StartNextNoteWindow(); // start the next note window
 
                     printf("Begin interaction timer: 15 SECONDS\r\n");
