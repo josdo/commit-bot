@@ -24,7 +24,7 @@
 #define FIVE_SEC (ONE_SEC * 5) // 5 sec timer
 #define FIFTEEN_SEC (ONE_SEC * 15) // 15 sec timer
 #define THIRTY_SEC (ONE_SEC * 30) // 30 sec timer
-#define ONE_MIN (ONE_SEC * 60) // 30 sec timer
+#define ONE_MIN (ONE_SEC * 60) // 60 sec timer
 
 #define INTERACTION_SEC (ONE_SEC * 15) // interaction timer
 #define NOTE_WINDOW (uint32_t)(1.5 * ONE_SEC) // 1.5 seconds between notes for now
