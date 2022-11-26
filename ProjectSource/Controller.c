@@ -19,7 +19,7 @@
 #include "communication_pwm_service.h"
 
 /*----------------------------- Module Defines ----------------------------*/
-#define ONE_SEC 1000 // 1 sec timer
+#define ONE_SEC 1000.0 // 1 sec timer
 #define QUARTER_SEC (ONE_SEC/4) // 1/4 sec timer
 #define HALF_SEC (ONE_SEC/2) // 1/2 sec timer
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
@@ -115,19 +115,21 @@ static const int32_t NumNotes = 12;
 //};
 
 static Drum_Note_t Song[12] = {
-    {note0, 2588 },
-    {note1, 346  },          // Tutorial slow start
-    {note2, 309  },
-    {note3, 389  },
-    {note4, 666  },
-    {note5, 702  },
-    {note0, 5548  },
-    {note6, 252  },
-    {note7, 318  },
-    {note8, 498  },
-    {note9, 366  },
-    {note10, 718  }    // Tutorial slow ends
+    {note0, (uint16_t)2588 },
+    {note1, (uint16_t)346  },          // Tutorial slow start
+    {note2, (uint16_t)309  },
+    {note3, (uint16_t)389  },
+    {note4, (uint16_t)666  },
+    {note5, (uint16_t)702  },
+    {note0, (uint16_t)5548  },
+    {note6, (uint16_t)252  },
+    {note7, (uint16_t)318  },
+    {note8, (uint16_t)498  },
+    {note9, (uint16_t)366  },
+    {note10, (uint16_t)718  }    // Tutorial slow ends
 };
+
+
 
 static bool IsLeftDrumHit = 0;
 static bool IsBottomDrumHit = 0;
@@ -472,7 +474,7 @@ bool ButtonPressed(void)
   bool StateChanged = LastButtonState != CurrButtonState;
   bool ButtonUp = CurrButtonState == 1;
 
-  if (ReadyToRead && StateChanged && ButtonUp)
+  if (ReadyToRead && StateChanged && !ButtonUp)
   {
     // printf("\r\nButton state changed to %i\r\n", CurrButtonState);
     // Change minimum smack intensity
@@ -485,6 +487,7 @@ bool ButtonPressed(void)
 //    MinPiezoAnalog = MinPiezoAnalogRange[MinPiezoAnalogIdx];
 //    printf("\r\nMinimum analog threshold now %u\r\n", MinPiezoAnalog);
       MotorsOn = !MotorsOn; // switch if the motors are on
+      printf("motor state = %d\r\n", (int)MotorsOn);
     ReturnVal = true;
   }
 
@@ -578,12 +581,15 @@ static void StartNextNoteWindow(void) {
     else {
         // Go to the next note. If the first time called, this will increment
         // from -1 to 0
-        CurrentNoteIdx++;
-        printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
         
+        CurrentNoteIdx++;
+        
+        printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
+        printf("Length of delay: %d\r\n", Song[CurrentNoteIdx].Duration);
         // begin the note window timer
 //        uint16_t time = (uint16_t)(NoteToDrum[Song[CurrentNoteIdx].Duration]*ONE_SEC);
-        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NoteToDrum[Song[CurrentNoteIdx].Duration]); 
+//        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, Song[CurrentNoteIdx].Duration); 
+        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, ONE_SEC); 
 //        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
         
         // post the note to the drums
@@ -660,7 +666,7 @@ static void StartMotor(LED_Types_t WhichDrum){
     
     switch(WhichDrum){
         case LeftDrum_LEDs: {
-            LEFT_MOTOR_LATCH = 1;
+            LEFT_MOTOR_LATCH = MotorsOn;
             BOTTOM_MOTOR_LATCH = 0;
             RIGHT_MOTOR_LATCH = 0;
         }
@@ -669,13 +675,13 @@ static void StartMotor(LED_Types_t WhichDrum){
         case RightDrum_LEDs: {
             LEFT_MOTOR_LATCH = 0;
             BOTTOM_MOTOR_LATCH = 0;
-            RIGHT_MOTOR_LATCH = 1;
+            RIGHT_MOTOR_LATCH = MotorsOn;
         }
         break;
         
         case BottomDrum_LEDs: {
             LEFT_MOTOR_LATCH = 0;
-            BOTTOM_MOTOR_LATCH = 1;
+            BOTTOM_MOTOR_LATCH = MotorsOn;
             RIGHT_MOTOR_LATCH = 0;
         }
         break;
