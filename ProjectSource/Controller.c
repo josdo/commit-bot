@@ -41,15 +41,18 @@
 // define all the notes
 typedef enum
 {
-    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9, note10
+    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9, note10, note11, note12, note13, note14, note15, note16
 }Note_t;
 
 // map note to drum
-static LED_Types_t NoteToDrum[10] = {
+static LED_Types_t NoteToDrum[17] = {
     NoDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs
 };
 
 // stores the notes and the corresponding active drum
@@ -96,7 +99,7 @@ static bool LastButtonState;
 static uint16_t ButtonDebounceCooldown = 100; // in ms for debounce
 
 static int32_t CurrentNoteIdx = -1; // index in note array
-static const int32_t NumNotes = 12;
+static const uint8_t NumNotes = 17;
 // notes to be played for the song
 // TODO: remove hardcoded magic
 //static Drum_Note_t Song[12] = {
@@ -114,22 +117,26 @@ static const int32_t NumNotes = 12;
 //    {note10, (uint16_t)(0.718 * ONE_SEC)}    // Tutorial slow ends
 //};
 
-static Drum_Note_t Song[12] = {
-    {note0, (uint16_t)2588 },
-    {note1, (uint16_t)346  },          // Tutorial slow start
-    {note2, (uint16_t)309  },
-    {note3, (uint16_t)389  },
-    {note4, (uint16_t)666  },
-    {note5, (uint16_t)702  },
-    {note0, (uint16_t)5548  },
-    {note6, (uint16_t)252  },
-    {note7, (uint16_t)318  },
-    {note8, (uint16_t)498  },
-    {note9, (uint16_t)366  },
-    {note10, (uint16_t)718  }    // Tutorial slow ends
+
+static Drum_Note_t Song[17] = {
+    {note0, (uint16_t)(5.48 * ONE_SEC)},
+    {note1, (uint16_t)(1.02 * ONE_SEC)},
+    {note2, (uint16_t)(0.661 * ONE_SEC)},
+    {note3, (uint16_t)(1.039 * ONE_SEC)},
+    {note4, (uint16_t)(1 * ONE_SEC)},
+    {note5, (uint16_t)(0.71 * ONE_SEC)},
+    {note6, (uint16_t)(1.01 * ONE_SEC)},
+    {note7, (uint16_t)(1.04 * ONE_SEC)},
+    {note8, (uint16_t)(1 * ONE_SEC)},
+    {note9, (uint16_t)(0.68 * ONE_SEC)},
+    {note10, (uint16_t)(0.56 * ONE_SEC)},
+    {note11, (uint16_t)(0.498 * ONE_SEC)},
+    {note12, (uint16_t)(0.982 * ONE_SEC)},
+    {note13, (uint16_t)(0.72 * ONE_SEC)},
+    {note14, (uint16_t)(0.52 * ONE_SEC)},
+    {note15, (uint16_t)(0.52 * ONE_SEC)},
+    {note16, (uint16_t)(1.04 * ONE_SEC)},
 };
-
-
 
 static bool IsLeftDrumHit = 0;
 static bool IsBottomDrumHit = 0;
@@ -588,8 +595,8 @@ static void StartNextNoteWindow(void) {
         printf("Length of delay: %d\r\n", Song[CurrentNoteIdx].Duration);
         // begin the note window timer
 //        uint16_t time = (uint16_t)(NoteToDrum[Song[CurrentNoteIdx].Duration]*ONE_SEC);
-//        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, Song[CurrentNoteIdx].Duration); 
-        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, ONE_SEC); 
+        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, Song[CurrentNoteIdx].Duration); 
+//        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, ONE_SEC); 
 //        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
         
         // post the note to the drums

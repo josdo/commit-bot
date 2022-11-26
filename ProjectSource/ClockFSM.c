@@ -260,6 +260,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   printf("Zen in the timer module\r\n");
                   CurrentState = ZenState_ClockFSM;
                   
+                  Clear_Strip(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, White);
                   Set_Intensity(Clock_LEDs, 10);
                     
@@ -276,6 +277,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     CurrentState = WelcomeState_ClockFSM; 
                   
                     // write the next welcoming color
+                    Clear_Strip(Clock_LEDs);
                     Set_All_Color(Clock_LEDs, NextWelcomingColor);
                     Set_Intensity(Clock_LEDs, LEDIntensity);
                     
