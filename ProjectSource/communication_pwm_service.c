@@ -1,7 +1,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "communication_pwm_service.h"
-#include "../ProjectHeaders/PWM_PIC32.h"
+#include "PWM_PIC32.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 
@@ -20,6 +20,13 @@ static uint8_t MyPriority;
 #define FIVE_SEC (ONE_SEC * 5)
 #define TENTH_SEC (ONE_SEC / 10)
 #define HUND_SEC (ONE_SEC / 100)
+#define ComPin PWM_RPB8
+#define ComTimer _Timer2_
+#define ComFreq 20000
+#define ComChannel 2
+
+
+
 /*------------------------------ Module Code ------------------------------*/
 /****************************************************************************
  Function
@@ -49,7 +56,13 @@ bool Initcommunication_pwm_service(uint8_t Priority)
    *******************************************/
   // post the initial transition event
   ThisEvent.EventType = ES_INIT;
-   puts("\rStarting communication \r");
+  printf("\rStarting communication \r");
+//  PWMSetup_BasicConfig(2);
+  PWMSetup_SetFreqOnTimer(ComFreq, ComTimer);
+  PWMSetup_AssignChannelToTimer(ComChannel, ComTimer);
+  PWMSetup_MapChannelToOutputPin(ComChannel, ComPin);
+
+  
   if (ES_PostToService(MyPriority, ThisEvent) == true)
   {
     return true;
@@ -110,31 +123,23 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       case ES_INIT:
       {
         puts("In Communication Service");
-        if(!PWMSetup_BasicConfig(2))
-            while(1);
-        if(!PWMSetup_SetFreqOnTimer(20000, _Timer3_))
-            while(1);
-        if(!PWMSetup_AssignChannelToTimer(1, _Timer3_))
-            while(1);
-        if(!PWMSetup_AssignChannelToTimer(2, _Timer3_))
-            while(1);  
-        if(!PWMSetup_MapChannelToOutputPin(1, PWM_RPB3))
-            while(1);
+        
+        
       }
       break;
       case ES_TIMEOUT:
       {
-        if(ThisEvent.Parameters == COMMUNICATION_PULSE_TIMER){
-          if(!PWMOperate_SetDutyOnChannel(0, 1))
-            while(1);
+        if(ThisEvent.EventParam == COMMUNICATION_PULSE_TIMER){
+            PWMOperate_SetDutyOnChannel(0, ComChannel);
+            puts("<<<<<<<<<<<<<<<<<");
         }
           
       }
       break;
       case ES_ENTER_GAME:
       {
-        if(!PWMOperate_SetDutyOnChannel(10, 1))
-          while(1);
+        PWMOperate_SetDutyOnChannel(70, ComChannel); 
+        puts(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
 //           if ('e' == ThisEvent.EventParam)
 //           {

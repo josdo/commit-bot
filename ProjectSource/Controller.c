@@ -16,6 +16,7 @@
 #include "PointServoService.h"
 #include "ClockFSM.h"
 #include "Utils.h"
+#include "communication_pwm_service.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000 // 1 sec timer
@@ -98,19 +99,34 @@ static int32_t CurrentNoteIdx = -1; // index in note array
 static const int32_t NumNotes = 12;
 // notes to be played for the song
 // TODO: remove hardcoded magic
+//static Drum_Note_t Song[12] = {
+//    {note0, (uint16_t)(2.588 * ONE_SEC)},
+//    {note1, (uint16_t)(0.346 * ONE_SEC)},          // Tutorial slow start
+//    {note2, (uint16_t)(0.309 * ONE_SEC)},
+//    {note3, (uint16_t)(0.389 * ONE_SEC)},
+//    {note4, (uint16_t)(0.666 * ONE_SEC)},
+//    {note5, (uint16_t)(0.702 * ONE_SEC)},
+//    {note0, (uint16_t)(5.548 * ONE_SEC)},
+//    {note6, (uint16_t)(0.252 * ONE_SEC)},
+//    {note7, (uint16_t)(0.318 * ONE_SEC)},
+//    {note8, (uint16_t)(0.498 * ONE_SEC)},
+//    {note9, (uint16_t)(0.366 * ONE_SEC)},
+//    {note10, (uint16_t)(0.718 * ONE_SEC)}    // Tutorial slow ends
+//};
+
 static Drum_Note_t Song[12] = {
-    {note0, 2.588},
-    {note1, 0.346},          // Tutorial slow start
-    {note2, 0.309},
-    {note3, 0.389},
-    {note4, 0.666},
-    {note5, 0.702},
-    {note0, 5.548},
-    {note6, 0.252},
-    {note7, 0.318},
-    {note8, 0.498},
-    {note9, 0.366},
-    {note10, 0.718}    // Tutorial slow ends
+    {note0, 2588 },
+    {note1, 346  },          // Tutorial slow start
+    {note2, 309  },
+    {note3, 389  },
+    {note4, 666  },
+    {note5, 702  },
+    {note0, 5548  },
+    {note6, 252  },
+    {note7, 318  },
+    {note8, 498  },
+    {note9, 366  },
+    {note10, 718  }    // Tutorial slow ends
 };
 
 static bool IsLeftDrumHit = 0;
@@ -221,7 +237,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                     NewEvent.EventType = ES_ENTER_GAME;
                     PostDRUM_LEDFSM(NewEvent);
                     PostClockFSM(NewEvent);
-                    Postcommunication_pwm_service(NewEvent);
+                    Postcommunication_pwm_service(NewEvent); // post this event to communication service
                     StartNextNoteWindow(); // start the next note window
 
                     printf("Begin interaction timer: 15 SECONDS\r\n");
@@ -550,7 +566,7 @@ static uint32_t AnalogToIntensity(uint32_t Analog)
 
 static void StartNextNoteWindow(void) {
     
-    if (CurrentNoteIdx >= NumNotes){
+    if (CurrentNoteIdx >= NumNotes-1){
         printf("Done with playing all the notes\r\n");
         
         ES_Event_t NewEvent;
@@ -560,13 +576,15 @@ static void StartNextNoteWindow(void) {
     }
     
     else {
-        // begin the note window timer
-        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
-
         // Go to the next note. If the first time called, this will increment
         // from -1 to 0
         CurrentNoteIdx++;
         printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
+        
+        // begin the note window timer
+//        uint16_t time = (uint16_t)(NoteToDrum[Song[CurrentNoteIdx].Duration]*ONE_SEC);
+        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NoteToDrum[Song[CurrentNoteIdx].Duration]); 
+//        ES_Timer_InitTimer(NOTE_WINDOW_TIMER, NOTE_WINDOW); 
         
         // post the note to the drums
         ES_Event_t NewEvent;

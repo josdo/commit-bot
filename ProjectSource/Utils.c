@@ -7,10 +7,10 @@
 
 
 // MUX defines
-#define MUX_A_PIN LATBbits.LATB8
+#define MUX_A_PIN LATAbits.LATA2
 #define MUX_B_PIN LATBbits.LATB9
 
-#define MUX_A_TRIS TRISBbits.TRISB8
+#define MUX_A_TRIS TRISAbits.TRISA2
 #define MUX_B_TRIS TRISBbits.TRISB9
 
 void InitMUXPins(void){

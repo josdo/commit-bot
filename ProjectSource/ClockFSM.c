@@ -46,7 +46,6 @@ bool InitClockFSM(uint8_t Priority)
 {
   ES_Event_t ThisEvent;
   
-  clrScrn();
   printf("Init clock module\r\n");
 
   // Init module level variables
@@ -246,6 +245,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               break;
               
               case ES_CORRECT_HIT: {
+                  Clear_Strip(Clock_LEDs);
                   SetLEDs(Clock_idx, Green);
                   Set_Intensity(Clock_LEDs, 1);
                   
@@ -286,6 +286,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   }
                   
                   else if (MOTOR_TIMER == ThisEvent.EventParam){
+                      Clear_Strip(Clock_LEDs);
                       SetLEDs(Clock_idx, Pink);
                       Set_Intensity(Clock_LEDs, 1);
                   

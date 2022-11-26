@@ -11,9 +11,9 @@
 /*----------------------------- Module Defines ----------------------------*/
 #define TICS_PER_MS 2500
 
-#define NUM_PWM 1
+#define NUM_PWM 2
 #define SERVO_PERIOD (20 * TICS_PER_MS)
-#define SERVO_TIMER _Timer2_
+#define SERVO_TIMER _Timer3_
 #define SERVO_CHANNEL 1
 #define SERVO_PIN PWM_RPB4
 

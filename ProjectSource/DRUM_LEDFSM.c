@@ -408,7 +408,7 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
         break;
         
         case ZenState_Drums: {
-            printf("Entering zen drums\r\n");
+//            printf("Entering zen drums\r\n");
             switch(ThisEvent.EventType){
                 case ES_UPDATING_LED: {
                     SetMuxOutput(ThisEvent.EventParam);
