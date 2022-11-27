@@ -411,8 +411,14 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
       case ZenState_Controller: {         
           switch(ThisEvent.EventType) {
             case ES_TIMEOUT: {
+                // done with zen mode
                 if (ZEN_TIMER == ThisEvent.EventParam){
                   CurrentState = WelcomingState_Controller;
+                }
+                
+                // turn off any motors
+                else if (MOTOR_TIMER == ThisEvent.EventParam){
+                  StopMotors();
                 }
             }
             break; 

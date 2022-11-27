@@ -17,6 +17,9 @@
 #define SERVO_CHANNEL 1
 #define SERVO_PIN PWM_RPB4
 
+#define MAX_POINTS 20 // how many points for 100%
+#define POINT_DIV 2 // update the servo every x point divs
+
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this service.They should be functions
    relevant to the behavior of this service
@@ -84,14 +87,22 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
       case ES_CORRECT_HIT: {
           TotalPoints++;
               
-          if (11 == TotalPoints){
-              TotalPoints = 0;
+//          if (11 == TotalPoints){
+//              TotalPoints = 0;
+//          }
+          
+          if (MAX_POINTS < TotalPoints){ // cap at max number of points
+              TotalPoints = MAX_POINTS;
           }
               
           printf("Total points = %d\r\n", TotalPoints);
- 
-          uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
-          PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
+          
+          if (TotalPoints%POINT_DIV == 0){
+              printf("Moving servo\r\n");
+            uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints/POINT_DIV*TICS_PER_MS + TICS_PER_MS);
+            PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
+          }
+          
 
       }
       break;

@@ -13,6 +13,7 @@
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000
 #define TWO_SEC (2 * ONE_SEC)
+#define FIVE_SEC (5 * ONE_SEC)
 #define SIX_SEC (6 * ONE_SEC)
 #define TEN_SEC (10 * ONE_SEC)
 
@@ -259,10 +260,11 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               case ES_ENTER_ZEN: {
                   printf("Zen in the timer module\r\n");
                   CurrentState = ZenState_ClockFSM;
+                  LEDIntensity = 12;
                   
                   Clear_Strip(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, White);
-                  Set_Intensity(Clock_LEDs, 10);
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
                     
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
@@ -304,7 +306,6 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     SetMuxOutput(Clock_LEDs);
                     
                     // Light the next LED for the timer
-//                    Set_Single_Color(Clock_LEDs, Pink, Clock_idx);
                     SetLEDs(Clock_idx, Pink);
                     Set_Intensity(Clock_LEDs, 1);
                     Clock_idx++;
@@ -344,6 +345,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               break;
               
               case ES_TIMEOUT: {
+                if (ZEN_TIMER == ThisEvent.EventParam){
                   // go back to welcoming state
                   CurrentState = WelcomeState_ClockFSM; 
                   
@@ -355,6 +357,19 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
                   PostClockFSM(NewEvent);
+                }
+                
+                else if(LED_REFRESH_TIMER == ThisEvent.EventParam){
+                  Set_All_Color(Clock_LEDs, NextWelcomingColor);
+                  LEDIntensity -= 4;
+                  Set_Intensity(Clock_LEDs, LEDIntensity);
+                    
+                  ES_Event_t NewEvent;
+                  NewEvent.EventType = ES_UPDATING_LED;
+                  NewEvent.EventParam = 0;
+                  PostClockFSM(NewEvent);
+                }
+                  
               }
               break;
           }

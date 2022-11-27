@@ -314,7 +314,7 @@ typedef enum
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC ES_PostList01 // LED refresh timer for welcoming mode
+#define TIMER0_RESP_FUNC ES_PostList01 // LED refresh timer 
 #define TIMER1_RESP_FUNC PostController // IR covered timer
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
@@ -325,7 +325,6 @@ typedef enum
 #define TIMER8_RESP_FUNC TIMER_UNUSED
 #define TIMER9_RESP_FUNC TIMER_UNUSED
 #define TIMER10_RESP_FUNC ES_PostList03 // motor and correct hit clock timer
-//#define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC Postcommunication_pwm_service
 #define TIMER12_RESP_FUNC ES_PostList02 // Note window
 #define TIMER13_RESP_FUNC PostClockFSM // 6 second timer for clock
