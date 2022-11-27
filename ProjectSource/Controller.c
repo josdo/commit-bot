@@ -207,9 +207,7 @@ static bool InitMotors()
     PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_15);
     PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_11);
     PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_10);
-    LEFT_MOTOR_LATCH = 0;
-    BOTTOM_MOTOR_LATCH = 0;
-    RIGHT_MOTOR_LATCH = 0;
+    StopMotors();
 }
 
 bool InitController(uint8_t Priority)
@@ -579,7 +577,6 @@ bool checkIRSensor(void){
         
         // IR covered and in the welcoming state
         if ((currVal < 500) && (WelcomingState_Controller == CurrentState)){ 
-
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_COVERED;
             ThisEvent.EventParam = Green;
@@ -591,8 +588,7 @@ bool checkIRSensor(void){
             returnVal = true;
         }
         
-        else if ((currVal >= 500) && (IRCoveredState_Controller == CurrentState)){
-            
+        else if ((currVal >= 500) && (IRCoveredState_Controller == CurrentState)){  
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_UNCOVERED;
             ThisEvent.EventParam = Green;
@@ -600,8 +596,7 @@ bool checkIRSensor(void){
             PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
             PostClockFSM(ThisEvent); 
             PostController(ThisEvent); // post to this FSM
-            returnVal = true;
-            
+            returnVal = true;       
         }
     }
     

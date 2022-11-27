@@ -108,6 +108,10 @@ bool Set_Intensity(LED_Types_t WhichStrip, uint8_t intensity) {
 // ****************************************************************************
 bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t WhichLED) {
     bool ReturnVal = true;
+    
+    if (NoDrum_LEDs == WhichStrip){
+        return false;
+    }
 
     selectLEDStrip(WhichStrip);
 
@@ -189,6 +193,10 @@ bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t Which
 // ****************************************************************************
 bool Set_All_Color(LED_Types_t WhichStrip, Colors_t WhichColor){
     bool ReturnVal = true;
+    
+    if (NoDrum_LEDs == WhichStrip){
+        return false;
+    }
 
     selectLEDStrip(WhichStrip);
     
