@@ -41,12 +41,30 @@
 // define all the notes
 typedef enum
 {
-    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9, note10, note11, note12, note13, note14, note15, note16
+    note0 = 0, note1, note2, note3, note4, note5, note6, note7, note8, note9, note10, 
+    note11, note12, note13, note14, note15, note16, note17, note18, note19, note20,
+    note21, note22, note23, note24, note25, note26, note27, note28, note29, note30,
+    note31, note32, note33, note34, note35, note36, note37, note38, note39, note40,
+    note41, note42, note43, note44, note45, note46, note47, note48, note49, note50,
+    note51, note52, note53, note54, note55
 }Note_t;
 
 // map note to drum
-static LED_Types_t NoteToDrum[17] = {
+static LED_Types_t NoteToDrum[56] = {
     NoDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
@@ -99,7 +117,7 @@ static bool LastButtonState;
 static uint16_t ButtonDebounceCooldown = 100; // in ms for debounce
 
 static int32_t CurrentNoteIdx = -1; // index in note array
-static const uint8_t NumNotes = 17;
+static const uint8_t NumNotes = 56;
 // notes to be played for the song
 // TODO: remove hardcoded magic
 //static Drum_Note_t Song[12] = {
@@ -118,7 +136,7 @@ static const uint8_t NumNotes = 17;
 //};
 
 
-static Drum_Note_t Song[17] = {
+static Drum_Note_t Song[56] = {
     {note0, (uint16_t)(5.48 * ONE_SEC)},
     {note1, (uint16_t)(1.02 * ONE_SEC)},
     {note2, (uint16_t)(0.661 * ONE_SEC)},
@@ -127,15 +145,54 @@ static Drum_Note_t Song[17] = {
     {note5, (uint16_t)(0.71 * ONE_SEC)},
     {note6, (uint16_t)(1.01 * ONE_SEC)},
     {note7, (uint16_t)(1.04 * ONE_SEC)},
-    {note8, (uint16_t)(1 * ONE_SEC)},
-    {note9, (uint16_t)(0.68 * ONE_SEC)},
-    {note10, (uint16_t)(0.56 * ONE_SEC)},
-    {note11, (uint16_t)(0.498 * ONE_SEC)},
-    {note12, (uint16_t)(0.982 * ONE_SEC)},
-    {note13, (uint16_t)(0.72 * ONE_SEC)},
-    {note14, (uint16_t)(0.52 * ONE_SEC)},
+    {note8, (uint16_t)(1.68 * ONE_SEC)},
+    {note9, (uint16_t)(1 * ONE_SEC)},
+    {note10, (uint16_t)(0.68 * ONE_SEC)},
+    {note11, (uint16_t)(0.56 * ONE_SEC)},
+    {note12, (uint16_t)(0.498 * ONE_SEC)},
+    {note13, (uint16_t)(0.982 * ONE_SEC)},
+    {note14, (uint16_t)(0.72 * ONE_SEC)},
     {note15, (uint16_t)(0.52 * ONE_SEC)},
-    {note16, (uint16_t)(1.04 * ONE_SEC)},
+    {note16, (uint16_t)(0.52 * ONE_SEC)},
+    {note17, (uint16_t)(1.04 * ONE_SEC)},
+    {note18, (uint16_t)(0.64 * ONE_SEC)},
+    {note19, (uint16_t)(0.52 * ONE_SEC)},
+    {note20, (uint16_t)(0.02 * ONE_SEC)},
+    {note21, (uint16_t)(0.5 * ONE_SEC)},
+    {note22, (uint16_t)(1.02 * ONE_SEC)},
+    {note23, (uint16_t)(0.68 * ONE_SEC)},
+    {note24, (uint16_t)(0.54 * ONE_SEC)},
+    {note25, (uint16_t)(0.48 * ONE_SEC)},
+    {note26, (uint16_t)(1 * ONE_SEC)},
+    {note27, (uint16_t)(0.69 * ONE_SEC)},
+    {note28, (uint16_t)(0.51 * ONE_SEC)},
+    {note29, (uint16_t)(0.56 * ONE_SEC)},
+    {note30, (uint16_t)(1 * ONE_SEC)},
+    {note31, (uint16_t)(0.68 * ONE_SEC)},
+    {note32, (uint16_t)(0.52 * ONE_SEC)},
+    {note33, (uint16_t)(0.52 * ONE_SEC)},
+    {note34, (uint16_t)(1 * ONE_SEC)},
+    {note35, (uint16_t)(1.7 * ONE_SEC)},
+    {note36, (uint16_t)(1.04 * ONE_SEC)},
+    {note37, (uint16_t)(0.7 * ONE_SEC)},
+    {note38, (uint16_t)(0.52 * ONE_SEC)},
+    {note39, (uint16_t)(0.5 * ONE_SEC)},
+    {note40, (uint16_t)(1 * ONE_SEC)},
+    {note41, (uint16_t)(0.7 * ONE_SEC)},
+    {note42, (uint16_t)(1 * ONE_SEC)},
+    {note43, (uint16_t)(1.03 * ONE_SEC)},
+    {note44, (uint16_t)(0.68* ONE_SEC)},
+    {note45, (uint16_t)(0.53 * ONE_SEC)},
+    {note46, (uint16_t)(0.52 * ONE_SEC)},
+    {note47, (uint16_t)(1 * ONE_SEC)},
+    {note48, (uint16_t)(0.79 * ONE_SEC)},
+    {note49, (uint16_t)(0.89 * ONE_SEC)},
+    {note50, (uint16_t)(1.04 * ONE_SEC)},
+    {note51, (uint16_t)(0.72 * ONE_SEC)},
+    {note52, (uint16_t)(0.64 * ONE_SEC)},
+    {note53, (uint16_t)(0.36 * ONE_SEC)},
+    {note54, (uint16_t)(1 * ONE_SEC)},
+    {note55, (uint16_t)(1.1 * ONE_SEC)},  
 };
 
 static bool IsLeftDrumHit = 0;

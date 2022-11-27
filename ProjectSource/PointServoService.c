@@ -17,8 +17,8 @@
 #define SERVO_CHANNEL 1
 #define SERVO_PIN PWM_RPB4
 
-#define MAX_POINTS 20 // how many points for 100%
-#define POINT_DIV 2 // update the servo every x point divs
+#define MAX_POINTS 40 // how many points for 100%
+#define POINT_DIV 4 // update the servo every x point divs
 
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this service.They should be functions
@@ -79,7 +79,7 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
   switch(ThisEvent.EventType){
       case ES_INIT: {
           TotalPoints = 0;
-          uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
+          uint16_t ServoPos = (uint16_t)(TICS_PER_MS);
           PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
       }
       break;
