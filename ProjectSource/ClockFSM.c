@@ -42,6 +42,9 @@ static Colors_t NextWelcomingColor;
 // index of clock while playing the game
 static uint8_t Clock_idx = 1;
 
+// time between each led lighting up on our clock
+static uint16_t TimeToNextLED = FIVE_SEC;
+
 /*------------------------------ Module Code ------------------------------*/
 bool InitClockFSM(uint8_t Priority)
 {
@@ -223,7 +226,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   PostClockFSM(NewEvent);
                   
                   printf("6 second clock init\r\n");
-                  ES_Timer_InitTimer(TIME_ELAPSED_TIMER, SIX_SEC);
+                  ES_Timer_InitTimer(TIME_ELAPSED_TIMER, TimeToNextLED);
               }
               break;
           }
@@ -320,7 +323,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     PostClockFSM(NewEvent);
                     
                     // restart the timer
-                    ES_Timer_InitTimer(TIME_ELAPSED_TIMER, SIX_SEC);
+                    ES_Timer_InitTimer(TIME_ELAPSED_TIMER, TimeToNextLED);
                   }
               }
               break;
