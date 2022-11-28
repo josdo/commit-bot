@@ -98,7 +98,7 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
           printf("Total points = %d\r\n", TotalPoints);
           
           if (TotalPoints%POINT_DIV == 0){
-              printf("Moving servo\r\n");
+            printf("Moving servo\r\n");
             uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints/POINT_DIV*TICS_PER_MS + TICS_PER_MS);
             PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
           }
@@ -113,11 +113,19 @@ ES_Event_t RunPointServoService(ES_Event_t ThisEvent)
               uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
               PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
           }
+          
+          else if (ZEN_TIMER == ThisEvent.EventParam){
+              TotalPoints = 0;
+              uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
+              PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
+          }
       }
       break;
       
       case ES_ENTER_ZEN: {
-          PWMOperate_SetPulseWidthOnChannel((uint16_t)(2*TICS_PER_MS), SERVO_CHANNEL);
+        //   PWMOperate_SetPulseWidthOnChannel((uint16_t)(2*TICS_PER_MS), SERVO_CHANNEL);
+//        uint16_t ServoPos = (uint16_t)(1.0/10.0*TotalPoints*TICS_PER_MS + TICS_PER_MS);
+//        PWMOperate_SetPulseWidthOnChannel(ServoPos, SERVO_CHANNEL);
       }
       break;
   }
