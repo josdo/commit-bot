@@ -25,6 +25,7 @@
 #define TWO_SEC (ONE_SEC * 2) // 2 sec timer
 #define FIVE_SEC (ONE_SEC * 5) // 5 sec timer
 #define FIFTEEN_SEC (ONE_SEC * 15) // 15 sec timer
+#define TWENTY_EIGHT_SEC (ONE_SEC * 28)
 #define THIRTY_SEC (ONE_SEC * 30) // 30 sec timer
 #define ONE_MIN (ONE_SEC * 60) // 60 sec timer
 
@@ -54,20 +55,20 @@ static LED_Types_t NoteToDrum[56] = {
     NoDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    RightDrum_LEDs, BottomDrum_LEDs, RightDrum_LEDs,
+    BottomDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    RightDrum_LEDs, LeftDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    RightDrum_LEDs, LeftDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    RightDrum_LEDs, LeftDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, RightDrum_LEDs, LeftDrum_LEDs,
+    BottomDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    LeftDrum_LEDs, BottomDrum_LEDs, LeftDrum_LEDs,
+    RightDrum_LEDs, LeftDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
-    LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
+    RightDrum_LEDs, LeftDrum_LEDs, RightDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs, RightDrum_LEDs, BottomDrum_LEDs,
     LeftDrum_LEDs
@@ -411,7 +412,8 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                         printf("Interaction timeout controller\r\n");
                         CurrentState = WelcomingState_Controller;
                         CurrentNoteIdx = -1;
-                        
+                        // post the interaction timeout to pic2 to stop the song.
+                        Postcommunication_pwm_service(ThisEvent);
                         // stop zen timer
                         ES_Timer_StopTimer(ZEN_TIMER);
                     }
@@ -436,8 +438,9 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   ES_Timer_StopTimer(TIME_ELAPSED_TIMER);
                   ES_Timer_StopTimer(NOTE_WINDOW_TIMER);
           
-                  printf("Begin zen mode timer: 15 sec\r\n");
-                  ES_Timer_InitTimer(ZEN_TIMER, FIFTEEN_SEC);
+                  printf("Begin zen mode timer: 28 sec\r\n");
+                  ES_Timer_InitTimer(ZEN_TIMER, TWENTY_EIGHT_SEC);
+                  Postcommunication_pwm_service(ThisEvent);
                   CurrentNoteIdx = -1;
               }
               break;

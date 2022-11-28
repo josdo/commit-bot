@@ -270,7 +270,8 @@ typedef enum
   ES_DRUMS_HIT,
   ES_CORRECT_HIT,
   ES_HIT_INTENSITY_CORRECT_ONLY,
-  ES_NOTE_WINDOW
+  ES_NOTE_WINDOW,
+  ES_RESTART_COM
 } ES_EventType_t;
 
 /****************************************************************************/

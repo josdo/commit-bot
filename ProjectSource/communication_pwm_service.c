@@ -130,8 +130,14 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       case ES_TIMEOUT:
       {
         if(ThisEvent.EventParam == COMMUNICATION_PULSE_TIMER){
+            puts("song stop");
             PWMOperate_SetDutyOnChannel(0, ComChannel);
-            puts("<<<<<<<<<<<<<<<<<");
+        }
+        
+        if(ThisEvent.EventParam == INTERACTION_TIMER){
+            ES_Event_t NewEvent = {ES_RESTART_COM, 0};
+            puts("interaction timeout stops");
+            Postcommunication_pwm_service(NewEvent);
         }
           
       }
@@ -139,46 +145,24 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       case ES_ENTER_GAME:
       {
         PWMOperate_SetDutyOnChannel(70, ComChannel); 
-        puts(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        puts("start song");
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-//           if ('e' == ThisEvent.EventParam)
-//           {
-// //            if(!PWMOperate_SetPulseWidthOnChannel((1*TICS_PER_MS),1))
-//               if(!PWMOperate_SetDutyOnChannel(10, 1))
-//                 while(1);
-//               ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-              
-//           }
-//           if ('r' == ThisEvent.EventParam)
-//           {
-// //            if(!PWMOperate_SetPulseWidthOnChannel((1*TICS_PER_MS),1))
-//               if(!PWMOperate_SetDutyOnChannel(20, 1))
-//                 while(1);
-//               ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-//           }
-//           if ('t' == ThisEvent.EventParam)
-//           {
-// //            if(!PWMOperate_SetPulseWidthOnChannel((1*TICS_PER_MS),1))
-//               if(!PWMOperate_SetDutyOnChannel(30, 1))
-//                 while(1);
-//               ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-//           }
-//           if ('y' == ThisEvent.EventParam)
-//           {
-// //            if(!PWMOperate_SetPulseWidthOnChannel((1*TICS_PER_MS),1))
-//               if(!PWMOperate_SetDutyOnChannel(40, 1))
-//                 while(1);
-//               ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-//           }
-//           if ('u' == ThisEvent.EventParam)
-//           {
-// //            if(!PWMOperate_SetPulseWidthOnChannel((2*TICS_PER_MS),1))
-//               if(!PWMOperate_SetDutyOnChannel(50,1))
-//                 while(1);
-//               ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
-//           }
       }
       break;
+     
+      case ES_RESTART_COM:
+      {
+        PWMOperate_SetDutyOnChannel(10, ComChannel); 
+        puts("interaction timeout begins");
+        ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC); 
+      }
+      break;
+      case ES_ENTER_ZEN:
+      {
+        PWMOperate_SetDutyOnChannel(30, ComChannel); 
+        puts("Zen timeout begins");
+        ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC); 
+      }
       default:
         {}
       break;
