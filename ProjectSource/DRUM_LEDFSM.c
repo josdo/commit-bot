@@ -36,15 +36,25 @@ extern uint32_t NumPiezoIntensities;
 // TODO remove hard coded NumPiezoIntensities
 static uint32_t HitIntensityToBrightness[9+1] = {
     0,
-    15,
+    10,
+    14,
     17,
-    19,
-    22,
-    24,
+    20,
+    23,
     26,
-    28,
+    29,
     30,
     31 // 9th intensity
+    // 0,
+    // 15,
+    // 17,
+    // 19,
+    // 22,
+    // 24,
+    // 26,
+    // 28,
+    // 30,
+    // 31 // 9th intensity
 };
 
 // next color in welcoming state

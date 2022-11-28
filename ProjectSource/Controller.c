@@ -96,7 +96,7 @@ static uint8_t MyPriority;
 // static uint32_t MinPiezoAnalogRange[3] = {25, 50, 100};
 // static uint32_t MinPiezoAnalogIdx = 0;
 static uint32_t MinPiezoAnalog = 10;
-static uint32_t MaxPiezoAnalog = 300;
+static uint32_t MaxPiezoAnalog = 800; // upper limit is 1023
 uint32_t NumPiezoIntensities = 9;
 
 // IR readings
