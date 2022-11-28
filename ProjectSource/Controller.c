@@ -93,9 +93,9 @@ static uint8_t MyPriority;
 // static float analog_to_mV = 1024.0 / 3300;
 // static uint32_t MinPiezoVoltage_mV = 100;
 // static uint32_t MaxPiezoVoltage_mV = 1000;
-static uint32_t MinPiezoAnalogRange[3] = {25, 50, 100};
-static uint32_t MinPiezoAnalogIdx = 0;
-static uint32_t MinPiezoAnalog = 50;
+// static uint32_t MinPiezoAnalogRange[3] = {25, 50, 100};
+// static uint32_t MinPiezoAnalogIdx = 0;
+static uint32_t MinPiezoAnalog = 10;
 static uint32_t MaxPiezoAnalog = 300;
 uint32_t NumPiezoIntensities = 9;
 
@@ -631,7 +631,7 @@ static uint32_t AnalogToIntensity(uint32_t Analog)
   // Analog is inside min max range, so subtraction and division is safe
   float BucketSize = 1. * (MaxPiezoAnalog - MinPiezoAnalog) / NumPiezoIntensities;
   float Intensity = 1. * (Analog - MinPiezoAnalog) / BucketSize;
-  // printf("\r\nAnalog: %d, Intensity: %.2f, BucketSize: %.2f\r\n", Analog, Intensity, BucketSize);
+  printf("\r\nAnalog: %d, Intensity: %.2f, BucketSize: %.2f\r\n", Analog, Intensity, BucketSize);
   return ceil(Intensity);
 }
 
