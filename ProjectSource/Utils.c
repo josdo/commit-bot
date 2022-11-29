@@ -13,6 +13,11 @@
 #define MUX_A_TRIS TRISAbits.TRISA2
 #define MUX_B_TRIS TRISBbits.TRISB9
 
+// Fade defines
+#define MAX_FADE 10
+uint8_t FadeIntensity = 0;
+
+
 void InitMUXPins(void){
  // Set up the MUX outputs from the PIC
   MUX_A_TRIS = 0;
@@ -45,4 +50,22 @@ void SetMuxOutput(LED_Types_t WhichOutput){
         }
         break;
     }
+}
+
+uint8_t UpdateFadeIntensity(void){
+    FadeIntensity++;
+    
+    if (MAX_FADE < FadeIntensity){
+        FadeIntensity = MAX_FADE;
+    }
+    
+    return FadeIntensity;
+}
+
+uint8_t GetFadeIntensity(void){
+    return FadeIntensity;
+}
+
+void ResetFadeIntensity(void){
+    FadeIntensity = 0;
 }

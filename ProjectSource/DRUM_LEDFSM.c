@@ -140,24 +140,24 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
         case WelcomingState_Drums: {
             switch(ThisEvent.EventType){
                 case ES_TIMEOUT: {
-                    SetMuxOutput(LeftDrum_LEDs);
-                    
-                    // write the next color
-                    Set_All_Color(LeftDrum_LEDs, NextWelcomingColor);
-                    Set_Intensity(LeftDrum_LEDs, MinBrightness);
-                    
-                    Set_All_Color(RightDrum_LEDs, NextWelcomingColor);
-                    Set_Intensity(RightDrum_LEDs, MinBrightness);
-                    
-                    Set_All_Color(BottomDrum_LEDs, NextWelcomingColor);
-                    Set_Intensity(BottomDrum_LEDs, MinBrightness);
-                    
-                    ES_Event_t NewEvent;
-                    NewEvent.EventType = ES_UPDATING_LED;
-                    NewEvent.EventParam = LeftDrum_LEDs;
-                    PostDRUM_LEDFSM(NewEvent);
-                    
                     if (LED_REFRESH_TIMER == ThisEvent.EventParam){
+                        SetMuxOutput(LeftDrum_LEDs);
+                    
+                        // write the next color
+                        Set_All_Color(LeftDrum_LEDs, NextWelcomingColor);
+                        Set_Intensity(LeftDrum_LEDs, MinBrightness);
+                    
+                        Set_All_Color(RightDrum_LEDs, NextWelcomingColor);
+                        Set_Intensity(RightDrum_LEDs, MinBrightness);
+                    
+                        Set_All_Color(BottomDrum_LEDs, NextWelcomingColor);
+                        Set_Intensity(BottomDrum_LEDs, MinBrightness);
+                    
+                        ES_Event_t NewEvent;
+                        NewEvent.EventType = ES_UPDATING_LED;
+                        NewEvent.EventParam = LeftDrum_LEDs;
+                        PostDRUM_LEDFSM(NewEvent);
+                        
                         if (Purple == NextWelcomingColor){
                             NextWelcomingColor = Turquoise;
                         }
@@ -166,7 +166,16 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                             NextWelcomingColor = Purple;
                         }
                     }
+                    
+                    else if (FADE_TIMER == ThisEvent.EventParam){
+                        Set_Intensity(LeftDrum_LEDs, GetFadeIntensity());
+                        Set_Intensity(RightDrum_LEDs, GetFadeIntensity());
+                        Set_Intensity(BottomDrum_LEDs, GetFadeIntensity());
+                    }
+                    
                 }
+                break;
+                
                 case ES_UPDATING_LED: {
                     SetMuxOutput(ThisEvent.EventParam); // which drum to light up
                     // still updating the LEDs
@@ -197,19 +206,19 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                 
                 case ES_IR_COVERED: {
                     printf("IR covered in Drum FSM\r\n");
-    //                  ES_Timer_StopTimer(LED_REFRESH_TIMER); // stop the timer
                     CurrentState = IRCoveredState_Drums; // advance the state
                     
                     // set the new color
                     SetMuxOutput(LeftDrum_LEDs);
                     Set_All_Color(LeftDrum_LEDs, ThisEvent.EventParam);
-                    Set_Intensity(LeftDrum_LEDs, MinBrightness);
+                    Set_Intensity(LeftDrum_LEDs, GetFadeIntensity());
                     
                     Set_All_Color(RightDrum_LEDs, ThisEvent.EventParam);
-                    Set_Intensity(RightDrum_LEDs, MinBrightness);
+//                    Set_Intensity(RightDrum_LEDs, MinBrightness);
+                    Set_Intensity(RightDrum_LEDs, GetFadeIntensity());
                     
                     Set_All_Color(BottomDrum_LEDs, ThisEvent.EventParam);
-                    Set_Intensity(BottomDrum_LEDs, MinBrightness);
+                    Set_Intensity(BottomDrum_LEDs, GetFadeIntensity());
                     
                     // start updating the LEDs
                     ES_Event_t NewEvent;
@@ -243,6 +252,18 @@ ES_Event_t RunDRUM_LEDFSM(ES_Event_t ThisEvent)
                         NewEvent.EventParam = ThisEvent.EventParam;
                         
                         PostDRUM_LEDFSM(NewEvent);
+                    }
+                }
+                break;
+                
+                case ES_TIMEOUT: {
+                    if (FADE_TIMER == ThisEvent.EventParam){
+                        Set_Intensity(LeftDrum_LEDs, GetFadeIntensity());
+                        Set_Intensity(RightDrum_LEDs, GetFadeIntensity());
+                        Set_Intensity(BottomDrum_LEDs, GetFadeIntensity());
+                        
+                        ES_Event_t FadeEvent = {ES_UPDATING_LED, LeftDrum_LEDs};
+                        PostDRUM_LEDFSM(FadeEvent);
                     }
                 }
                 break;

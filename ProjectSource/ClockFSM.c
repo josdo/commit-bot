@@ -28,7 +28,7 @@
 */
 
 static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor);
-static void UpdateFadeIntensity(void);
+//static void UpdateFadeIntensity(void);
 
 /*---------------------------- Module Variables ---------------------------*/
 // everybody needs a state variable, you may need others as well.
@@ -179,7 +179,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   // set the new color
                   SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, ThisEvent.EventParam);
-                  Set_Intensity(Clock_LEDs, FadeIntensity);
+                  Set_Intensity(Clock_LEDs, UpdateFadeIntensity());
                   
                   // start updating the LEDs
                   ES_Event_t NewEvent;
@@ -209,8 +209,8 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               
               case ES_TIMEOUT: {
                   if (FADE_TIMER == ThisEvent.EventParam){
-                      UpdateFadeIntensity();
-                      Set_Intensity(Clock_LEDs, FadeIntensity);
+//                      UpdateFadeIntensity();
+                      Set_Intensity(Clock_LEDs, UpdateFadeIntensity());
                       
                       ES_Event_t FadeEvent = {ES_UPDATING_LED, 0};
                       PostClockFSM(FadeEvent);
@@ -226,7 +226,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   CurrentState = WelcomeState_ClockFSM; // back to welcome mode
                   
                   ES_Timer_StopTimer(FADE_TIMER); // stop the fade timer
-                  FadeIntensity = 1; // reset the fade intensity
+                  ResetFadeIntensity(); // reset the fade intensity
                   
                   // write the next welcoming color
                   SetMuxOutput(Clock_LEDs);
@@ -423,10 +423,10 @@ static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor){
     }
 }
 
-static void UpdateFadeIntensity(void){
-    FadeIntensity++;
-    
-    if (MAX_FADE < FadeIntensity){
-        FadeIntensity = MAX_FADE;
-    }
-}
+//static void UpdateFadeIntensity(void){
+//    FadeIntensity++;
+//    
+//    if (MAX_FADE < FadeIntensity){
+//        FadeIntensity = MAX_FADE;
+//    }
+//}

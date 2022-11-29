@@ -25,8 +25,19 @@ typedef union
   uint16_t All;
 }Intensities_t;
 
+// set MUX pins as digital outputs
 void InitMUXPins(void);
 
+// change the MUX output depending on which LED strip is passed
 void SetMuxOutput(LED_Types_t WhichOutput);
+
+// update the fade intensity during IR covered
+uint8_t UpdateFadeIntensity(void);
+
+// get the Fade Intensity
+uint8_t GetFadeIntensity(void);
+
+// reset the fade intensity to 0
+void ResetFadeIntensity(void);
 
 #endif 
