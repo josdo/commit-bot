@@ -250,7 +250,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               
               case ES_CORRECT_HIT: {
                   Clear_Strip(Clock_LEDs);
-                  SetLEDs(Clock_idx, Green);
+                  SetLEDs(Clock_idx, Gold);
                   Set_Intensity(Clock_LEDs, 1);
                   
                   ES_Event_t NewEvent;

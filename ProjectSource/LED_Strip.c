@@ -173,6 +173,12 @@ bool Set_Single_Color(LED_Types_t WhichStrip, Colors_t WhichColor, uint8_t Which
         blue = 25;
         break;
         
+    case Gold:
+        red = 255;
+        green = 50;
+        blue = 0;
+        break;
+        
     default:
         red = 0;
         green = 0;
@@ -250,6 +256,12 @@ bool Set_All_Color(LED_Types_t WhichStrip, Colors_t WhichColor){
     case Pink:
         red = 255;
         green = 25;
+        blue = 50;
+        break;
+        
+    case Gold:
+        red = 255;
+        green = 100;
         blue = 50;
         break;
         

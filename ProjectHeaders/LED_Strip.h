@@ -12,7 +12,7 @@
 
 // ################# Module Vars #################
 typedef enum {
-    Red = 1, Green, Blue, Purple, White, Yellow, Turquoise, Pink
+    Red = 1, Green, Blue, Purple, White, Yellow, Turquoise, Pink, Gold
 } Colors_t;
 
 //****************************************************************************
