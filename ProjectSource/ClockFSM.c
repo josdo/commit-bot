@@ -12,10 +12,14 @@
 
 /*----------------------------- Module Defines ----------------------------*/
 #define ONE_SEC 1000
+#define HALF_SEC (ONE_SEC/2)
 #define TWO_SEC (2 * ONE_SEC)
 #define FIVE_SEC (5 * ONE_SEC)
 #define SIX_SEC (6 * ONE_SEC)
 #define TEN_SEC (10 * ONE_SEC)
+
+#define MAX_FADE 10
+#define FADE_TIME (ONE_SEC/10)
 
 #define NUM_TIMER_LED 10
 /*---------------------------- Module Functions ---------------------------*/
@@ -24,6 +28,7 @@
 */
 
 static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor);
+static void UpdateFadeIntensity(void);
 
 /*---------------------------- Module Variables ---------------------------*/
 // everybody needs a state variable, you may need others as well.
@@ -33,8 +38,9 @@ static ClockFSMState_t CurrentState;
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
 
-// keep track of LED intensity
+// keep track of LED intensities
 static uint8_t LEDIntensity = 1;
+static uint8_t FadeIntensity = 1;
 
 // next color in welcoming state
 static Colors_t NextWelcomingColor;
@@ -166,13 +172,14 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                 break;
               
               case ES_IR_COVERED: {
-                  ES_Timer_StopTimer(LED_REFRESH_TIMER); // stop the timer
+                  ES_Timer_StopTimer(LED_REFRESH_TIMER); // stop the refresh timer
+                  ES_Timer_InitTimer(FADE_TIMER, FADE_TIME); // begin fade timer
                   CurrentState = IRCovered_ClockFSM; // advance the state
                   
                   // set the new color
                   SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, ThisEvent.EventParam);
-                  Set_Intensity(Clock_LEDs, LEDIntensity);
+                  Set_Intensity(Clock_LEDs, FadeIntensity);
                   
                   // start updating the LEDs
                   ES_Event_t NewEvent;
@@ -199,16 +206,33 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   }
               }
               break;
+              
+              case ES_TIMEOUT: {
+                  if (FADE_TIMER == ThisEvent.EventParam){
+                      UpdateFadeIntensity();
+                      Set_Intensity(Clock_LEDs, FadeIntensity);
+                      
+                      ES_Event_t FadeEvent = {ES_UPDATING_LED, 0};
+                      PostClockFSM(FadeEvent);
+                      
+                      ES_Timer_InitTimer(FADE_TIMER, FADE_TIME); // start fade again
+                  }
+              }
+              break;
           
           
           case ES_IR_UNCOVERED: {
                   // go back to welcoming state
-                  CurrentState = WelcomeState_ClockFSM; 
+                  CurrentState = WelcomeState_ClockFSM; // back to welcome mode
+                  
+                  ES_Timer_StopTimer(FADE_TIMER); // stop the fade timer
+                  FadeIntensity = 1; // reset the fade intensity
                   
                   // write the next welcoming color
                   SetMuxOutput(Clock_LEDs);
                   Set_All_Color(Clock_LEDs, NextWelcomingColor);
                   Set_Intensity(Clock_LEDs, LEDIntensity);
+                  
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
                   NewEvent.EventParam = 0;
@@ -396,5 +420,13 @@ static void SetLEDs(uint8_t NumLEDs, Colors_t WhichColor){
         for (uint8_t i=1; i<=NumLEDs; i++){
             Set_Single_Color(Clock_LEDs, WhichColor, i);
         }
+    }
+}
+
+static void UpdateFadeIntensity(void){
+    FadeIntensity++;
+    
+    if (MAX_FADE < FadeIntensity){
+        FadeIntensity = MAX_FADE;
     }
 }

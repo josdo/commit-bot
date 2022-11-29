@@ -324,7 +324,7 @@ typedef enum
 #define TIMER6_RESP_FUNC TIMER_UNUSED
 #define TIMER7_RESP_FUNC TIMER_UNUSED
 #define TIMER8_RESP_FUNC TIMER_UNUSED
-#define TIMER9_RESP_FUNC TIMER_UNUSED
+#define TIMER9_RESP_FUNC ES_PostList01 // fade timer for drums and clock
 #define TIMER10_RESP_FUNC ES_PostList03 // motor and correct hit clock timer
 #define TIMER11_RESP_FUNC Postcommunication_pwm_service
 #define TIMER12_RESP_FUNC ES_PostList02 // Note window
@@ -343,6 +343,7 @@ typedef enum
 
 #define LED_REFRESH_TIMER 0
 #define IR_COVERED_TIMER 1
+#define FADE_TIMER 9
 #define MOTOR_TIMER 10
 #define COMMUNICATION_PULSE_TIMER 11
 #define NOTE_WINDOW_TIMER 12

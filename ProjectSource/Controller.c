@@ -275,7 +275,7 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                   CurrentState = IRCoveredState_Controller;
                   
                   // start the IR covered timer
-                  ES_Timer_InitTimer(IR_COVERED_TIMER, TWO_SEC);
+                  ES_Timer_InitTimer(IR_COVERED_TIMER, ONE_SEC);
                   printf("The 2 second timer has started\r\n");
               }
               break;
