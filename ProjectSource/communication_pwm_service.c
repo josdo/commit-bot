@@ -157,6 +157,7 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC); 
       }
       break;
+      
       case ES_ENTER_ZEN:
       {
         PWMOperate_SetDutyOnChannel(30, ComChannel); 

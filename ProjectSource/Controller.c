@@ -438,6 +438,9 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
           
                   printf("Begin zen mode timer: 28 sec\r\n");
                   ES_Timer_InitTimer(ZEN_TIMER, TWENTY_EIGHT_SEC);
+                  
+//                  ES_Event_t ZenEvent = {ES_ENTER_ZEN, 0};
+//                  Postcommunication_pwm_service(ZenEvent);
                   Postcommunication_pwm_service(ThisEvent);
                   CurrentNoteIdx = -1;
               }

@@ -19,7 +19,7 @@
 
 /*----------------------------- Module Defines ----------------------------*/
 #define NUMDrum 9 // LEDs in each drum strip
-#define NUMClock 10 // LEDs in the timer
+#define NUMClock 13 // LEDs in the timer
 #define NumModules 4 // num of 8 bit words for each LED
 
 #define LED_Start 0b11100000

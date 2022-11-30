@@ -21,7 +21,8 @@
 #define MAX_FADE 10
 #define FADE_TIME (ONE_SEC/10)
 
-#define NUM_TIMER_LED 10
+#define NUM_TIMER_LED 13
+
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
    relevant to the behavior of this state machine
@@ -49,8 +50,8 @@ static Colors_t NextWelcomingColor;
 static uint8_t Clock_idx = 1;
 
 // time between each led lighting up on our clock
-static uint16_t TimeToNextLED = FIVE_SEC;
-
+static uint16_t TimeToNextLED = (uint16_t)(49/NUM_TIMER_LED*ONE_SEC);
+//static uint16_t TimeToNextLED = 2 * ONE_SEC;
 /*------------------------------ Module Code ------------------------------*/
 bool InitClockFSM(uint8_t Priority)
 {
@@ -249,7 +250,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   NewEvent.EventParam = ThisEvent.EventParam; 
                   PostClockFSM(NewEvent);
                   
-                  printf("6 second clock init\r\n");
+                  printf("timer clock init\r\n");
                   ES_Timer_InitTimer(TIME_ELAPSED_TIMER, TimeToNextLED);
               }
               break;
@@ -337,8 +338,8 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     Set_Intensity(Clock_LEDs, 1);
                     Clock_idx++;
                     
-                    if (Clock_idx > 10){
-                        Clock_idx = 10;
+                    if (Clock_idx > NUM_TIMER_LED){
+                        Clock_idx = NUM_TIMER_LED;
                     }
                     
                     ES_Event_t NewEvent;
