@@ -19,7 +19,7 @@
 
 /*----------------------------- Module Defines ----------------------------*/
 #define NUMDrum 9 // LEDs in each drum strip
-#define NUMClock 13 // LEDs in the timer
+#define NUMClock 12 // LEDs in the timer
 #define NumModules 4 // num of 8 bit words for each LED
 
 #define LED_Start 0b11100000
@@ -65,7 +65,7 @@ static LED_t ClearLEDs;
 static uint8_t RightDrum_idx = 0;
 static uint8_t LeftDrum_idx = 0;
 static uint8_t BottomDrum_idx = 0;
-static uint8_t Clock_idx = 0;
+// static uint8_t Clock_idx = 0;
 
 //------------------------------ Module Code ------------------------------*/
 
@@ -342,7 +342,7 @@ static void selectLEDStrip(LED_Types_t WhichLED) {
     else if (Clock_LEDs == WhichLED) {
         pLEDStrip = Clock_Strip;
         NumLEDs = NUMClock;
-        Idx = Clock_idx;
+        Idx = 0;
     }
 }
 // *************************************************************************

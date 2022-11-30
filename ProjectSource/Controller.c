@@ -374,14 +374,14 @@ ES_Event_t RunController(ES_Event_t ThisEvent)
                 // Brighten drums with new hit intensities,
                 // zeroing out intensities of all the wrong drums
                 Intensities_t HitIntensitiesCorrectOnly = KeepCorrectDrumIntensities(HitIntensities);
-                printf("\r\nHit intensities: %u, %u, %u \r\n", HitIntensities.Left, HitIntensities.Bottom, HitIntensities.Right);
-                printf("\r\nCorrect intensities: %u, %u, %u \r\n", HitIntensitiesCorrectOnly.Left, HitIntensitiesCorrectOnly.Bottom, HitIntensitiesCorrectOnly.Right);
+                // printf("\r\nHit intensities: %u, %u, %u \r\n", HitIntensities.Left, HitIntensities.Bottom, HitIntensities.Right);
+                // printf("\r\nCorrect intensities: %u, %u, %u \r\n", HitIntensitiesCorrectOnly.Left, HitIntensitiesCorrectOnly.Bottom, HitIntensitiesCorrectOnly.Right);
                 ES_Event_t DrumEvent = {ES_HIT_INTENSITY_CORRECT_ONLY, HitIntensitiesCorrectOnly.All};
                 PostDRUM_LEDFSM(DrumEvent);
 
                 // Detect if correct drums hit
                 if (IsCorrectHit()) {
-                    printf("\r\nCorrect hit! Posting from Controller to self\r\n");
+                    // printf("\r\nCorrect hit! Posting from Controller to self\r\n");
                     ES_Event_t CorrectHitEvent = {ES_CORRECT_HIT};
                     PostController(CorrectHitEvent);
                 }
@@ -585,7 +585,7 @@ bool checkIRSensor(void){
         if ((currVal < 500) && (WelcomingState_Controller == CurrentState)){ 
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_COVERED;
-            ThisEvent.EventParam = Green;
+            ThisEvent.EventParam = Pink;
             
             PostDRUM_LEDFSM(ThisEvent); // post to drum FSM
             PostController(ThisEvent); // post to this FSM
@@ -597,7 +597,7 @@ bool checkIRSensor(void){
         else if ((currVal >= 500) && (IRCoveredState_Controller == CurrentState)){  
             ES_Event_t ThisEvent;
             ThisEvent.EventType = ES_IR_UNCOVERED;
-            ThisEvent.EventParam = Green;
+            ThisEvent.EventParam = Pink;
             
             PostDRUM_LEDFSM(ThisEvent); // post to LED FSM
             PostClockFSM(ThisEvent); 
@@ -634,14 +634,14 @@ static uint32_t AnalogToIntensity(uint32_t Analog)
   // Analog is inside min max range, so subtraction and division is safe
   float BucketSize = 1. * (MaxPiezoAnalog - MinPiezoAnalog) / NumPiezoIntensities;
   float Intensity = 1. * (Analog - MinPiezoAnalog) / BucketSize;
-  printf("\r\nAnalog: %d, Intensity: %.2f, BucketSize: %.2f\r\n", Analog, Intensity, BucketSize);
+//   printf("\r\nAnalog: %d, Intensity: %.2f, BucketSize: %.2f\r\n", Analog, Intensity, BucketSize);
   return ceil(Intensity);
 }
 
 static void StartNextNoteWindow(void) {
     
     if (CurrentNoteIdx >= NumNotes-1){
-        printf("Done with playing all the notes\r\n");
+        // printf("Done with playing all the notes\r\n");
         
         ES_Event_t NewEvent;
         NewEvent.EventType = ES_ENTER_ZEN;
@@ -655,8 +655,8 @@ static void StartNextNoteWindow(void) {
         
         CurrentNoteIdx++;
         
-        printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
-        printf("Length of delay: %d\r\n", Song[CurrentNoteIdx].Duration);
+        // printf("\r\n\n\nCurrent note idx %d \r\n\n\n", CurrentNoteIdx);
+        // printf("Length of delay: %d\r\n", Song[CurrentNoteIdx].Duration);
         // begin the note window timer
 //        uint16_t time = (uint16_t)(NoteToDrum[Song[CurrentNoteIdx].Duration]*ONE_SEC);
         ES_Timer_InitTimer(NOTE_WINDOW_TIMER, Song[CurrentNoteIdx].Duration); 
@@ -733,7 +733,7 @@ static Intensities_t KeepCorrectDrumIntensities(Intensities_t HitIntensities) {
 
 static void StartMotor(LED_Types_t WhichDrum){
     ES_Timer_InitTimer(MOTOR_TIMER, QUARTER_SEC);
-    printf("Turning on a motor\r\n");
+    // printf("Turning on a motor\r\n");
     
     switch(WhichDrum){
         case LeftDrum_LEDs: {
