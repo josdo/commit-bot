@@ -276,7 +276,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
               case ES_CORRECT_HIT: {
                   Clear_Strip(Clock_LEDs);
                   SetLEDs(Clock_idx, Gold);
-                  Set_Intensity(Clock_LEDs, 1);
+                  Set_Intensity(Clock_LEDs, 30);
                   
                   ES_Event_t NewEvent;
                   NewEvent.EventType = ES_UPDATING_LED;
@@ -320,7 +320,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   else if (MOTOR_TIMER == ThisEvent.EventParam){
                       Clear_Strip(Clock_LEDs);
                       SetLEDs(Clock_idx, Pink);
-                      Set_Intensity(Clock_LEDs, 1);
+                      Set_Intensity(Clock_LEDs, 10);
                   
                       ES_Event_t NewEvent;
                       NewEvent.EventType = ES_UPDATING_LED;
@@ -335,7 +335,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     
                     // Light the next LED for the timer
                     SetLEDs(Clock_idx, Pink);
-                    Set_Intensity(Clock_LEDs, 1);
+                    Set_Intensity(Clock_LEDs, 10);
                     Clock_idx++;
                     
                     if (Clock_idx > NUM_TIMER_LED){

@@ -160,7 +160,7 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       
       case ES_ENTER_ZEN:
       {
-        PWMOperate_SetDutyOnChannel(30, ComChannel); 
+        PWMOperate_SetDutyOnChannel(90, ComChannel); 
         puts("Zen timeout begins");
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC); 
       }
