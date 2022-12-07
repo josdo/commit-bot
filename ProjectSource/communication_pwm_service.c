@@ -130,7 +130,7 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       case ES_TIMEOUT:
       {
         if(ThisEvent.EventParam == COMMUNICATION_PULSE_TIMER){
-            puts("song stop");
+            // puts("song stop");
             PWMOperate_SetDutyOnChannel(0, ComChannel);
         }
         
@@ -144,8 +144,8 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       break;
       case ES_ENTER_GAME:
       {
-        PWMOperate_SetDutyOnChannel(70, ComChannel); 
-        puts("start song");
+        PWMOperate_SetDutyOnChannel(90, ComChannel); 
+        // puts("start song");
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC);
       }
       break;
@@ -160,7 +160,7 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       
       case ES_ENTER_ZEN:
       {
-        PWMOperate_SetDutyOnChannel(90, ComChannel); 
+        PWMOperate_SetDutyOnChannel(50, ComChannel); 
         puts("Zen timeout begins");
         ES_Timer_InitTimer(COMMUNICATION_PULSE_TIMER, HUND_SEC); 
       }
@@ -169,4 +169,4 @@ ES_Event_t Runcommunication_pwm_service(ES_Event_t ThisEvent)
       break;
   }
   return ReturnEvent;
-}
+} 

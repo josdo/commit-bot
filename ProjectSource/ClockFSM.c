@@ -21,7 +21,7 @@
 #define MAX_FADE 10
 #define FADE_TIME (ONE_SEC/10)
 
-#define NUM_TIMER_LED 13
+#define NUM_TIMER_LED 12
 
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this machine.They should be functions
@@ -47,11 +47,11 @@ static uint8_t FadeIntensity = 1;
 static Colors_t NextWelcomingColor;
 
 // index of clock while playing the game
-static uint8_t Clock_idx = 1;
+static uint8_t Clock_idx = 0;
 
 // time between each led lighting up on our clock
-static uint16_t TimeToNextLED = (uint16_t)(49/NUM_TIMER_LED*ONE_SEC);
-//static uint16_t TimeToNextLED = 2 * ONE_SEC;
+static uint16_t TimeToNextLED = (uint16_t)(49./NUM_TIMER_LED*ONE_SEC);
+// static uint16_t TimeToNextLED = 10 * ONE_SEC;
 /*------------------------------ Module Code ------------------------------*/
 bool InitClockFSM(uint8_t Priority)
 {
@@ -130,7 +130,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
     } break;
     
       case WelcomeState_ClockFSM: {
-          Clock_idx = 1;
+          Clock_idx = 0;
           switch (ThisEvent.EventType){
             case ES_TIMEOUT: {
               // write the next color
@@ -250,7 +250,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   NewEvent.EventParam = ThisEvent.EventParam; 
                   PostClockFSM(NewEvent);
                   
-                  printf("timer clock init\r\n");
+                  // printf("timer clock init\r\n");
                   ES_Timer_InitTimer(TIME_ELAPSED_TIMER, TimeToNextLED);
               }
               break;
@@ -329,6 +329,8 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                   }
                   
                   else if (TIME_ELAPSED_TIMER == ThisEvent.EventParam){
+                    Clock_idx++;
+
                     CurrentState = PlayingGameState_ClockFSM;
                     printf("6 sec clock timeout\r\n");
                     SetMuxOutput(Clock_LEDs);
@@ -336,7 +338,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     // Light the next LED for the timer
                     SetLEDs(Clock_idx, Pink);
                     Set_Intensity(Clock_LEDs, 10);
-                    Clock_idx++;
+                    printf("\r\n********** Clock idx: %d\r\n", Clock_idx);
                     
                     if (Clock_idx > NUM_TIMER_LED){
                         Clock_idx = NUM_TIMER_LED;
@@ -349,6 +351,7 @@ ES_Event_t RunClockFSM(ES_Event_t ThisEvent)
                     
                     // restart the timer
                     ES_Timer_InitTimer(TIME_ELAPSED_TIMER, TimeToNextLED);
+
                   }
               }
               break;
