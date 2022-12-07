@@ -1,0 +1,3 @@
+﻿"sheetthickness"= 1 / 8
+"D5@Sketch8"="sheetthickness"
+"D1@Sketch8"="sheetthickness"
