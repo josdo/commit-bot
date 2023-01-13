@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "controllerfsm.h": "c",
+        "stdint.h": "c",
+        "controller.h": "c",
+        "pic32_ad_lib.h": "c",
+        "pic32porthal.h": "c",
+        "es_framework.h": "c"
+    }
+}
