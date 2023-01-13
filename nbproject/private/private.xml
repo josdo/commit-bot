@@ -3,16 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/DRUM_LEDFSM.c</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/Utils.c</file>
-            <file>file:/U:/gandharv/drumhero/FrameworkHeaders/ES_Configure.h</file>
-            <file>file:/U:/gandharv/drumhero/ProjectHeaders/EventCheckWrapper.h</file>
-            <file>file:/U:/gandharv/drumhero/ProjectHeaders/Controller.h</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/communication_pwm_service.c</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/PointServoService.c</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/Controller.c</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/ClockFSM.c</file>
-            <file>file:/U:/gandharv/drumhero/ProjectSource/LED_Strip.c</file>
+            <file>file:/J:/DevProjects/2021Projects/Framework4PIC32_2021/ProjectSource/TestHarnessService0.c</file>
+            <file>file:/J:/DevProjects/2021Projects/Framework4PIC32_2021/ProjectSource/main.c</file>
+            <file>file:/J:/DevProjects/2021Projects/Framework4PIC32_2021/FrameworkSource/dbprintf.c</file>
         </group>
     </open-files>
 </project-private>
