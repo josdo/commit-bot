@@ -1,0 +1,1 @@
+const float SUPPLY_VOLTAGE = 3.3;
