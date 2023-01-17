@@ -5,6 +5,9 @@
         "controller.h": "c",
         "pic32_ad_lib.h": "c",
         "pic32porthal.h": "c",
-        "es_framework.h": "c"
+        "es_framework.h": "c",
+        "es_types.h": "c",
+        "es_general.h": "c",
+        "speeddialservice.h": "c"
     }
 }
