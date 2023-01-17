@@ -1,9 +1,10 @@
+#include <stdio.h>
+#include <math.h>
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "MotorStepService.h"
 #include "PhaseControl.h"
 #include "SpeedDialService.h"
-#include <math.h>
 
 static uint8_t MyPriority;
 
@@ -53,8 +54,8 @@ bool InitMotorStepService(uint8_t Priority)
 
   // Initialize step sequence for two phase on
   // TODO: generalize to all step modes
-  SetCurrTheta(pi/4);
-  SetStepSize(pi/2);
+  SetCurrTheta(M_PI_4);
+  SetStepSize(M_PI_4);
   // TODO: setMaxStepRate from empirical testing
 
   SetStepRate(10);

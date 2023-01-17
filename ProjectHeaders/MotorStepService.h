@@ -10,7 +10,7 @@
 
 #include "ES_Types.h"
 
-typdef enum
+typedef enum
 {
     TWO_PHASE_ON,
     ONE_PHASE_ON,
