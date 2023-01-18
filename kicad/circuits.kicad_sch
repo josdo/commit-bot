@@ -1753,7 +1753,7 @@
     (in_bom yes) (on_board yes)
     (uuid 1a6f3c8d-1462-4485-be33-8c1fe3f4d604)
     (property "Reference" "C?" (id 0) (at 63.5 86.36 90))
-    (property "Value" "0.1uF" (id 1) (at 63.5 88.9 90))
+    (property "Value" "10uF" (id 1) (at 63.5 88.9 90))
     (property "Footprint" "" (id 2) (at 63.5 84.1248 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -2561,7 +2561,7 @@
       (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
     )
     (path "/1a6f3c8d-1462-4485-be33-8c1fe3f4d604"
-      (reference "C?") (unit 1) (value "0.1uF") (footprint "")
+      (reference "C?") (unit 1) (value "10uF") (footprint "")
     )
     (path "/6957f5cf-e005-4f44-ac03-9d9405342d8f"
       (reference "C?") (unit 1) (value "0.1uF") (footprint "")
