@@ -58,7 +58,7 @@ bool InitMotorStepService(uint8_t Priority)
   // Initialize step sequence for one phase on
   // TODO: generalize to all step modes
   SetCurrTheta(0);
-  SetStepSize(M_PI_4);
+  SetStepSize(M_PI_2);
   // TODO: setMaxStepRate from empirical testing
 
   SetStepRate(10);
