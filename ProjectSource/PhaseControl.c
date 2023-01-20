@@ -34,7 +34,7 @@ static channel_t channelsPhB[2] = {3,4};
 static uint32_t NumPWMChs = 4;
 static uint16_t PWMTimerPeriod = 2500;
 static uint16_t PWMTimerFreq = 20000;
-static const WhichTimer_t PWMTimer = _Timer2_;
+static const WhichTimer_t PWMTimer = _Timer3_;
 
 static bool NearZero(phaseV_t v);
 static bool IsForward(phaseV_t v);
@@ -154,8 +154,7 @@ void SetPhaseVoltage(phase_t p, phaseV_t v)
   // Set voltage across coil
   if (!phaseDisabled)
   {
-    printf("A: %u ", ActiveChannel(p, isForward));
-    printf("F: %u ", isForward);
+    printf("A: %u   D: %u\n\r", ActiveChannel(p, isForward), dutyCycle);
   }
   bool status = PWMOperate_SetDutyOnChannel(dutyCycle, ActiveChannel(p, isForward));
   status = PWMOperate_SetDutyOnChannel(0, PassiveChannel(p, isForward));

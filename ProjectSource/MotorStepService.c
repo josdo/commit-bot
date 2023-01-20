@@ -61,7 +61,7 @@ bool InitMotorStepService(uint8_t Priority)
   SetStepSize(M_PI_2);
   // TODO: setMaxStepRate from empirical testing
 
-  SetStepRate(10);
+  SetStepRate(100);
   StartNextStepTimer();
 
   // Post successful initialization
@@ -89,7 +89,6 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
      && (NEXT_STEP_TIMER == ThisEvent.EventParam))
   {
     // TODO: getStepRateFromDial()
-    SetStepRate(10);
     SetCurrTheta(currTheta + dTheta);
     StartNextStepTimer();
   }
