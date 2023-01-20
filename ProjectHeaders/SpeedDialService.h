@@ -12,6 +12,9 @@
 
 // Public Function Prototypes
 
+void SetMaxStepRate(uint32_t r);
+uint32_t GetStepRateFromDial();
+
 /*
 Params: 
      uint8_t : the priorty of this service
