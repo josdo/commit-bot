@@ -8,6 +8,7 @@
         "es_framework.h": "c",
         "es_types.h": "c",
         "es_general.h": "c",
-        "speeddialservice.h": "c"
+        "speeddialservice.h": "c",
+        "eventcheckwrapper.h": "c"
     }
 }

@@ -2,9 +2,11 @@
 #include <math.h>
 #include "ES_Configure.h"
 #include "ES_Framework.h"
+#include "ES_Timers.h"
 #include "MotorStepService.h"
 #include "PhaseControl.h"
 #include "SpeedDialService.h"
+
 
 static uint8_t MyPriority;
 
@@ -12,6 +14,11 @@ static float currTheta = 0;
 static float dTheta = 0;
 static uint32_t sps = 0;
 // static stepMode_t stepMode;
+
+#define buttonPort PORTBbits.RB14
+static uint16_t lastButtonDownTime;
+
+static void InitButton(void);
 
 /*  Set desired stator north and commands it. */
 void SetCurrTheta(float theta)
@@ -49,11 +56,36 @@ void StartNextStepTimer()
   ES_Timer_StartTimer(NEXT_STEP_TIMER);
 }
 
+static void InitButton(void)
+{
+  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_14);
+  lastButtonDownTime = ES_Timer_GetTime();
+}
+
+/*  Event checker that returns true when a button is pressed. */
+bool ButtonIsPressed(void)
+{
+  static uint16_t cooldown = 300;
+
+  uint16_t currTime = ES_Timer_GetTime();
+  bool doneCooling = (currTime - lastButtonDownTime) > cooldown;
+  bool isPressed = (1 == buttonPort);
+  if (doneCooling && isPressed)
+  {
+    lastButtonDownTime = currTime;
+    ES_Event_t ReverseEvent = {ES_REVERSE_ROTATION, 0};
+    PostMotorStepService(ReverseEvent);
+    return true;
+  }
+  return false;
+}
+
 bool InitMotorStepService(uint8_t Priority)
 {
   MyPriority = Priority;
 
   InitPhaseControl();
+  InitButton();
 
   // Initialize step sequence for one phase on
   // TODO: generalize to all step modes
@@ -61,7 +93,7 @@ bool InitMotorStepService(uint8_t Priority)
   SetStepSize(M_PI_2);
   // TODO: setMaxStepRate from empirical testing
 
-  SetStepRate(100);
+  SetStepRate(10);
   StartNextStepTimer();
 
   // Post successful initialization
@@ -80,22 +112,30 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
 
-//   if (ES_TIMEOUT == ThisEvent.EventType) 
-//   {
-//     printf("Timer parameter is %i\n", ThisEvent.EventParam);
-//   }
-
-  if ((ES_TIMEOUT == ThisEvent.EventType) 
-     && (NEXT_STEP_TIMER == ThisEvent.EventParam))
+  switch (ThisEvent.EventType)
   {
-    // TODO: getStepRateFromDial()
-    SetCurrTheta(currTheta + dTheta);
-    StartNextStepTimer();
-  }
+    case ES_REVERSE_ROTATION:
+    {
+      SetStepSize(-1 * dTheta);
+      printf("Reverse rotation, dTh = %f \n\r", dTheta);
+    }
+    break;
 
-  // TODO
-  // if ES_NEW_SPEED
-  // SetStepRate(event.param);
+    // TODO
+    // if ES_NEW_SPEED
+    // SetStepRate(event.param);
+
+    case ES_TIMEOUT:
+    {
+      if (NEXT_STEP_TIMER == ThisEvent.EventParam)
+      {
+        // TODO: getStepRateFromDial()
+        SetCurrTheta(currTheta + dTheta);
+        StartNextStepTimer();
+      }
+    }
+    break;
+  }
 
   return ReturnEvent;
 }

@@ -261,7 +261,8 @@ typedef enum
   /* User-defined events start here */
   ES_NEW_KEY,               /* signals a new key received from terminal */
   ES_LOCK,
-  ES_UNLOCK
+  ES_UNLOCK,
+  ES_REVERSE_ROTATION
 }ES_EventType_t;
 
 /****************************************************************************/
@@ -296,7 +297,7 @@ typedef enum
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke
+#define EVENT_CHECK_LIST Check4Keystroke, ButtonIsPressed
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the

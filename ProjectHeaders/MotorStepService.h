@@ -51,5 +51,8 @@ Description:
 */
 ES_Event_t RunMotorStepService(ES_Event_t ThisEvent);
 
+
+bool ButtonIsPressed(void);
+
 #endif /* MotorStepService_H */
 
