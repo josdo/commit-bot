@@ -15,6 +15,8 @@ static float currTheta = 0;
 static float dTheta = 0;
 static uint32_t sps = 0;
 static stepMode_t stepMode;
+static bool checkDrift = false; /* Forward and reverse stepping to spot drift. */
+static uint32_t driftCheckSteps;
 
 // Button
 #define buttonPort PORTBbits.RB14
@@ -91,7 +93,10 @@ bool InitMotorStepService(uint8_t Priority)
 
   // Configure
   stepMode = QTR_STEP;
+  SetStepRate(75);
   SetUseMaxDutyCycle(false);
+  checkDrift = false;
+  driftCheckSteps = 50;
 
   // Initialize step sequence based on step mode
   if (TWO_PHASE_ON == stepMode)
@@ -134,6 +139,9 @@ bool PostMotorStepService(ES_Event_t ThisEvent)
 
 ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 {
+  // Keep track of forward and reverse steps
+  static uint16_t netStepsForward = 0;
+
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
 
@@ -156,6 +164,18 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
       {
         SetCurrTheta(currTheta + dTheta);
         StartNextStepTimer();
+
+        // Update net steps forward
+        netStepsForward += (dTheta > 0) ? 1 : -1;
+        if (checkDrift)
+        {
+          if (netStepsForward == driftCheckSteps || netStepsForward == 0)
+          {
+            ES_Event_t reverseEvent = {ES_REVERSE_ROTATION, 0};
+            PostMotorStepService(reverseEvent);
+          }
+        }
+        
       }
     }
     break;
