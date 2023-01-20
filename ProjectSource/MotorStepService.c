@@ -91,7 +91,7 @@ bool InitMotorStepService(uint8_t Priority)
 
   // Configure
   stepMode = QTR_STEP;
-  SetStepRate(2);
+  SetUseMaxDutyCycle(false);
 
   // Initialize step sequence based on step mode
   if (TWO_PHASE_ON == stepMode)

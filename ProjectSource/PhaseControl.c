@@ -36,6 +36,9 @@ static uint16_t PWMTimerPeriod = 2500;
 static uint16_t PWMTimerFreq = 20000;
 static const WhichTimer_t PWMTimer = _Timer3_;
 
+// Specific to lab specs for 100% duty cycle on full step and half step
+static bool useMaxDutyCycle = false;
+
 static bool NearZero(phaseV_t v);
 static bool IsForward(phaseV_t v);
 
@@ -124,6 +127,11 @@ static bool IsForward(phaseV_t v)
   return (v > 0.0);
 }
 
+void SetUseMaxDutyCycle(bool b)
+{
+  useMaxDutyCycle = b;
+}
+
 /*  Set stator's effective north pole.
   Args
     theta: orientation of stator's north pole in radians */
@@ -140,6 +148,10 @@ void SetPhaseVoltage(phase_t p, phaseV_t v)
   bool phaseDisabled = NearZero(v);
   bool isForward = IsForward(v);
   uint8_t dutyCycle = round(100.0 * fabs(v / GetSupplyVoltage()));
+  if (useMaxDutyCycle)
+  {
+    dutyCycle = 100;
+  }
 
   // Enable H-bridge
   if (phase(1) == p)

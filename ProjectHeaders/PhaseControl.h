@@ -18,5 +18,6 @@ phase_t phase(uint32_t p);
 channel_t channel(uint32_t c);
 channel_t ActiveChannel(phase_t p, bool isForward);
 channel_t PassiveChannel(phase_t p, bool isForward);
+void SetUseMaxDutyCycle(bool b);
 void SetStatorNorth(float theta);
 void SetPhaseVoltage(phase_t p, phaseV_t v);
