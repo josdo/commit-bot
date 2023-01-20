@@ -34,7 +34,7 @@ static void SetStepRateWithAnalog(uint32_t read)
   // maxStepRate is only 90% of the true max step rate
   uint32_t trueMaxStepRate = 10.0 / 9.0 * maxStepRate;
   float r = (1.0 * read) / MAX_ANALOG_READING * trueMaxStepRate;
-  printf("DialStepRate (f): %f\n\r", r);
+  // printf("DialStepRate (f): %f\n\r", r);
   dialStepRate = r;
 }
 

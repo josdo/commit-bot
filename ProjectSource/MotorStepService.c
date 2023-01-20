@@ -10,11 +10,13 @@
 
 static uint8_t MyPriority;
 
+// Stepping
 static float currTheta = 0;
 static float dTheta = 0;
 static uint32_t sps = 0;
-// static stepMode_t stepMode;
+static stepMode_t stepMode;
 
+// Button
 #define buttonPort PORTBbits.RB14
 static uint16_t lastButtonDownTime;
 
@@ -25,7 +27,7 @@ void SetCurrTheta(float theta)
 {
   // Constrains range to [0, 2pi)
   currTheta = theta - floor(theta / (2*M_PI)) * 2*M_PI;
-  printf("currTheta = %f\n\r", currTheta);
+  printf("currTheta = %.2f pi\n\r", currTheta/M_PI);
   SetStatorNorth(currTheta);
 }
 
@@ -87,13 +89,36 @@ bool InitMotorStepService(uint8_t Priority)
   InitPhaseControl();
   InitButton();
 
-  // Initialize step sequence for one phase on
-  // TODO: generalize to all step modes
-  SetCurrTheta(0);
-  SetStepSize(M_PI_2);
-  // TODO: setMaxStepRate from empirical testing
+  // Configure
+  stepMode = QTR_STEP;
+  SetStepRate(2);
 
-  SetStepRate(10);
+  // Initialize step sequence based on step mode
+  if (TWO_PHASE_ON == stepMode)
+  {
+    SetCurrTheta(M_PI_4);
+    SetStepSize(M_PI_2);
+    // SetMaxStepRate from empirical testing
+  }
+  else if (ONE_PHASE_ON == stepMode)
+  {
+    SetCurrTheta(0);
+    SetStepSize(M_PI_2);
+    // SetMaxStepRate from empirical testing
+  }
+  else if (HALF_STEP == stepMode)
+  {
+    SetCurrTheta(0);
+    SetStepSize(M_PI_4);
+    // SetMaxStepRate from empirical testing
+  }
+  else if (QTR_STEP == stepMode)
+  {
+    SetCurrTheta(0);
+    SetStepSize(M_PI_4/2);
+    // SetMaxStepRate from empirical testing
+  }
+
   StartNextStepTimer();
 
   // Post successful initialization
@@ -129,7 +154,6 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
     {
       if (NEXT_STEP_TIMER == ThisEvent.EventParam)
       {
-        // TODO: getStepRateFromDial()
         SetCurrTheta(currTheta + dTheta);
         StartNextStepTimer();
       }
