@@ -51,7 +51,10 @@ void SetStepSize(float rads)
     numStepsPerSec: steps per second */
 void SetStepRate(uint32_t numStepsPerSec)
 {
-  sps = numStepsPerSec;
+  if (numStepsPerSec < 1)
+    sps = 1;
+  else
+    sps = numStepsPerSec;
 }
 
 void StartNextStepTimer()
@@ -92,7 +95,7 @@ bool InitMotorStepService(uint8_t Priority)
   InitButton();
 
   // Configure
-  stepMode = QTR_STEP;
+  stepMode = TWO_PHASE_ON;
   SetStepRate(75);
   checkDrift = false;
   driftCheckSteps = 50;
@@ -157,14 +160,11 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
     }
     break;
 
-    // TODO
-    // if ES_NEW_SPEED
-    // SetStepRate(event.param);
-
     case ES_TIMEOUT:
     {
       if (NEXT_STEP_TIMER == ThisEvent.EventParam)
       {
+        SetStepRate(GetStepRateFromDial());
         SetCurrTheta(currTheta + dTheta);
         StartNextStepTimer();
 
