@@ -166,7 +166,7 @@ void SetPhaseVoltage(phase_t p, phaseV_t v)
   // Set voltage across coil
   if (!phaseDisabled)
   {
-    printf("A: %u   D: %u\n\r", ActiveChannel(p, isForward), dutyCycle);
+    // printf("A: %u   D: %u\n\r", ActiveChannel(p, isForward), dutyCycle);
   }
   bool status = PWMOperate_SetDutyOnChannel(dutyCycle, ActiveChannel(p, isForward));
   status = PWMOperate_SetDutyOnChannel(0, PassiveChannel(p, isForward));

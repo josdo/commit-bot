@@ -29,7 +29,7 @@ void SetCurrTheta(float theta)
 {
   // Constrains range to [0, 2pi)
   currTheta = theta - floor(theta / (2*M_PI)) * 2*M_PI;
-  printf("currTheta = %.2f pi\n\r", currTheta/M_PI);
+  // printf("currTheta = %.2f pi\n\r", currTheta/M_PI);
   SetStatorNorth(currTheta);
 }
 
@@ -94,7 +94,6 @@ bool InitMotorStepService(uint8_t Priority)
   // Configure
   stepMode = QTR_STEP;
   SetStepRate(75);
-  SetUseMaxDutyCycle(false);
   checkDrift = false;
   driftCheckSteps = 50;
 
@@ -103,25 +102,29 @@ bool InitMotorStepService(uint8_t Priority)
   {
     SetCurrTheta(M_PI_4);
     SetStepSize(M_PI_2);
-    // SetMaxStepRate from empirical testing
+    SetMaxStepRate(250);
+    SetUseMaxDutyCycle(true);
   }
   else if (ONE_PHASE_ON == stepMode)
   {
     SetCurrTheta(0);
     SetStepSize(M_PI_2);
-    // SetMaxStepRate from empirical testing
+    SetMaxStepRate(200);
+    SetUseMaxDutyCycle(true);
   }
   else if (HALF_STEP == stepMode)
   {
     SetCurrTheta(0);
     SetStepSize(M_PI_4);
-    // SetMaxStepRate from empirical testing
+    SetMaxStepRate(500);
+    SetUseMaxDutyCycle(true);
   }
   else if (QTR_STEP == stepMode)
   {
     SetCurrTheta(0);
     SetStepSize(M_PI_4/2);
-    // SetMaxStepRate from empirical testing
+    SetMaxStepRate(75);
+    SetUseMaxDutyCycle(false);
   }
 
   StartNextStepTimer();
