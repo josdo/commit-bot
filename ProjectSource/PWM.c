@@ -8,8 +8,8 @@
 #include "SharedData.h"
 
 // Duty cycle from [0, 100] percent
-static int32_t initDutyCycle = 50;
-static int32_t PWMPeriod = 50000;
+static uint32_t initDutyCycle = 0;
+static uint32_t PWMPeriod = 50000;
 
 // Use OC1, T3, and OC pin A0 for PWM with a 200 Hz frequency.
 void InitPWM(void)
@@ -49,4 +49,15 @@ void InitPWM(void)
   // since OC1R is read-only when OC1 is on.
   OC1CONbits.ON = 1;
   T3CONbits.ON = 1;
+}
+
+// Set duty cycle of OC1.
+void SetDutyCycle(uint32_t dutyCycle)
+{
+  if (dutyCycle > 100)
+  {
+    printf("ERROR: SetDutyCycle argument exceeds max duty cycle");
+  }
+  // Scale duty cycle range [0-100] to [0-49999]
+  OC1RS = (PWMPeriod - 1) * dutyCycle / 100;
 }

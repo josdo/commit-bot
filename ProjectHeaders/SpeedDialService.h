@@ -12,8 +12,8 @@
 
 // Public Function Prototypes
 
-void SetMaxStepRate(uint32_t r);
-uint32_t GetStepRateFromDial();
+uint32_t DialDutyCycle();
+void StartDialReadTimer();
 
 /*
 Params: 

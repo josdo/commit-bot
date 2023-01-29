@@ -9,6 +9,7 @@
 
 
 static uint8_t MyPriority;
+static uint16_t StepPeriod;
 
 // // Button
 // #define buttonPort PORTBbits.RB14
@@ -16,11 +17,11 @@ static uint8_t MyPriority;
 
 // static void InitButton(void);
 
-// void StartNextStepTimer()
-// {
-//   ES_Timer_InitTimer(NEXT_STEP_TIMER, (uint16_t) (1000.0 / sps));
-//   ES_Timer_StartTimer(NEXT_STEP_TIMER);
-// }
+void StartNextStepTimer()
+{
+  ES_Timer_InitTimer(NEXT_STEP_TIMER, StepPeriod);
+  ES_Timer_StartTimer(NEXT_STEP_TIMER);
+}
 
 // static void InitButton(void)
 // {
@@ -50,6 +51,8 @@ bool InitMotorStepService(uint8_t Priority)
 {
   MyPriority = Priority;
   InitPWM();
+  StepPeriod = 1000;
+  StartNextStepTimer();
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -70,38 +73,36 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
 
-  // switch (ThisEvent.EventType)
-  // {
-  //   case ES_REVERSE_ROTATION:
-  //   {
-  //     SetStepSize(-1 * dTheta);
-  //     printf("Reverse rotation, dTh = %f \n\r", dTheta);
-  //   }
-  //   break;
+  switch (ThisEvent.EventType)
+  {
+    // case ES_REVERSE_ROTATION:
+    // {
+    //   SetStepSize(-1 * dTheta);
+    //   printf("Reverse rotation, dTh = %f \n\r", dTheta);
+    // }
+    // break;
 
-  //   case ES_TIMEOUT:
-  //   {
-  //     if (NEXT_STEP_TIMER == ThisEvent.EventParam)
-  //     {
-  //       SetStepRate(GetStepRateFromDial());
-  //       SetCurrTheta(currTheta + dTheta);
-  //       StartNextStepTimer();
+    case ES_TIMEOUT:
+    {
+      if (NEXT_STEP_TIMER == ThisEvent.EventParam)
+      {
+        SetDutyCycle(DialDutyCycle());
+        StartNextStepTimer();
 
-  //       // Update net steps forward
-  //       netStepsForward += (dTheta > 0) ? 1 : -1;
-  //       if (checkDrift)
-  //       {
-  //         if (netStepsForward == driftCheckSteps || netStepsForward == 0)
-  //         {
-  //           ES_Event_t reverseEvent = {ES_REVERSE_ROTATION, 0};
-  //           PostMotorStepService(reverseEvent);
-  //         }
-  //       }
-        
-  //     }
-  //   }
-  //   break;
-  // }
+        // // Update net steps forward
+        // netStepsForward += (dTheta > 0) ? 1 : -1;
+        // if (checkDrift)
+        // {
+        //   if (netStepsForward == driftCheckSteps || netStepsForward == 0)
+        //   {
+        //     ES_Event_t reverseEvent = {ES_REVERSE_ROTATION, 0};
+        //     PostMotorStepService(reverseEvent);
+        //   }
+        // }
+      }
+    }
+    break;
+  }
 
   return ReturnEvent;
 }
