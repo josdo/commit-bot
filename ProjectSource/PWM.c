@@ -14,9 +14,8 @@ static uint32_t PWMPeriod = 50000;
 // Use OC1, T3, and OC pin A0 for PWM with a 200 Hz frequency.
 void InitPWM(void)
 {
-  // Configure PWM pin A0 and enable pin B3
+  // Configure PWM pin A0
   PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0);
-  PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_3);
 
   // Setup timer module
   // Turn off T3

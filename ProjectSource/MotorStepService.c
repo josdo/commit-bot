@@ -3,6 +3,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "ES_Timers.h"
+#include "PIC32PortHAL.h"
 #include "MotorStepService.h"
 #include "PWM.h"
 #include "SpeedDialService.h"
@@ -15,42 +16,20 @@ static uint16_t StepPeriod;
 // #define buttonPort PORTBbits.RB14
 // static uint16_t lastButtonDownTime;
 
-// static void InitButton(void);
-
-void StartNextStepTimer()
-{
-  ES_Timer_InitTimer(NEXT_STEP_TIMER, StepPeriod);
-  ES_Timer_StartTimer(NEXT_STEP_TIMER);
-}
-
-// static void InitButton(void)
-// {
-//   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_14);
-//   lastButtonDownTime = ES_Timer_GetTime();
-// }
-
-// /*  Event checker that returns true when a button is pressed. */
-// bool ButtonIsPressed(void)
-// {
-//   static uint16_t cooldown = 300;
-
-//   uint16_t currTime = ES_Timer_GetTime();
-//   bool doneCooling = (currTime - lastButtonDownTime) > cooldown;
-//   bool isPressed = (1 == buttonPort);
-//   if (doneCooling && isPressed)
-//   {
-//     lastButtonDownTime = currTime;
-//     ES_Event_t ReverseEvent = {ES_REVERSE_ROTATION, 0};
-//     PostMotorStepService(ReverseEvent);
-//     return true;
-//   }
-//   return false;
-// }
+static void StartNextStepTimer();
 
 bool InitMotorStepService(uint8_t Priority)
 {
   MyPriority = Priority;
+  // Configure pin A0 for PWM to one terminal of the DC motor coil
   InitPWM();
+  // Configure pin A1 for holding the other terminal low
+  PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_1);
+  LATAbits.LATA1 = 0;
+  // Configure pin B3 to enable the H-bridge
+  PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_3);
+  LATBbits.LATB3 = 1;
+
   StepPeriod = 1000;
   StartNextStepTimer();
 
@@ -106,3 +85,33 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 
   return ReturnEvent;
 }
+
+static void StartNextStepTimer()
+{
+  ES_Timer_InitTimer(NEXT_STEP_TIMER, StepPeriod);
+  ES_Timer_StartTimer(NEXT_STEP_TIMER);
+}
+
+// static void InitButton(void)
+// {
+//   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_14);
+//   lastButtonDownTime = ES_Timer_GetTime();
+// }
+
+// /*  Event checker that returns true when a button is pressed. */
+// bool ButtonIsPressed(void)
+// {
+//   static uint16_t cooldown = 300;
+
+//   uint16_t currTime = ES_Timer_GetTime();
+//   bool doneCooling = (currTime - lastButtonDownTime) > cooldown;
+//   bool isPressed = (1 == buttonPort);
+//   if (doneCooling && isPressed)
+//   {
+//     lastButtonDownTime = currTime;
+//     ES_Event_t ReverseEvent = {ES_REVERSE_ROTATION, 0};
+//     PostMotorStepService(ReverseEvent);
+//     return true;
+//   }
+//   return false;
+// }
