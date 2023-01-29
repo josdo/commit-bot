@@ -1,233 +1,103 @@
-/*  --------------- 
-    sharedData 
-    --------------- */
-static const float SUPPLY_VOLTAGE = 3.3;
-
-/*  --------------- 
-    phaseControl 
-    --------------- */
-#include "sharedData.h"
-
-/*  Control three parts of stepping: 
-    * where is magnetic pull
-    * how strong is the pull
-    * how quickly does the pull move around the circumference
-*/
-
-/*  rotPerSec = dThetaPerStep * stepsPerSec
-*/
-
-/* Create a phase and phase voltage using these safe constructors. */
-typedef float phaseV_t;
-typedef uint32_t phase_t;
-typedef uint32_t channel_t;
-
-// Phase 1 owns the first row of channels. Phase 2 owns the second row.
-static channel_t const channelOrder[2][2] = [
-    [channel(1), channel(2)],
-    [channel(3), channel(4)]
-];
-
-void initPhaseControl()
+/*  DC motor drive  */
+void Init()
 {
-    // Configure pins
-    // Setup PWM
+  // Configure two motor drive pins to digital output
+  // Handover two pins to PWM library
+
+  // Start POLL_SPEED_DIAL_TIMER
 }
 
-/*  Return phase voltage. */
-phaseV_t phaseV(float v)
+void Run()
 {
-    // Check abs <= SUPPLY_VOLTAGE
-    // return v
+  // if ES_TIMEOUT from POLL_SPEED_DIAL_TIMER
+    // Poll speed dial (gives uint from 0-100)
+    // Set PWM to that duty cycle
 }
 
-/*  Return phase. */
-phase_t phase(uint32_t p)
+/*  PWM  */
+#include "PIC32PortHAL.h"
+
+// Use OC1, T3, and OC pin A0 for PWM with a 200 Hz frequency.
+void Init()
 {
-    // Check phase is 1 or 2
-    // return p
+  // Setup timer module
+  // Turn off T3
+  T3CONbits = 0;
+  // Use PBCLK
+  T3CONbits.TCS = 0;
+  // 200 Hz frequency means 5ms per period, which is 100k 50ns ticks of PBCLK.
+  // To count one period without overflow with 16bits (~65k), we need to prescale
+  // by 2.
+  T3CONbits.TCKPS = 0b001;
+  // Set period of 5ms, which is 50k ticks.
+  PR3 = 49999;
+
+  // Setup output compare module
+  // Turn off OC1
+  OC1CONbits = 0;
+  // Use T3
+  OC1CONbits.OCTSEL = 1;
+  // Use PWM mode with faults disabled
+  OC1CONbits.OCM = 0b110;
+  // Set number of ticks of high pulse for each period
+  OC1R = defaultDutyCycle;
+  OC1RS = defaultDutyCycle;
+
+  // Setup pin for OC1 output
+  RPA0Rbits.RPA0R = 0b0101;
+  PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0);
+
+  // Enable modules. Must turn on OC1 only after OC1R is written,
+  // since OC1R is read-only when OC1 is on.
+  OC1CONbits.ON = 1;
+  T3CONbits.ON = 1;
 }
 
-channel_t channel(uint32_t c)
+// Set duty cycle of OC1.
+void SetDutyCycle(uint32_t dutyCycle)
 {
-    // Check within [1,4]
-    // return c
-}
-
-/*  Gets the pair of channels corresponding to a phase. */
-channel_t * getChannels(phase_t p)
-{
-    // return &( (phase(1) == p) ? channelOrder[0] : channelOrder[1] );
-}
-
-/*  Return 1 out of the 2 channels of a phase that will be
-    high voltage. */
-channel_t activeChannel(phase_t p, bool isForward)
-{
-    channel_t *chs = getChannels(p);
-    // Return the active channel
-    return (isForward) ? chs[0] : chs[1];
-}
-
-/*  Return 1 out of the 2 channels of a phase that will be
-    held low (0 V). */
-channel_t passiveChannel(phase_t p, bool isForward)
-{
-    channel_t *chs = getChannels(p);
-    // Return the passive channel
-    return (isForward) ? chs[1] : chs[0];
-}
-
-/*  Set stator's effective north pole.
-    Args
-        theta: orientation of stator's north pole in radians */
-void setStatorNorth(float theta)
-{
-    setPhaseVoltage(phase(1), sin(theta));
-    setPhaseVoltage(phase(2), cos(theta));
-}
-
-/*  Set phase voltage using PWM. */
-void setPhaseVoltage(phase_t p, phaseV_t v)
-{
-    bool phaseDisabled = (phaseV(0) == v);
-    // if phaseDisabled
-        // Clear latch of the enable pin
-        // Zero out duty cycle for both phase channels
-    // else
-        // Set latch of the enable pin
-        // Set the duty cycle of the active channel
-        // Zero out the duty cycle of the passive channel
-
-        // bool isForward = (phaseV(0) > v);
-        // activeChannel(p, isForward);
-        // passiveChannel(p, isForward);
-}
-
-/*  --------------- 
-    motorStepService 
-    --------------- */
-#include "sharedData.h"
-
-typdef enum
-{
-    TWO_PHASE_ON,
-    ONE_PHASE_ON,
-    HALF_STEP,
-    QTR_STEP
-} stepMode_t;
-
-static float currTheta = 0;
-static float dTheta = 0;
-static uint32_t sps = 0;
-static stepMode_t stepMode;
-
-/*  Set desired stator north and commands it. */
-void setCurrTheta(float theta)
-{
-    // Constrain to [0, 2pi)
-    // update currTheta
-    // setStatorNorth(currTheta)
-}
-
-/*  Set step size with error checks.
-    Args
-        rads: radial step in stator's north pole, in radians. 
-            Can be positive or negative. */
-void setStepSize(float rads)
-{
-    // Check between -pi/2 and pi/2
-    // set dTheta
-}
-
-/*  Set step rate. 
-    Args
-        numStepsPerSec: steps per second */
-void setStepRate(uint32_t numStepsPerSec)
-{
-    // set sps
-}
-
-void init()
-{
-    // Initialize step sequence based on step mode
-    if (TWO_PHASE_ON == stepMode)
-    {
-        // setCurrTheta(pi/4);
-        // setStepSize(pi/2);
-        // setMaxStepRate from empirical testing
-    }
-    else if (ONE_PHASE_ON == stepMode)
-    {
-        // setCurrTheta(0);
-        // setStepSize(pi/2);
-        // setMaxStepRate from empirical testing
-    }
-    else if (HALF_STEP == stepMode)
-    {
-        // setCurrTheta(0);
-        // setStepSize(pi/4);
-        // setMaxStepRate from empirical testing
-    }
-    else if (QTR_STEP == stepMode)
-    {
-        // setCurrTheta(0);
-        // setStepSize(pi/8);
-        // setMaxStepRate from empirical testing
-    }
-
-    // setStepRate(10);
-    // Initialize step timer to (1000 / sps) ms
-    // Start step timer
-}
-
-void run()
-{
-    // if ES_TIMEOUT
-        // setStepRate(getStepRateFromDial())
-        // perform a step using setStatorNorth
-        // start the step timer
-    // if ES_NEW_SPEED
-        // setStepRate(event.param);
-}
-
-/*  --------------- 
-    speedDialService 
-    --------------- */
-
-#include "SharedData.h"
-
-static const uint32_t MAX_ANALOG_READING; // TODO
-static const uint32_t MS_PER_READ = 20;
-static uint32_t currStepRate = 0;
-static uint32_t maxStepRate = 0;
-
-// analog pin
-
-void init()
-{
-    // Set up AD read library
-    // Set maximums based on empirical testing with 2 phase on drive
-    // Create and start pot read timer of MS_PER_READ
-}
-
-void run()
-{
-    // if ES_TIMEOUT
-        // read analog pin
-        // updaet currStepRate to reading / MAX_ANALOG_READING * MAX_STEP_RATE
-        // restart timer
-}
-
-void setMaxStepRate(uint32_t r)
-{
-    // check >= 0
-    // maxStepRate = r;
-}
-
-uint32_t getStepRateFromDial()
-{
-    return currStepRate;
+  if (dutyCycle > 100)
+  {
+    printf("ERROR: SetDutyCycle argument exceeds max duty cycle");
+  }
+  // Scale duty cycle range [0-100] to [0-49999]
+  OC1RS = dutyCycle * 49.999;
 }
 
 
+/*  Measure speed  */
+void Init()
+{
+  // TODO: Setup IC module following lecture slides
+  // Setup pin for IC1 output
+  // RPA0Rbits.RPA0R = 0b0101;
+  // PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0);
+}
+
+// ISR for encoder input capture
+void MeasureEncoderPeriod()
+{
+  // Keep track of last encoder rise time by reading from IC buf
+  // Read until FIFO buf is empty
+  // Post event to display service
+}
+
+// Displays the last measured period on a 8 segment LED bar.
+// A long period lights up all the bars. No very short period lights up one bar.
+void DisplayMeasuredPeriodRun()
+{
+  // if received new measurement event
+    // TODO: flesh out
+    // Program the ACT
+}
+
+// Raises a IO line for time profiling a software operation with an attached oscilloscope
+void RaiseIOLine()
+{
+  // Set a specified pin's latch
+}
+
+void LowerIOLine()
+{
+  // Clear a specified pin's latch
+}
