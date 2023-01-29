@@ -54,7 +54,7 @@
 #define ENTER_RUN      ((MyPriority<<3)|1)
 #define ENTER_TIMEOUT  ((MyPriority<<3)|2)
 
-#define TEST_INT_POST
+// #define TEST_INT_POST
 /*---------------------------- Module Functions ---------------------------*/
 /* prototypes for private functions for this service.They should be functions
    relevant to the behavior of this service
@@ -228,7 +228,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       }
       if ('p' == ThisEvent.EventParam)
       {
+#ifdef TEST_INT_POST
         StartTMR2();
+#endif
       }
     }
     break;
