@@ -44,7 +44,7 @@ ES_Event_t RunSpeedDialService(ES_Event_t ThisEvent)
     uint32_t read;
     ADC_MultiRead(&read);
     dialReading = read;
-    printf("Dial duty cycle: %u\n\r", DialDutyCycle());
+    // printf("Dial duty cycle: %u\n\r", DialDutyCycle());
     StartDialReadTimer();
   }
 

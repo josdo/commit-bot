@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/drumhero.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=drumhero.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=drumhero/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/lab6_dc_motors.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=lab6_dc_motors.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=lab6dcmotors/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/drumhero/bin
+makeDirectory ${TMPDIR}/lab6dcmotors/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/drumhero.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/lab6dcmotors.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/drumhero.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/lab6dcmotors.tar *
 checkReturnCode
 
 # Cleanup
