@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name "218")(type "Legacy")(uri "/Users/sleepearly/Classes/me218/Kicad_Lib/ME218_BaseLib.lib")(options "")(descr ""))
+  (lib (name "218")(type "Legacy")(uri "/Users/sleepearly/Classes/me218/Kicad_Lib/ME218_BaseLib.lib")(options "")(descr "")(disabled))
+  (lib (name "218 spdl")(type "Legacy")(uri "${KIPRJMOD}/ME218_BaseLib.lib")(options "")(descr ""))
 )
