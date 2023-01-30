@@ -6,11 +6,11 @@ typedef union
   uint32_t w;
   struct
   {
-    uint16_t MSB;
     uint16_t LSB;
+    uint16_t MSB;
   };
 } RolloverTime_t;
 
 
 void InitMeasureEncoder(void);
-uint32_t getEncoderHiPulse(void);
+uint32_t getEncoderPeriod(void);

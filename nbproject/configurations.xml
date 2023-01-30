@@ -57,8 +57,8 @@
       <itemPath>ProjectHeaders/SharedData.h</itemPath>
       <itemPath>ProjectHeaders/SpeedDialService.h</itemPath>
       <itemPath>ProjectHeaders/PWM.h</itemPath>
-      <itemPath>ProjectHeaders/DisplayEncoderService.h</itemPath>
       <itemPath>ProjectHeaders/Measure.h</itemPath>
+      <itemPath>ProjectHeaders/DisplayEncoderService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -101,7 +101,7 @@
         <platformTool>snap</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>4.10</languageToolchainVersion>
-        <platform>4</platform>
+        <platform>3</platform>
       </toolsSet>
       <packs>
         <pack name="PIC32MX_DFP" vendor="Microchip" version="1.4.243"/>

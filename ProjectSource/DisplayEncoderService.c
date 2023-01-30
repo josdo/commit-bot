@@ -46,7 +46,8 @@ ES_Event_t RunDisplayEncoderService(ES_Event_t ThisEvent)
       if (NEXT_DISPLAY_TIMER == ThisEvent.EventParam)
       {
         // TODO: Display
-        printf("Encoder hi pulse: %u\n\r", getEncoderHiPulse());
+        getEncoderPeriod();
+        // printf("Encoder hi pulse: %u\n\r", getEncoderHiPulse());
 
         StartNextDisplayTimer();
       }
