@@ -9,7 +9,7 @@
 
 static uint8_t MyPriority;
 // Wait between refreshing display with new encoder hi pulse
-static uint16_t refreshWait = 1000;
+static uint16_t refreshWait = 100;
 
 static void StartNextDisplayTimer();
 
@@ -45,9 +45,7 @@ ES_Event_t RunDisplayEncoderService(ES_Event_t ThisEvent)
     {
       if (NEXT_DISPLAY_TIMER == ThisEvent.EventParam)
       {
-        // TODO: Display
-        getEncoderPeriod();
-        // printf("Encoder hi pulse: %u\n\r", getEncoderHiPulse());
+        GetEncoderPeriodBin();
 
         StartNextDisplayTimer();
       }

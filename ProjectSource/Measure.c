@@ -8,7 +8,7 @@
 #include <sys/attribs.h>
 
 // Length of high pulse in a PWM period. Read / write is interrupt protected.
-volatile static RolloverTime_t lastEdge = {0};
+volatile static RolloverTime_t currRise = {0};
 static uint32_t maxPR2Value = 0xffff;
 static uint32_t encoderPeriod = 0;
 
@@ -20,8 +20,7 @@ void InitMeasureEncoder(void)
 
   IC2CONbits.w = 0;     // Turn off and set to defaults
   IC2CONbits.ICM = 0b011; // every rising edge
-  // IC2CONbits.ICM = 0b100; // every 4th rising edge
-  IC2CONbits.ICTMR = 0; // Use Timer2
+  IC2CONbits.ICTMR = 1; // Use Timer2
   IC2CONbits.FEDGE = 1; // Capture rising edge first
 
   // Setup timer 2 module
@@ -50,46 +49,74 @@ void InitMeasureEncoder(void)
 
 // encoderPeriod value could be many rollovers large since measuring encoder,
 // not PWM hi pulse
-uint32_t getEncoderPeriod(void)
+uint32_t GetEncoderPeriod(void)
 {
-  printf("Encoder period: %u\n\r", encoderPeriod);
+  printf("EPeriod: %u\n\r", encoderPeriod);
   return encoderPeriod;
 }
 
-// Update MSB of lastEdge
+// Split encoder period into bin 1 (smallest) to 8 (largest).
+// Bins chosen from empirically observed min and max periods.
+uint32_t GetEncoderPeriodBin(void)
+{
+  static const uint32_t minEncoderPeriod = 10000;
+  static const uint32_t maxEncoderPeriod = 25000;
+  static const uint32_t numBins = 8;
+
+  uint32_t period = GetEncoderPeriod();
+  uint32_t binSize = (maxEncoderPeriod - minEncoderPeriod) / numBins;
+  if (period < minEncoderPeriod)
+    period = minEncoderPeriod;
+  if (period > maxEncoderPeriod)
+    period = maxEncoderPeriod;
+  
+  // Integer division rounds to 0, so quotient has values [0,6], thus +1 needed
+  uint32_t bin = (period - minEncoderPeriod) / binSize + 1;
+  if (bin > numBins)
+    bin = numBins;
+  printf("EBin: %u\n\r", bin);
+  return bin;
+}
+
+// Update MSB of currRise
 void __ISR(_TIMER_2_VECTOR, IPL6SOFT) RolloverISR(void)
 {
   __builtin_disable_interrupts();
   if (IFS0bits.T2IF)
   {
-    lastEdge.MSB += 1;
+    currRise.MSB += 1;
     IFS0CLR = _IFS0_T2IF_MASK;
   }
   __builtin_enable_interrupts();
 }
 
-// Update lastEdge and encoderPeriod. Assumes first interrupt is rise.
+// Update currRise and encoderPeriod. Assumes every interrupt is rise.
 void __ISR(_INPUT_CAPTURE_2_VECTOR, IPL7SOFT) MeasureEncoderISR(void)
 {
-  static RolloverTime_t lastRise = {0};
+  volatile static RolloverTime_t lastRise = {0};
 
-  __builtin_disable_interrupts();
   // Read until FIFO buf is empty
   while (1 == IC2CONbits.ICBNE)
   {
-    // lastEdge
-    lastEdge.LSB = (uint16_t) IC2BUF; 
-    if ((IFS0bits.T2IF) && (lastEdge.LSB < 0x8000))
+    // currRise
+    currRise.LSB = (uint16_t) IC2BUF; 
+    if ((IFS0bits.T2IF) && (currRise.LSB < 0x8000))
     {
-      lastEdge.MSB += 1;
+      currRise.MSB += 1;
       IFS0CLR = _IFS0_T2IF_MASK;
     }
 
     // encoderPeriod
-    encoderPeriod = lastEdge.w - lastRise.w;
-    lastRise = lastEdge;
+    encoderPeriod = currRise.w - lastRise.w;
+    // printf("%u\n\r", encoderPeriod);
+    if (lastRise.w > currRise.w)
+    {
+      printf("\n\r\n\r");
+      printf("currRise %x\n\r", currRise.w);
+      printf("lastRise %x\n\r", lastRise.w);
+    }
+    lastRise = currRise;
   }
 
   IFS0CLR = _IFS0_IC2IF_MASK; // clear interrupt source
-  __builtin_enable_interrupts();
 }
