@@ -12,12 +12,24 @@ static uint8_t MyPriority;
 static uint16_t refreshWait = 100;
 
 static void StartNextDisplayTimer();
+static void LightLEDBars(uint32_t numToLight);
+
+// Port B pins corresponding to the 1st to 8th LED bars, in order
+static const uint32_t const LEDBarPinMasks[8] = {1 << 4, 1 << 5, 1 << 8, 
+                                                 1 << 9, 1 << 11, 1 << 12,
+                                                 1 << 13, 1 << 14};
+static const uint32_t numBars = 8;
 
 bool InitDisplayEncoderService(uint8_t Priority)
 {
   MyPriority = Priority;
   // Configure pin B10 for 5V input capture
   InitMeasureEncoder();
+
+  // Configure LED bar pins
+  PortSetup_ConfigureDigitalOutputs(_Port_B, 
+                                    _Pin_4|_Pin_5|_Pin_8|_Pin_9|_Pin_11|_Pin_12|_Pin_13|_Pin_14);
+  LightLEDBars(0);
 
   StartNextDisplayTimer();
 
@@ -45,8 +57,7 @@ ES_Event_t RunDisplayEncoderService(ES_Event_t ThisEvent)
     {
       if (NEXT_DISPLAY_TIMER == ThisEvent.EventParam)
       {
-        GetEncoderPeriodBin();
-
+        LightLEDBars(GetEncoderPeriodBin());
         StartNextDisplayTimer();
       }
     }
@@ -59,4 +70,15 @@ static void StartNextDisplayTimer()
 {
   ES_Timer_InitTimer(NEXT_DISPLAY_TIMER, refreshWait);
   ES_Timer_StartTimer(NEXT_DISPLAY_TIMER);
+}
+
+static void LightLEDBars(uint32_t numToLight)
+{
+  for (uint32_t i = 0; i < numBars; i++)
+  {
+    if (i < numToLight)
+      LATBSET = LEDBarPinMasks[i];
+    else
+      LATBCLR = LEDBarPinMasks[i];
+  }
 }
