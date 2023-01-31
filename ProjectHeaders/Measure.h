@@ -15,3 +15,4 @@ typedef union
 void InitMeasureEncoder(void);
 uint32_t GetEncoderPeriod(void);
 uint32_t GetEncoderPeriodBin(void);
+uint32_t GetEncoderRPM(void);

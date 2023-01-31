@@ -9,8 +9,11 @@
 
 // Length of high pulse in a PWM period. Read / write is interrupt protected.
 volatile static RolloverTime_t currRise = {0};
-static uint32_t maxPR2Value = 0xffff;
+static const uint32_t maxPR2Value = 0xffff;
 static uint32_t encoderPeriod = 0;
+static const uint32_t pulsesPerRev = 512;
+static const uint32_t ticksPerMin = 1200000000; // 20M ticks / s * 60s / min
+static const float gearboxRatio = 5.9;
 
 // Configure 5VT pin B10 for IC2 and timer 2 for IC2.
 void InitMeasureEncoder(void)
@@ -51,7 +54,7 @@ void InitMeasureEncoder(void)
 // not PWM hi pulse
 uint32_t GetEncoderPeriod(void)
 {
-  printf("EPeriod: %u\n\r", encoderPeriod);
+  // printf("EPeriod: %u\n\r", encoderPeriod);
   return encoderPeriod;
 }
 
@@ -74,8 +77,20 @@ uint32_t GetEncoderPeriodBin(void)
   uint32_t bin = (period - minEncoderPeriod) / binSize + 1;
   if (bin > numBins)
     bin = numBins;
-  printf("EBin: %u\n\r", bin);
   return bin;
+}
+
+uint32_t GetEncoderRPM(void)
+{
+  if (0 == GetEncoderPeriod())
+  {
+    return 0;
+  }
+  // ticks / min * pulse / ticks = pulses / min
+  float pulsesPerMin = (float) ticksPerMin / (float) GetEncoderPeriod();
+  // pulse / min * outer rev / inner rev * inner rev / pulse = rev / min
+  float rpm = (float) pulsesPerMin / (gearboxRatio * (float) pulsesPerRev);
+  return rpm;
 }
 
 // Update MSB of currRise
