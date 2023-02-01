@@ -9,7 +9,7 @@
 
 // Duty cycle from [0, 100] percent
 static uint32_t initDutyCycle = 0;
-static uint32_t PWMPeriod = 50000;
+static uint32_t PWMPeriod = 20000;
 
 // Use OC1, T3, and OC pin A0 for PWM with a 200 Hz frequency.
 void InitPWM(void)

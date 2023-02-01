@@ -30,8 +30,8 @@ bool InitMotorStepService(uint8_t Priority)
   PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_3);
   LATBbits.LATB3 = 1;
 
-  StepPeriod = 1000;
-  StartNextStepTimer();
+  // StepPeriod = 1000;
+  // StartNextStepTimer();
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -47,40 +47,40 @@ bool PostMotorStepService(ES_Event_t ThisEvent)
 ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 {
   // Keep track of forward and reverse steps
-  static uint16_t netStepsForward = 0;
+  static uint16_t currDC = 0;
+  static const uint16_t stepDC = 10;
+  static const uint16_t maxDC = 100;
+  static const uint16_t minDC = 0;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
 
   switch (ThisEvent.EventType)
   {
-    // case ES_REVERSE_ROTATION:
+    case ES_NEW_KEY:
+    {
+      if ('k' == ThisEvent.EventParam && currDC < 100)
+      {
+        currDC += stepDC;
+        printf("Up to %u%% DC\n\r", currDC);
+      }
+      else if ('j' == ThisEvent.EventParam && currDC > 0)
+      {
+        currDC -= stepDC;
+        printf("Dn to %u%% DC\n\r", currDC);
+      }
+      SetDutyCycle(currDC);
+    } break;
+
+    // case ES_TIMEOUT:
     // {
-    //   SetStepSize(-1 * dTheta);
-    //   printf("Reverse rotation, dTh = %f \n\r", dTheta);
+    //   if (NEXT_STEP_TIMER == ThisEvent.EventParam)
+    //   {
+    //     // SetDutyCycle(DialDutyCycle());
+    //     StartNextStepTimer();
+    //   }
     // }
     // break;
-
-    case ES_TIMEOUT:
-    {
-      if (NEXT_STEP_TIMER == ThisEvent.EventParam)
-      {
-        SetDutyCycle(DialDutyCycle());
-        StartNextStepTimer();
-
-        // // Update net steps forward
-        // netStepsForward += (dTheta > 0) ? 1 : -1;
-        // if (checkDrift)
-        // {
-        //   if (netStepsForward == driftCheckSteps || netStepsForward == 0)
-        //   {
-        //     ES_Event_t reverseEvent = {ES_REVERSE_ROTATION, 0};
-        //     PostMotorStepService(reverseEvent);
-        //   }
-        // }
-      }
-    }
-    break;
   }
 
   return ReturnEvent;

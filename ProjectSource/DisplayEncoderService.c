@@ -9,7 +9,7 @@
 
 static uint8_t MyPriority;
 // Wait between refreshing display with new encoder hi pulse
-static uint16_t refreshWait = 100;
+static uint16_t refreshWait = 500;
 
 static void StartNextDisplayTimer();
 static void LightLEDBars(uint32_t numToLight);
