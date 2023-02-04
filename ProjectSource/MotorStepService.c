@@ -48,7 +48,7 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 {
   // Keep track of forward and reverse steps
   static uint16_t currDC = 0;
-  static const uint16_t stepDC = 10;
+  static const uint16_t stepDC = 1;
   static const uint16_t maxDC = 100;
   static const uint16_t minDC = 0;
 

@@ -9,7 +9,7 @@
 
 // Duty cycle from [0, 100] percent
 static uint32_t initDutyCycle = 0;
-static uint32_t PWMPeriod = 20000;
+static uint32_t PWMPeriod = 250; // 25us period, 40kHz freq
 
 // Use OC1, T3, and OC pin A0 for PWM with a 200 Hz frequency.
 void InitPWM(void)
@@ -24,7 +24,7 @@ void InitPWM(void)
   T3CONbits.TCS = 0;
   // 200 Hz frequency means 5ms per period, which is 100k 50ns ticks of PBCLK.
   // To count one period without overflow with 16bits (~65k), we need to prescale
-  // by 2.
+  // by 2. This gives us 100ns/tick.
   T3CONbits.TCKPS = 0b001;
   // Set period of 5ms, which is 50k ticks.
   PR3 = PWMPeriod - 1;
