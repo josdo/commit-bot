@@ -89,7 +89,7 @@ bool PostMotorStepService(ES_Event_t ThisEvent)
 ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 {
   // Either use the keys, or use the speed dial, to set the desired RPM
-  bool use_dial = true;
+  bool use_dial = false;
 
   static const uint16_t step_rpm = 10;
 
@@ -144,8 +144,10 @@ void __ISR(_TIMER_4_VECTOR, IPL6SOFT) VelocityControllerISR(void)
   // How often to print
   static uint16_t printPeriod = 60;
 
-  static float kP = 1;
-  static float kI = 1;
+  // static float kP = 1;
+  // static float kI = 1;
+  static float kP = 10;
+  static float kI = 2;
   static float curr_cum_e = 0;
   static float last_cum_e = 0;
 
