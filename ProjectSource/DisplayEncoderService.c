@@ -63,7 +63,7 @@ ES_Event_t RunDisplayEncoderService(ES_Event_t ThisEvent)
         LightLEDBars(GetEncoderPeriodBin());
         uint32_t currRPM = GetEncoderRPM();
         B15ToHi();
-        printf("RPM %u\n\r", currRPM);
+        // printf("RPM %u\n\r", currRPM);
         B15ToLo();
         StartNextDisplayTimer();
       }

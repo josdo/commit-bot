@@ -8,19 +8,47 @@
 #include "PWM.h"
 #include "SpeedDialService.h"
 
+// For ISRs
+#include <xc.h>
+#include <sys/attribs.h>
 
 static uint8_t MyPriority;
 static uint16_t StepPeriod;
-
-// // Button
-// #define buttonPort PORTBbits.RB14
-// static uint16_t lastButtonDownTime;
+static uint16_t ControllerUpdatePeriod = 40000;
 
 static void StartNextStepTimer();
+
+void InitVelocityController()
+{
+  // Setup timer module
+  // Turn off T4
+  T4CONbits.w = 0;
+  // Use PBCLK
+  T4CONbits.TCS = 0;
+  // Set prescale value to 1:1, which allows for 
+  // (2^16-1 ticks) * 50ns/tick * 10^6ms/ns = 3.27ms of time measurement
+  T4CONbits.TCKPS = 0;
+  // Set PR4 to 2ms, which is 40,000 ticks
+  PR4 = ControllerUpdatePeriod - 1;
+
+  // Enable interrupts for timer 2
+  __builtin_enable_interrupts(); // global enable
+  INTCONbits.w = 0;
+  INTCONbits.MVEC = 1; // use multi-vectored interrupts
+
+  IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
+  IPC4bits.T4IP = 0b110; // Lower priority than encoder interrupt's priority 7
+  IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
+
+  // Turn on T4 module
+  T4CONbits.ON = 1;
+}
 
 bool InitMotorStepService(uint8_t Priority)
 {
   MyPriority = Priority;
+  // Initialize timer interrupt updates for the velocity controller.
+  InitVelocityController();
   // Configure pin A0 for PWM to one terminal of the DC motor coil
   InitPWM();
   // Configure pin A1 for holding the other terminal low
@@ -92,26 +120,18 @@ static void StartNextStepTimer()
   ES_Timer_StartTimer(NEXT_STEP_TIMER);
 }
 
-// static void InitButton(void)
-// {
-//   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_14);
-//   lastButtonDownTime = ES_Timer_GetTime();
-// }
-
-// /*  Event checker that returns true when a button is pressed. */
-// bool ButtonIsPressed(void)
-// {
-//   static uint16_t cooldown = 300;
-
-//   uint16_t currTime = ES_Timer_GetTime();
-//   bool doneCooling = (currTime - lastButtonDownTime) > cooldown;
-//   bool isPressed = (1 == buttonPort);
-//   if (doneCooling && isPressed)
-//   {
-//     lastButtonDownTime = currTime;
-//     ES_Event_t ReverseEvent = {ES_REVERSE_ROTATION, 0};
-//     PostMotorStepService(ReverseEvent);
-//     return true;
-//   }
-//   return false;
-// }
+// Updates velocity control, i.e. duty cycle applied
+void __ISR(_TIMER_4_VECTOR, IPL6SOFT) VelocityControllerISR(void)
+{
+  // First printed time will be rubbish due to arbitrary initialization
+  static uint16_t lastTime = 0;
+  // __builtin_disable_interrupts();
+  if (IFS0bits.T4IF)
+  {
+    uint16_t currTime = ES_Timer_GetTime();
+    printf("Timer 4 window: %u\n\r", currTime - lastTime);
+    lastTime = currTime;
+    IFS0CLR = _IFS0_T4IF_MASK;
+  }
+  // __builtin_enable_interrupts();
+}
