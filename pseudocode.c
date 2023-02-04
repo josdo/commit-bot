@@ -1,3 +1,27 @@
+/* PI control */
+// Initialize timer 4
+void InitDutyCycleControl(void)
+{
+  // Turn off T4 module
+  // Set prescale value to 1:1, which allows for 
+  // (2^16-1 ticks) * 50ns/tick * 10^6ms/ns = 3.27ms of time measurement
+  // Set PR4 to 2ms, which is 40,000 ticks
+  // Turn on T4 module
+
+  // Enable interrupts
+}
+
+
+// Recalculate duty cycle using RPM measurement and PI feedback
+void __ISR(_TIMER_4_2_VECTOR, IPL6SOFT) DutyCycleControlISR(void)
+{
+  // TODO
+}
+
+
+/* ++++++++++++++++++++++++++ */
+/* Same pseudocode from lab 6 */
+/* ++++++++++++++++++++++++++ */
 /*  DC motor drive  */
 void Init()
 {
