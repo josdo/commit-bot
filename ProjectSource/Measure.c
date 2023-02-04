@@ -108,6 +108,8 @@ void __ISR(_TIMER_2_VECTOR, IPL6SOFT) RolloverISR(void)
 // Update currRise and encoderPeriod. Assumes every interrupt is rise.
 void __ISR(_INPUT_CAPTURE_2_VECTOR, IPL7SOFT) MeasureEncoderISR(void)
 {
+  static uint32_t numInitRises = 0;
+  static uint32_t minInitRises = 2;
   volatile static RolloverTime_t lastRise = {0};
 
   // Read until FIFO buf is empty
@@ -121,9 +123,20 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IPL7SOFT) MeasureEncoderISR(void)
       IFS0CLR = _IFS0_T2IF_MASK;
     }
 
-    // encoderPeriod
-    encoderPeriod = currRise.w - lastRise.w;
-    // printf("%u\n\r", encoderPeriod);
+    // Update encoderPeriod after a minimum number of initialization rises
+    // or else encoderPeriod will be some extremely high value at first,
+    // messing up the velocity controller's error estimate
+    if (numInitRises <= minInitRises)
+    {
+      numInitRises++;
+      encoderPeriod = 0;
+    }
+    else
+    {
+      encoderPeriod = currRise.w - lastRise.w;
+    }
+
+    // If captured times are out of time order, print here
     if (lastRise.w > currRise.w)
     {
       printf("\n\r\n\r");

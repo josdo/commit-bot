@@ -12,7 +12,7 @@
 
 // Public Function Prototypes
 
-uint32_t DialDutyCycle();
+uint32_t DialRPM();
 void StartDialReadTimer();
 
 /*

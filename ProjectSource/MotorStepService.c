@@ -4,6 +4,7 @@
 #include "ES_Framework.h"
 #include "ES_Timers.h"
 #include "PIC32PortHAL.h"
+#include "Measure.h"
 #include "MotorStepService.h"
 #include "PWM.h"
 #include "SpeedDialService.h"
@@ -13,13 +14,22 @@
 #include <sys/attribs.h>
 
 static uint8_t MyPriority;
-static uint16_t StepPeriod;
-static uint16_t ControllerUpdatePeriod = 40000;
 
+// Desired RPM for velocity controller to reach
+static int32_t rpm_desired = 0;
+
+// Last time the velocity controller printed its stats
+static uint16_t lastPrintTime;
+
+// How often to read from the speed dial
+static uint16_t StepPeriod = 1000;
 static void StartNextStepTimer();
 
 void InitVelocityController()
 {
+  // How frequently the controller updates
+  static uint16_t ControllerUpdatePeriod = 40000;
+
   // Setup timer module
   // Turn off T4
   T4CONbits.w = 0;
@@ -42,6 +52,9 @@ void InitVelocityController()
 
   // Turn on T4 module
   T4CONbits.ON = 1;
+
+  // Ensure ISR printing is ready to go
+  lastPrintTime = ES_Timer_GetTime();
 }
 
 bool InitMotorStepService(uint8_t Priority)
@@ -58,8 +71,8 @@ bool InitMotorStepService(uint8_t Priority)
   PortSetup_ConfigureDigitalOutputs(_Port_B, _Pin_3);
   LATBbits.LATB3 = 1;
 
-  // StepPeriod = 1000;
-  // StartNextStepTimer();
+  StepPeriod = 1000;
+  StartNextStepTimer();
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -74,11 +87,10 @@ bool PostMotorStepService(ES_Event_t ThisEvent)
 
 ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
 {
-  // Keep track of forward and reverse steps
-  static uint16_t currDC = 0;
-  static const uint16_t stepDC = 1;
-  static const uint16_t maxDC = 100;
-  static const uint16_t minDC = 0;
+  // Either use the keys, or use the speed dial, to set the desired RPM
+  bool use_dial = true;
+
+  static const uint16_t step_rpm = 10;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -87,28 +99,33 @@ ES_Event_t RunMotorStepService(ES_Event_t ThisEvent)
   {
     case ES_NEW_KEY:
     {
-      if ('k' == ThisEvent.EventParam && currDC < 100)
+      if (use_dial)
+        break;
+
+      if ('k' == ThisEvent.EventParam && rpm_desired < 45)
       {
-        currDC += stepDC;
-        printf("Up to %u%% DC\n\r", currDC);
+        rpm_desired += step_rpm;
+        printf("Up to %u%% rpm\n\r", rpm_desired);
       }
-      else if ('j' == ThisEvent.EventParam && currDC > 0)
+      else if ('j' == ThisEvent.EventParam && rpm_desired > 0)
       {
-        currDC -= stepDC;
-        printf("Dn to %u%% DC\n\r", currDC);
+        rpm_desired -= step_rpm;
+        printf("Dn to %u%% rpm\n\r", rpm_desired);
       }
-      SetDutyCycle(currDC);
     } break;
 
-    // case ES_TIMEOUT:
-    // {
-    //   if (NEXT_STEP_TIMER == ThisEvent.EventParam)
-    //   {
-    //     // SetDutyCycle(DialDutyCycle());
-    //     StartNextStepTimer();
-    //   }
-    // }
-    // break;
+    case ES_TIMEOUT:
+    {
+      if (!use_dial)
+        break;
+
+      if (NEXT_STEP_TIMER == ThisEvent.EventParam)
+      {
+        rpm_desired = (int32_t) DialRPM();
+        StartNextStepTimer();
+      }
+    }
+    break;
   }
 
   return ReturnEvent;
@@ -123,15 +140,44 @@ static void StartNextStepTimer()
 // Updates velocity control, i.e. duty cycle applied
 void __ISR(_TIMER_4_VECTOR, IPL6SOFT) VelocityControllerISR(void)
 {
-  // First printed time will be rubbish due to arbitrary initialization
-  static uint16_t lastTime = 0;
-  // __builtin_disable_interrupts();
+  // How often to print
+  static uint16_t printPeriod = 60;
+
+  static float kP = 1;
+  static float kI = 1;
+  static float curr_cum_e = 0;
+  static float last_cum_e = 0;
+
+  int32_t rpm_actual = (int32_t) GetEncoderRPM();
+  int32_t e = rpm_desired - rpm_actual;
+  last_cum_e = curr_cum_e;
+  curr_cum_e += e;
+
   if (IFS0bits.T4IF)
   {
+    float candidate_dc = kP * (e + (kI * curr_cum_e));
+    uint32_t final_dc;
+    // Clamp cumulative error if it drives the commanded duty cycle out of
+    // valid range
+    if (candidate_dc > 100 || candidate_dc < 0)
+    {
+      curr_cum_e = last_cum_e;
+      final_dc = (candidate_dc > 100) ? 100 : 0;
+    }
+    else
+    {
+      final_dc = round(candidate_dc);
+    }
+    SetDutyCycle(final_dc);
+
     uint16_t currTime = ES_Timer_GetTime();
-    printf("Timer 4 window: %u\n\r", currTime - lastTime);
-    lastTime = currTime;
+    if (currTime - lastPrintTime >= printPeriod)
+    {
+      printf("Desired %u vs actual %u\r\n", rpm_desired, rpm_actual);
+      printf("DC: %u\r\n", final_dc);
+      printf("\r\n");
+      lastPrintTime = currTime;
+    }
     IFS0CLR = _IFS0_T4IF_MASK;
   }
-  // __builtin_enable_interrupts();
 }

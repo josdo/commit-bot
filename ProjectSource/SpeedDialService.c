@@ -8,7 +8,7 @@
 static uint8_t MyPriority;
 
 static const uint32_t MAX_READING = 1023;
-static const uint32_t MAX_PWM = 100;
+static const uint32_t MAX_RPM = 45;
 static const uint16_t MS_PER_READ = 100;
 static uint32_t dialReading;
 static const uint16_t DialAnalogNum = BIT4HI; // RB2 is AN4
@@ -44,16 +44,16 @@ ES_Event_t RunSpeedDialService(ES_Event_t ThisEvent)
     uint32_t read;
     ADC_MultiRead(&read);
     dialReading = read;
-    // printf("Dial duty cycle: %u\n\r", DialDutyCycle());
+    // printf("Dial RPM: %u\n\r", DialRPM());
     StartDialReadTimer();
   }
 
   return ReturnEvent;
 }
 
-uint32_t DialDutyCycle()
+uint32_t DialRPM()
 {
-  return MAX_PWM * dialReading / MAX_READING;
+  return MAX_RPM * dialReading / MAX_READING;
 }
 
 void StartDialReadTimer()
