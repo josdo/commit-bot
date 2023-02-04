@@ -8,6 +8,7 @@
 #include "MotorStepService.h"
 #include "PWM.h"
 #include "SpeedDialService.h"
+#include "DisplayEncoderService.h"
 
 // For ISRs
 #include <xc.h>
@@ -148,6 +149,8 @@ void __ISR(_TIMER_4_VECTOR, IPL6SOFT) VelocityControllerISR(void)
   static float curr_cum_e = 0;
   static float last_cum_e = 0;
 
+  B15ToHi();
+
   int32_t rpm_actual = (int32_t) GetEncoderRPM();
   int32_t e = rpm_desired - rpm_actual;
   last_cum_e = curr_cum_e;
@@ -180,4 +183,6 @@ void __ISR(_TIMER_4_VECTOR, IPL6SOFT) VelocityControllerISR(void)
     }
     IFS0CLR = _IFS0_T4IF_MASK;
   }
+
+  B15ToLo();
 }

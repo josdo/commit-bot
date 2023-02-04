@@ -13,8 +13,6 @@ static uint16_t refreshWait = 500;
 
 static void StartNextDisplayTimer();
 static void LightLEDBars(uint32_t numToLight);
-static void B15ToHi();
-static void B15ToLo();
 
 // Port B pins corresponding to the 1st to 8th LED bars, in order
 static const uint32_t const LEDBarPinMasks[8] = {1 << 4, 1 << 5, 1 << 8, 
@@ -62,9 +60,6 @@ ES_Event_t RunDisplayEncoderService(ES_Event_t ThisEvent)
       {
         LightLEDBars(GetEncoderPeriodBin());
         uint32_t currRPM = GetEncoderRPM();
-        B15ToHi();
-        // printf("RPM %u\n\r", currRPM);
-        B15ToLo();
         StartNextDisplayTimer();
       }
     }
@@ -90,12 +85,12 @@ static void LightLEDBars(uint32_t numToLight)
   }
 }
 
-static void B15ToHi()
+void B15ToHi()
 {
   LATBSET = BIT15HI;
 }
 
-static void B15ToLo()
+void B15ToLo()
 {
   LATBCLR = BIT15HI;
 }
