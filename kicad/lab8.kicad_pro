@@ -239,7 +239,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Lab 5 Stepper Motors.kicad_pro",
+    "filename": "lab8.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -318,7 +318,7 @@
   },
   "sheets": [
     [
-      "ba0e438a-361f-4946-b896-6b3342f5a529",
+      "4395bdf3-963e-4f83-9e65-920657afec17",
       ""
     ]
   ],

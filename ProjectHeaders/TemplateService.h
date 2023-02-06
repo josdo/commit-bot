@@ -1,16 +1,7 @@
-/****************************************************************************
-
-  Header file for template service
-  based on the Gen 2 Events and Services Framework
-
- ****************************************************************************/
-
 #ifndef TemplateService_H
 #define TemplateService_H
 
 #include "ES_Types.h"
-
-// Public Function Prototypes
 
 /*
 Params: 
