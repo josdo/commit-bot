@@ -33,7 +33,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 4
+#define NUM_SERVICES 2
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -57,11 +57,11 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "MotorStepService.h"
+#define SERV_1_HEADER "LeaderService.h"
 // the name of the Init function
-#define SERV_1_INIT InitMotorStepService
+#define SERV_1_INIT InitLeaderService
 // the name of the run function
-#define SERV_1_RUN RunMotorStepService
+#define SERV_1_RUN RunLeaderService
 // How big should this services Queue be?
 #define SERV_1_QUEUE_SIZE 3
 #endif
@@ -306,9 +306,9 @@ typedef enum
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC PostMotorStepService
-#define TIMER1_RESP_FUNC PostSpeedDialService
-#define TIMER2_RESP_FUNC PostDisplayEncoderService
+#define TIMER0_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC TIMER_UNUSED
+#define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
 #define TIMER5_RESP_FUNC TIMER_UNUSED
@@ -331,9 +331,9 @@ typedef enum
 // These symbolic names should be changed to be relevant to your application
 
 #define SERVICE0_TIMER 15
-#define NEXT_STEP_TIMER 0
-#define DIAL_READ_TIMER 1
-#define NEXT_DISPLAY_TIMER 2
+//#define NEXT_STEP_TIMER 0
+//#define DIAL_READ_TIMER 1
+//#define NEXT_DISPLAY_TIMER 2
 
 
 #endif /* ES_CONFIGURE_H */
