@@ -155,8 +155,8 @@ void setPWM(){
   T3CONbits.ON = 1;
   
   // mapping output compare channel to pins
-  RPB10R = 0b0101;
-  RPB13R = 0b0101;
+  RPB10R = 0b0101;                          // pin 21
+  RPB13R = 0b0101;                          // pin 24
   
   // setting period on the timer
   //Use the Frequency (expressed in Hz) to calculate a new period
@@ -183,8 +183,8 @@ void setLeaderMode(){
     IFS1CLR = _IFS1_SPI1RXIF_MASK;
     IEC1SET = _IEC1_SPI1RXIE_MASK;
     // multivector is enabled
-    INTCONbits.MVEC = 1;
-    IPC7bits.SPI1IP = 7;
+    INTCONbits.MVEC = 1;                // enable multivector mode
+    IPC7bits.SPI1IP = 7;                // interrupt priority is 7
 //    IPC7 = 7;
     __builtin_enable_interrupts();
     

@@ -4,24 +4,16 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/U:/gandharv/Lab8/FrameworkHeaders/ES_ServiceHeaders.h</file>
-            <file>file:/U:/gandharv/Lab8/FrameworkHeaders/LeaderService.h</file>
             <file>file:/U:/gandharv/Lab8/ProjectHeaders/TestHarnessService0.h</file>
-            <file>file:/U:/gandharv/Lab8/ProjectSource/PIC32PortHAL.c</file>
+            <file>file:/U:/gandharv/Lab8/ProjectSource/TestHarnessService0.c</file>
             <file>file:/U:/gandharv/Lab8/ProjectHeaders/EventCheckWrapper.h</file>
             <file>file:/U:/gandharv/Lab8/FrameworkSource/ES_Timers.c</file>
-            <file>file:/U:/gandharv/Lab8/FrameworkHeaders/dbprintf.h</file>
-            <file>file:/U:/gandharv/Lab8/FrameworkSource/dbprintf.c</file>
-            <file>file:/U:/gandharv/Lab8/ProjectSource/TestHarnessService0.c</file>
-            <file>file:/U:/gandharv/Lab8/FrameworkHeaders/ES_Timers.h</file>
-            <file>file:/U:/gandharv/Lab8/ProjectHeaders/PIC32_SPI_HAL.h</file>
-            <file>file:/U:/gandharv/Lab8/ProjectSource/PIC32_SPI_HAL.c</file>
-            <file>file:/U:/gandharv/Lab8/ProjectHeaders/TemplateService.h</file>
-            <file>file:/U:/gandharv/Lab8/FrameworkHeaders/LeaderService.c</file>
             <file>file:/U:/gandharv/Lab8/FrameworkHeaders/PIC32_SPI_HAL.h</file>
             <file>file:/U:/gandharv/Lab8/FrameworkHeaders/ES_Events.h</file>
             <file>file:/U:/gandharv/Lab8/ProjectSource/TemplateService.c</file>
             <file>file:/U:/gandharv/Lab8/FrameworkHeaders/ES_Configure.h</file>
-            <file>file:/U:/gandharv/Lab8/ProjectHeaders/PIC32PortHAL.h</file>
+            <file>file:/U:/gandharv/Lab8/ProjectHeaders/TemplateService.h</file>
+            <file>file:/U:/gandharv/Lab8/FrameworkHeaders/LeaderService.c</file>
         </group>
     </open-files>
 </project-private>
