@@ -6,6 +6,8 @@
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
+#include <sys/attribs.h>
+#include "LeaderService.h"
 
 SPI_Module_t Module = SPI_SPI1;
 SPI_SamplePhase_t Phase = SPI_SMP_END;
@@ -17,27 +19,25 @@ SPI_Clock_t WhichState = SPI_CLK_HI;
 SPI_ActiveEdge_t WhichEdge = SPI_SECOND_EDGE;
 SPI_XferWidth_t DataWidth = SPI_8BIT;
 
+volatile uint8_t newCommand;
+volatile uint8_t lastCommand = 0xFF;
+volatile uint8_t currentCommand;
+
+#define PBCLK_RATE 20000000L
+// TIMERx divisor for PWM, standard value is 8, to give maximum resolution
+#define TIMER_DIV 8
+uint16_t reqFreq = 100;
+uint16_t period;
+
+
 static uint8_t MyPriority;
 
 bool InitLeaderService(uint8_t Priority)
 {
   MyPriority = Priority;
-          
-  SPISetup_BasicConfig(Module);
-  SPISetup_SetLeader(Module, Phase);
-  SPISetup_SetBitTime(Module, SPI_ClkPeriodIn_ns);
-  SPISetup_MapSSOutput(Module, SSPin);
-  SPISetup_MapSDInput(Module, SDIPin);
-  SPISetup_MapSDOutput(Module, SDOPin);
-  SPISetup_SetClockIdleState(Module, WhichState);
-  SPISetup_SetActiveEdge(Module, WhichEdge);
-  SPISetup_SetXferWidth(Module, DataWidth);
-  SPISetEnhancedBuffer(Module, false);
-  SPISetup_EnableSPI(Module);
   
-  PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
-  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
-
+  setLeaderMode();
+  setPWM();
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
   return ES_PostToService(MyPriority, ThisEvent);
@@ -74,9 +74,7 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
       break;
       case ES_START_COM:
       {
-          SPISetup_EnableSPI(Module);
           puts("Start Communication with Command Gen \r\n");
-//          SPIOperate_SPI1_Send8Wait(0xAA);
           ES_Timer_InitTimer(COMMAND_TIMER, 300);
       }
       break;
@@ -85,7 +83,6 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
           puts("Stop Communication with Command Gen \r\n");
           SPIOperate_SPI1_Send8Wait(0xFF);
           ES_Timer_StopTimer(COMMAND_TIMER);
-//          SPISetup_DisableSPI(Module);
       }
       break;
       case ES_NEW_KEY:
@@ -103,7 +100,106 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
               PostLeaderService(ThisEvent);
           }
       }
+      case ES_NEW_COMMAND:
+      {
+          DB_printf("New Command: %x\r\n", ThisEvent.EventParam);
+      }
+      break;
 
   }
   return ReturnEvent;
 }
+
+void setPWM(){
+    //switching the timer 3 off
+  T3CONbits.ON = 0;
+  //selecting timer source
+  T3CONbits.TCS = 0;
+  // selecting a prescaler for the timer
+  T3CONbits.TCKPS = 0b011;
+  
+  // Channel 3
+  // switching off the output compare module
+  OC3CONbits.ON = 0;
+  // selecting timer for the output compare mode
+  OC3CONbits.OCTSEL = 1;
+  // set PWM mode with no fault
+  OC3CONbits.OCM = 0b110;
+  // set the timer to 16 bits
+  OC3CONbits.OC32 = 0;
+  // set the inital cycle
+  OC3R = 0;
+  // set the repeating cycle
+  OC3RS = 0;
+  // switch on the output compare module
+  OC3CONbits.ON = 1;
+  
+  // Channel 4
+  // switching off the output compare module
+  OC4CONbits.ON = 0;
+  // selecting timer for the output compare mode
+  OC4CONbits.OCTSEL = 1;
+  // set PWM mode with no fault
+  OC4CONbits.OCM = 0b110;
+  // set the timer to 16 bits
+  OC4CONbits.OC32 = 0;
+  // set the initial cycle 
+  OC4R = 0;
+  // set the repeating cycle
+  OC4RS = 0;
+  // switch on the output compare module
+  OC4CONbits.ON = 1;
+  
+  // turn on the timer 3
+  T3CONbits.ON = 1;
+  
+  // mapping output compare channel to pins
+  RPB14R = 0b0101;
+  RPB13R = 0b0101;
+  
+  // setting period on the timer
+  //Use the Frequency (expressed in Hz) to calculate a new period
+  period = PBCLK_RATE/TIMER_DIV /reqFreq;
+  PR3 = period;
+}
+
+void setLeaderMode(){
+    // Setting SPI Basic config and pins
+    SPISetup_BasicConfig(Module);
+    SPISetup_SetLeader(Module, Phase);
+    SPISetup_SetBitTime(Module, SPI_ClkPeriodIn_ns);
+    SPISetup_MapSSOutput(Module, SSPin);
+    SPISetup_MapSDInput(Module, SDIPin);
+    SPISetup_MapSDOutput(Module, SDOPin);
+    SPISetup_SetClockIdleState(Module, WhichState);
+    SPISetup_SetActiveEdge(Module, WhichEdge);
+    SPISetup_SetXferWidth(Module, DataWidth);
+    SPISetEnhancedBuffer(Module, false);
+    SPISetup_EnableSPI(Module);
+    
+//    // Setting the interrupts
+//    IFS1CLR = _IFS1_SPI1RXIF_MASK;
+//    IEC1CLR = _IEC1_SPI1RXIE_MASK;
+//    // multivector is enabled
+//    INTCONbits.MVEC = 1;
+//    IPC7 = 7;
+//    __builtin_enable_interrupts();
+    
+    PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
+    PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
+}
+
+//void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
+//    IFS1CLR = _IFS1_SPI1RXIF_MASK;
+//    currentCommand = SPI1BUF;
+////    puts("hello");
+//    if (currentCommand != lastCommand){
+//        lastCommand = currentCommand;
+////        DB_printf("com: %x\r\n", currentCommand);
+//        ES_Event_t NewEvent;
+//        NewEvent.EventType = ES_NEW_COMMAND;
+//        NewEvent.EventParam = currentCommand;
+//        PostLeaderService(NewEvent);
+//    }
+//    
+//}

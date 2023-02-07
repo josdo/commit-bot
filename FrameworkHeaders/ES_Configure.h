@@ -264,7 +264,8 @@ typedef enum
   ES_UNLOCK,
   ES_REVERSE_ROTATION,
   ES_START_COM,
-  ES_STOP_COM
+  ES_STOP_COM,
+  ES_NEW_COMMAND
 }ES_EventType_t;
 
 /****************************************************************************/
