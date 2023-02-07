@@ -653,6 +653,10 @@ void SPIOperate_SPI1_Send32(uint32_t TheData)
 void SPIOperate_SPI1_Send8Wait(uint8_t TheData)
 {
   // not needed for ME218a Labs
+    SPI1BUF = TheData; // write to the buffer
+    //SPIOperate_HasSS1_Risen(); // while INT4 flag is false wait
+    //while (SPI1STATbits.SPITBF);
+    while (false == SPIOperate_HasSS1_Risen()){}
 }
 
 /****************************************************************************

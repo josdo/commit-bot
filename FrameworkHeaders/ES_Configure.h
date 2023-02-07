@@ -262,7 +262,9 @@ typedef enum
   ES_NEW_KEY,               /* signals a new key received from terminal */
   ES_LOCK,
   ES_UNLOCK,
-  ES_REVERSE_ROTATION
+  ES_REVERSE_ROTATION,
+  ES_START_COM,
+  ES_STOP_COM
 }ES_EventType_t;
 
 /****************************************************************************/
@@ -320,7 +322,7 @@ typedef enum
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER14_RESP_FUNC PostLeaderService
 #define TIMER15_RESP_FUNC PostTestHarnessService0
 
 /****************************************************************************/
@@ -331,6 +333,7 @@ typedef enum
 // These symbolic names should be changed to be relevant to your application
 
 #define SERVICE0_TIMER 15
+#define COMMAND_TIMER 14
 //#define NEXT_STEP_TIMER 0
 //#define DIAL_READ_TIMER 1
 //#define NEXT_DISPLAY_TIMER 2

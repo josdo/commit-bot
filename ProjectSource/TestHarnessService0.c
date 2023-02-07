@@ -200,19 +200,19 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     break;
     case ES_SHORT_TIMEOUT:   // lower the line & announce
     {
-      puts("\rES_SHORT_TIMEOUT received\r\n");
+//      puts("\rES_SHORT_TIMEOUT received\r\n");
     }
     break;
     case ES_NEW_KEY:   // announce
     {
-      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
-          (char)ThisEvent.EventParam);
+//      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
+//          (char)ThisEvent.EventParam);
       if ('d' == ThisEvent.EventParam)
       {
         ThisEvent.EventParam = DeferredChar++;   //
         if (ES_DeferEvent(DeferralQueue, ThisEvent))
         {
-          puts("ES_NEW_KEY deferred in Service 0\r");
+//          puts("ES_NEW_KEY deferred in Service 0\r");
         }
       }
       if ('r' == ThisEvent.EventParam)
@@ -222,7 +222,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         // but we slide the deferred events under it so it(they) should come out first
         if (true == ES_RecallEvents(MyPriority, DeferralQueue))
         {
-          puts("ES_NEW_KEY(s) recalled in Service 0\r");
+//          puts("ES_NEW_KEY(s) recalled in Service 0\r");
           DeferredChar = '1';
         }
       }

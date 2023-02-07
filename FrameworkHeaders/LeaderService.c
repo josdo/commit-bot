@@ -7,21 +7,21 @@
 #include "terminal.h"
 #include "dbprintf.h"
 
+SPI_Module_t Module = SPI_SPI1;
+SPI_SamplePhase_t Phase = SPI_SMP_END;
+uint32_t SPI_ClkPeriodIn_ns = 10000;
+SPI_PinMap_t SSPin = SPI_RPA0;
+SPI_PinMap_t SDIPin = SPI_RPB8;
+SPI_PinMap_t SDOPin = SPI_RPA1;
+SPI_Clock_t WhichState = SPI_CLK_HI;
+SPI_ActiveEdge_t WhichEdge = SPI_SECOND_EDGE;
+SPI_XferWidth_t DataWidth = SPI_8BIT;
+
 static uint8_t MyPriority;
 
 bool InitLeaderService(uint8_t Priority)
 {
   MyPriority = Priority;
-  
-  SPI_Module_t Module = SPI_SPI1;
-  SPI_SamplePhase_t Phase = SPI_SMP_END;
-  uint32_t SPI_ClkPeriodIn_ns = 10000;
-  SPI_PinMap_t SSPin = SPI_RPA0;
-  SPI_PinMap_t SDIPin = SPI_RPB8;
-  SPI_PinMap_t SDOPin = SPI_RPA1;
-  SPI_Clock_t WhichState = SPI_CLK_HI;
-  SPI_ActiveEdge_t WhichEdge = SPI_SECOND_EDGE;
-  SPI_XferWidth_t DataWidth = SPI_8BIT;
           
   SPISetup_BasicConfig(Module);
   SPISetup_SetLeader(Module, Phase);
@@ -61,21 +61,49 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
       {
         puts("Service 01:");
         DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
-        while(true){
-                  SPIOperate_SPI1_Send8(0xAA);
-              }
       }
       break;
-      
-//      case ES_NEW_KEY:
-//      {
-//          if ('s' == ThisEvent.EventParam){
-//              puts("hello");
-//              
-//              
-//          }
-//          
-//      }
+      case ES_TIMEOUT:
+      {
+          if(ThisEvent.EventParam == COMMAND_TIMER)
+          {
+              SPIOperate_SPI1_Send8Wait(0xAA);
+              ES_Timer_InitTimer(COMMAND_TIMER, 300);
+          }
+      }
+      break;
+      case ES_START_COM:
+      {
+          SPISetup_EnableSPI(Module);
+          puts("Start Communication with Command Gen \r\n");
+//          SPIOperate_SPI1_Send8Wait(0xAA);
+          ES_Timer_InitTimer(COMMAND_TIMER, 300);
+      }
+      break;
+      case ES_STOP_COM:
+      {
+          puts("Stop Communication with Command Gen \r\n");
+          SPIOperate_SPI1_Send8Wait(0xFF);
+          ES_Timer_StopTimer(COMMAND_TIMER);
+//          SPISetup_DisableSPI(Module);
+      }
+      break;
+      case ES_NEW_KEY:
+      {
+          // Start the communication with command gen
+          if ('s' == ThisEvent.EventParam){
+              ThisEvent.EventType = ES_START_COM;
+              PostLeaderService(ThisEvent);
+              
+          }
+          
+          // Stop the communication with command generator
+          if ('o' == ThisEvent.EventParam){
+              ThisEvent.EventType = ES_STOP_COM;
+              PostLeaderService(ThisEvent);
+          }
+      }
+
   }
   return ReturnEvent;
 }
