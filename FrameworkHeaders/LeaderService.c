@@ -100,6 +100,7 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
               PostLeaderService(ThisEvent);
           }
       }
+      break;
       case ES_NEW_COMMAND:
       {
           DB_printf("New Command: %x\r\n", ThisEvent.EventParam);
@@ -154,7 +155,7 @@ void setPWM(){
   T3CONbits.ON = 1;
   
   // mapping output compare channel to pins
-  RPB14R = 0b0101;
+  RPB10R = 0b0101;
   RPB13R = 0b0101;
   
   // setting period on the timer
@@ -177,29 +178,32 @@ void setLeaderMode(){
     SPISetEnhancedBuffer(Module, false);
     SPISetup_EnableSPI(Module);
     
-//    // Setting the interrupts
-//    IFS1CLR = _IFS1_SPI1RXIF_MASK;
-//    IEC1CLR = _IEC1_SPI1RXIE_MASK;
-//    // multivector is enabled
-//    INTCONbits.MVEC = 1;
+    // Setting the interrupts
+    __builtin_disable_interrupts();
+    IFS1CLR = _IFS1_SPI1RXIF_MASK;
+    IEC1SET = _IEC1_SPI1RXIE_MASK;
+    // multivector is enabled
+    INTCONbits.MVEC = 1;
+    IPC7bits.SPI1IP = 7;
 //    IPC7 = 7;
-//    __builtin_enable_interrupts();
+    __builtin_enable_interrupts();
     
     PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
 }
 
-//void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
-//    IFS1CLR = _IFS1_SPI1RXIF_MASK;
-//    currentCommand = SPI1BUF;
-////    puts("hello");
-//    if (currentCommand != lastCommand){
-//        lastCommand = currentCommand;
-////        DB_printf("com: %x\r\n", currentCommand);
-//        ES_Event_t NewEvent;
-//        NewEvent.EventType = ES_NEW_COMMAND;
-//        NewEvent.EventParam = currentCommand;
-//        PostLeaderService(NewEvent);
-//    }
-//    
-//}
+void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
+    IFS1CLR = _IFS1_SPI1RXIF_MASK;              // clear the flag
+    
+    currentCommand = SPI1BUF;                   // read the buffer
+//    puts("hello");
+    if (currentCommand != lastCommand){
+        lastCommand = currentCommand;           // store previous command
+//        DB_printf("com: %x\r\n", currentCommand);
+        ES_Event_t NewEvent;
+        NewEvent.EventType = ES_NEW_COMMAND;
+        NewEvent.EventParam = currentCommand;
+        PostLeaderService(NewEvent);            // post the command
+    }
+    
+}
