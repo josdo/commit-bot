@@ -1,6 +1,6 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "../ProjectHeaders/PIC32_SPI_HAL.h"
+#include "PIC32_SPI_HAL.h"
 #include "ES_DeferRecall.h"
 #include "PIC32PortHAL.h"
 #include "ES_Port.h"

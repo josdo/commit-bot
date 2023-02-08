@@ -13,7 +13,6 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-uint16_t PWM_PERIOD;                                    // convert to ticks
 #define TURN_90 1000
 #define TURN_45 TURN_90/2
 
@@ -24,6 +23,7 @@ uint16_t PWM_PERIOD;                                    // convert to ticks
 // ------------------------------- Module Variables ---------------------------
 static uint8_t MyPriority;
 
+uint16_t PWM_PERIOD;                                    // convert to ticks
 static uint8_t DutyCycle = 0;
 static Commands_t currentCommand;
 // ----------------------------------------------------------------------------
