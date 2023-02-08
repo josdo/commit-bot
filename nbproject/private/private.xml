@@ -3,7 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/U:/kindled/lab8_mobile_platform/ProjectHeaders/TestHarnessService0.h</file>
+            <file>file:/U:/vkackar/Lab8/FrameworkHeaders/ES_Configure.h</file>
+            <file>file:/U:/vkackar/Lab8/ProjectSource/DCMotorService.c</file>
+            <file>file:/U:/vkackar/Lab8/ProjectSource/LeaderService.c</file>
+            <file>file:/U:/vkackar/Lab8/ProjectHeaders/DCMotorService.h</file>
         </group>
     </open-files>
 </project-private>
