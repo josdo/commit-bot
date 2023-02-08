@@ -37,7 +37,6 @@ bool InitLeaderService(uint8_t Priority)
   MyPriority = Priority;
   clrScrn();
   setLeaderMode();
-  setPWM();
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
   return ES_PostToService(MyPriority, ThisEvent);
@@ -111,58 +110,6 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
   return ReturnEvent;
 }
 
-void setPWM(){
-    //switching the timer 3 off
-  T3CONbits.ON = 0;
-  //selecting timer source
-  T3CONbits.TCS = 0;
-  // selecting a prescaler for the timer
-  T3CONbits.TCKPS = 0b011;
-  
-  // Channel 3
-  // switching off the output compare module
-  OC3CONbits.ON = 0;
-  // selecting timer for the output compare mode
-  OC3CONbits.OCTSEL = 1;
-  // set PWM mode with no fault
-  OC3CONbits.OCM = 0b110;
-  // set the timer to 16 bits
-  OC3CONbits.OC32 = 0;
-  // set the inital cycle
-  OC3R = 0;
-  // set the repeating cycle
-  OC3RS = 0;
-  // switch on the output compare module
-  OC3CONbits.ON = 1;
-  
-  // Channel 4
-  // switching off the output compare module
-  OC4CONbits.ON = 0;
-  // selecting timer for the output compare mode
-  OC4CONbits.OCTSEL = 1;
-  // set PWM mode with no fault
-  OC4CONbits.OCM = 0b110;
-  // set the timer to 16 bits
-  OC4CONbits.OC32 = 0;
-  // set the initial cycle 
-  OC4R = 0;
-  // set the repeating cycle
-  OC4RS = 0;
-  // switch on the output compare module
-  OC4CONbits.ON = 1;
-  
-  // turn on the timer 3
-  T3CONbits.ON = 1;
-  
-  // mapping output compare channel to pins
-  RPB10R = 0b0101;                          // pin 21
-  RPB13R = 0b0101;                          // pin 24
-  
-  // setting period on the timer
-  //Use the Frequency (expressed in Hz) to calculate a new period
-  period = PBCLK_RATE/TIMER_DIV /reqFreq;
-  PR3 = period;
-}
 
 void setLeaderMode(){
     // Setting SPI Basic config and pins
