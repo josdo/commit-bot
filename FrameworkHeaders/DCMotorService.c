@@ -1,6 +1,8 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "DCMotorService.h"
+#include "dbprintf.h"
+
 
 // ------------------------------- Module Defines ---------------------------
 #define EN12 LATBbits.LATB11                            // Enable pin 1,2
@@ -10,8 +12,10 @@
 #define A4 LATAbits.LATA4                               // non PWM control pin
 
 #define TIMER_DIV 4                                     // pre scalar on timer
-#define PWM_FREQ 1000                                   // in Hz
-#define PWM_PERIOD 20*1000000/TIMER_DIV/PWM_FREQ-1      // convert to ticks
+#define PWM_FREQ 1500                                   // in Hz
+uint16_t PWM_PERIOD;                                    // convert to ticks
+#define TURN_90 1000
+#define TURN_45 TURN_90/2
 
 #define PBCLK_RATE 20000000L
 // TIMERx divisor for PWM, standard value is 8, to give maximum resolution
@@ -43,7 +47,6 @@ bool InitDCMotorService(uint8_t Priority)
   TRISBCLR = _TRISB_TRISB12_MASK;               // set rb12 as output (EN 34)
   
   TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (4A)
-  
   TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (2A)
   
   EN12 = 1;                                     // enable the first motor
@@ -72,42 +75,110 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
 
   // TODO write service code
   switch(ThisEvent.EventType){
+      case ES_INIT:
+      {
+        puts("Service 02:");
+        DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
+      }
+      break;
       case ES_TIMEOUT:{
-          
+          if (TURN_TIMER == ThisEvent.EventParam){
+              A2 = 0;
+              A4 = 0;
+              OC3RS = 0;
+              OC4RS = 0;
+          }
       }
       break;
       
-      case ES_NEW_COMMAND:{
-          decodeCommand(ThisEvent.EventParam);      // decode the command
+      case ES_NEW_KEY:{
+          if ('0' == ThisEvent.EventParam){
+              puts("STOP command\r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x00};
+              PostDCMotorService(NewEvent);
+          }
           
+          else if ('1' == ThisEvent.EventParam){
+              puts("CW 90 command\r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x02};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('2' == ThisEvent.EventParam){
+              puts("CW 45 command\r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x03};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('3' == ThisEvent.EventParam){
+              puts("CCW 90 command\r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x04};
+              PostDCMotorService(NewEvent);
+          }
+      }
+      break;
+      
+      case ES_NEW_COMMAND:{          
+          decodeCommand(ThisEvent.EventParam);      // decode the command
+          DB_printf("Current command = %x\r\n", ThisEvent.EventParam);
           switch(currentCommand){
               case STOP:{
+                  EN12 = 0;
+                  EN34 = 0;
+                  A2 = 0;
+                  A4 = 0;
                   OC3RS = 0;
                   OC4RS = 0;
               }
               break;
               
               case CW_90:{
-                  
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 0;
+                  A4 = 1;
+                  OC3RS = PWM_PERIOD/2;
+                  OC4RS = PWM_PERIOD/2;
+                  ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CW_45:{
-                  
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 0;
+                  A4 = 1;
+                  OC3RS = PWM_PERIOD/2;
+                  OC4RS = PWM_PERIOD/2;
+                  ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case CCW_90:{
-                  
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 1;
+                  A4 = 0;
+                  OC3RS = PWM_PERIOD/2;
+                  OC4RS = PWM_PERIOD/2;
+                  ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CCW_45:{
-                  
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 1;
+                  A4 = 0;
+                  OC3RS = PWM_PERIOD/2;
+                  OC4RS = PWM_PERIOD/2;
+                  ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case FORWARD_HALF:{
+                  EN12 = 1;
+                  EN34 = 1;
                   A2 = 0;
                   A4 = 0;
                   OC3RS = PWM_PERIOD/2;
@@ -116,12 +187,18 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               break;
               
               case FORWARD_FULL:{
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 0;
+                  A4 = 0;
                   OC3RS = PWM_PERIOD;
                   OC4RS = PWM_PERIOD;
               }
               break;
               
               case BACKWARD_HALF:{
+                  EN12 = 1;
+                  EN34 = 1;
                   A2 = 1;
                   A4 = 1;
                   OC3RS = PWM_PERIOD/2;
@@ -130,8 +207,30 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               break;
               
               case BACKWARD_FULL:{
+                  EN12 = 1;
+                  EN34 = 1;
                   A2 = 1;
                   A4 = 1;
+                  OC3RS = 0;
+                  OC4RS = 0;
+              }
+              break;
+              
+              case BEACON:{
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 0;
+                  A4 = 0;
+                  OC3RS = 0;
+                  OC4RS = 0;
+              }
+              break;
+              
+              case TAPE:{
+                  EN12 = 1;
+                  EN34 = 1;
+                  A2 = 0;
+                  A4 = 0;
                   OC3RS = 0;
                   OC4RS = 0;
               }
@@ -156,7 +255,7 @@ void setPWM(){
   // clear the timer register
   TMR3 = 0;
   // -------------------------------------------------------
-  
+  PWM_PERIOD = PBCLK_RATE/TIMER_DIV/PWM_FREQ-1;
   // --------------------- Channel 3 --------------------- 
   // switching off the output compare module
   OC3CONbits.ON = 0;
@@ -167,9 +266,9 @@ void setPWM(){
   // set the timer to 16 bits
   OC3CONbits.OC32 = 0;
   // set the inital cycle
-  OC3R = (uint16_t)(PWM_PERIOD / 2);
+  OC3R = 0;
   // set the repeating cycle
-  OC3RS = (uint16_t)(PWM_PERIOD / 2);
+  OC3RS = 0;
   // -------------------------------------------------------
   
   // --------------------- Channel 4 --------------------- 
@@ -182,9 +281,9 @@ void setPWM(){
   // set the timer to 16 bits
   OC4CONbits.OC32 = 0;
   // set the initial cycle 
-  OC4R = (uint16_t)(PWM_PERIOD / 2);
+  OC4R = 0;
   // set the repeating cycle
-  OC4RS = (uint16_t)(PWM_PERIOD / 2);
+  OC4RS = 0;
   // -------------------------------------------------------
   
   // mapping output compare channel to pins
@@ -195,12 +294,13 @@ void setPWM(){
   OC3CONbits.ON = 1;
   // switch on the output compare module
   OC4CONbits.ON = 1;
-  
+  T3CONbits.ON = 1;
   // setting period on the timer
+  
   PR3 = PWM_PERIOD;
           
   // turn on the timer 3
-  T3CONbits.ON = 1;
+  
 }
 \
 void decodeCommand(uint16_t command){

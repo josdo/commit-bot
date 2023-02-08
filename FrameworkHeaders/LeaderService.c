@@ -8,6 +8,7 @@
 #include "dbprintf.h"
 #include <sys/attribs.h>
 #include "LeaderService.h"
+#include "DCMotorService.h"
 
 SPI_Module_t Module = SPI_SPI1;
 SPI_SamplePhase_t Phase = SPI_SMP_END;
@@ -100,11 +101,7 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
           }
       }
       break;
-      case ES_NEW_COMMAND:
-      {
-          DB_printf("New Command: %x\r\n", ThisEvent.EventParam);
-      }
-      break;
+      
 
   }
   return ReturnEvent;
@@ -150,7 +147,7 @@ void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
         ES_Event_t NewEvent;
         NewEvent.EventType = ES_NEW_COMMAND;
         NewEvent.EventParam = currentCommand;
-        PostLeaderService(NewEvent);            // post the command
+        PostDCMotorService(NewEvent);            // post the command
     }
     
 }
