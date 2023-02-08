@@ -53,6 +53,7 @@
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
       <itemPath>ProjectHeaders/DCMotorService.h</itemPath>
       <itemPath>ProjectHeaders/LeaderService.h</itemPath>
+      <itemPath>FrameworkHeaders/OptoSensorService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -67,6 +68,7 @@
       <itemPath>ProjectSource/TemplateService.c</itemPath>
       <itemPath>ProjectSource/DCMotorService.c</itemPath>
       <itemPath>ProjectSource/LeaderService.c</itemPath>
+      <itemPath>FrameworkHeaders/OptoSensorService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
