@@ -35,7 +35,7 @@ static uint8_t MyPriority;
 bool InitLeaderService(uint8_t Priority)
 {
   MyPriority = Priority;
-  
+  clrScrn();
   setLeaderMode();
   setPWM();
   // Post successful initialization
