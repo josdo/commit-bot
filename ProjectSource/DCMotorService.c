@@ -13,7 +13,7 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-#define TURN_90 1000
+#define TURN_90 3500
 #define TURN_45 TURN_90/2
 
 #define PBCLK_RATE 20000000L
@@ -32,6 +32,7 @@ static Commands_t currentCommand;
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
 void decodeCommand(uint16_t command);   // decod the command
+void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle);
 // ----------------------------------------------------------------------------
 
 
@@ -115,6 +116,18 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x04};
               PostDCMotorService(NewEvent);
           }
+          
+          else if ('4' == ThisEvent.EventParam){
+              puts("FORWARDS FULL command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x09};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('5' == ThisEvent.EventParam){
+              puts("BACKWARDS FULL command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x11};
+              PostDCMotorService(NewEvent);
+          }
       }
       break;
       
@@ -123,22 +136,26 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
           DB_printf("Current command = %x\r\n", ThisEvent.EventParam);
           switch(currentCommand){
               case STOP:{
-                  EN12 = 0;
-                  EN34 = 0;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+//                  EN12 = 0;
+//                  EN34 = 0;
+//                  A2 = 0;
+//                  A4 = 0;
+//                  OC3RS = 0;
+//                  OC4RS = 0;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
               }
               break;
               
               case CW_90:{
                   EN12 = 1;
                   EN34 = 1;
-                  A2 = 0;
-                  A4 = 1;
+                  A2 = 1;
+                  A4 = 0;
                   OC3RS = PWM_PERIOD/2;
                   OC4RS = PWM_PERIOD/2;
+//                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+//                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
@@ -150,6 +167,8 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
                   A4 = 1;
                   OC3RS = PWM_PERIOD/2;
                   OC4RS = PWM_PERIOD/2;
+//                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+//                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
@@ -157,10 +176,12 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               case CCW_90:{
                   EN12 = 1;
                   EN34 = 1;
-                  A2 = 1;
-                  A4 = 0;
+                  A2 = 0;
+                  A4 = 1;
                   OC3RS = PWM_PERIOD/2;
                   OC4RS = PWM_PERIOD/2;
+//                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+//                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
@@ -168,51 +189,61 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               case CCW_45:{
                   EN12 = 1;
                   EN34 = 1;
-                  A2 = 1;
-                  A4 = 0;
+                  A2 = 0;
+                  A4 = 1;
                   OC3RS = PWM_PERIOD/2;
                   OC4RS = PWM_PERIOD/2;
+//                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+//                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case FORWARD_HALF:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+//                  EN12 = 1;
+//                  EN34 = 1;
+//                  A2 = 0;
+//                  A4 = 0;
+//                  OC3RS = PWM_PERIOD/2;
+//                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
               }
               break;
               
               case FORWARD_FULL:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD;
-                  OC4RS = PWM_PERIOD;
+//                  EN12 = 1;
+//                  EN34 = 1;
+//                  A2 = 0;
+//                  A4 = 0;
+//                  OC3RS = PWM_PERIOD;
+//                  OC4RS = PWM_PERIOD;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
               }
               break;
               
               case BACKWARD_HALF:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 1;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+//                  EN12 = 1;
+//                  EN34 = 1;
+//                  A2 = 1;
+//                  A4 = 1;
+//                  OC3RS = PWM_PERIOD/2;
+//                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
               }
               break;
               
               case BACKWARD_FULL:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 1;
-                  OC3RS = 0;
-                  OC4RS = 0;
+//                  EN12 = 1;
+//                  EN34 = 1;
+//                  A2 = 1;
+//                  A4 = 1;
+//                  OC3RS = 0;
+//                  OC4RS = 0;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
               }
               break;
               
@@ -344,5 +375,50 @@ void decodeCommand(uint16_t command){
     }
     else{
         currentCommand = NA;
+    }
+}
+
+void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){
+    //forwards full
+//                      EN12 = 1;
+//                  EN34 = 1;
+//                  A2 = 0; forward
+//                  A4 = 0;
+//                  OC3RS = PWM_PERIOD;
+//                  OC4RS = PWM_PERIOD;
+                  
+    if (0 == dutyCycle){
+       EN12 = 0;
+       EN34 = 0;
+       A2 = 0;
+       A4 = 0;
+       OC3RS = 0;
+       OC4RS = 0;
+    }
+    
+    else if (LEFT_MOTOR == whichMotor){
+        EN34 = 1;
+        A4 = whichDirection;
+        
+        if (FORWARD == whichDirection){
+            OC4RS = PWM_PERIOD * (uint16_t)(dutyCycle/100);
+        }
+        
+        else {
+            OC4RS = PWM_PERIOD * (uint16_t)(1 - (uint16_t)(dutyCycle/100));
+        }
+    }
+    
+    else if (RIGHT_MOTOR == whichMotor){
+        EN12 = 1;
+        A2 = whichDirection;
+        
+        if (FORWARD == whichDirection){
+            OC3RS = PWM_PERIOD * (uint16_t)(dutyCycle/100);
+        }
+        
+        else {
+            OC3RS = PWM_PERIOD * (uint16_t)(1 - (uint16_t)(dutyCycle/100));
+        }
     }
 }

@@ -18,6 +18,16 @@ typedef enum{
     NA
 } Commands_t;
 
+typedef enum{
+    LEFT_MOTOR = 0,
+    RIGHT_MOTOR        
+} Motors_t;
+
+typedef enum{
+    FORWARD = 0,
+    BACKWARD
+} Directions_t;
+
 /*
 Params: 
      uint8_t : the priorty of this service
