@@ -268,7 +268,9 @@ typedef enum
   ES_TAPE_DETECTED,
   ES_ButtonDown,
   ES_ButtonUp,
-  ES_NEW_COMMAND
+  ES_NEW_COMMAND,
+  ES_READ_OPTO,
+  ES_STOP_OPTO
 }ES_EventType_t;
 
 /****************************************************************************/

@@ -5,10 +5,13 @@
 #include "PIC32_AD_Lib.h"
 #include "dbprintf.h"
 #include "PIC32PortHAL.h"
+#include "DCMotorService.h"
 
 
 
 static uint8_t MyPriority;
+static bool readOpto = false;
+
 #define ONE_SEC 1000
 #define HALF_SEC (ONE_SEC / 2)
 #define TWO_SEC (ONE_SEC * 2)
@@ -58,11 +61,20 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
         DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
     }
     break;
+    
+      case ES_READ_OPTO:{
+          readOpto = true;
+      }
+      break;
   
     case ES_TAPE_DETECTED:
     {
         // TODO
-        DB_printf("%d\r\n", analog_signal[0]);
+        DB_printf("Analog signal: %d\r\n", analog_signal[0]);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+        
+        readOpto = false;
     }
     break;
       
@@ -73,12 +85,16 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
 
 bool readOptoSensor(){
     bool ReturnVal = false;
-    ADC_MultiRead(analog_signal);
-    if(analog_signal[0] > THRESHOLD) {
-        ReturnVal = true;
-        ES_Event_t ReturnEvent;
-        ReturnEvent.EventType = ES_TAPE_DETECTED;
-        PostOptoSensorService(ReturnEvent);  
+    
+    if (1 == readOpto){
+        ADC_MultiRead(analog_signal);
+    
+        if(analog_signal[0] > THRESHOLD) {
+            ReturnVal = true;
+            ES_Event_t ReturnEvent;
+            ReturnEvent.EventType = ES_TAPE_DETECTED;
+            PostOptoSensorService(ReturnEvent);  
+        }
     }
     
     return ReturnVal;

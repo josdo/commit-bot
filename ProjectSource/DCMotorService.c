@@ -2,6 +2,7 @@
 #include "ES_Framework.h"
 #include "DCMotorService.h"
 #include "dbprintf.h"
+#include "OptoSensorService.h"
 
 
 // ------------------------------- Module Defines ---------------------------
@@ -128,6 +129,12 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x11};
               PostDCMotorService(NewEvent);
           }
+          
+          else if ('9' == ThisEvent.EventParam){
+              puts("TAPE command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x40};
+              PostDCMotorService(NewEvent);
+          }
       }
       break;
       
@@ -206,12 +213,11 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               
               case TAPE:{
                   // TODO
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  ES_Event_t OptoEvent = {ES_READ_OPTO, 0};
+                  PostOptoSensorService(OptoEvent);
+                  
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
               }
               break;
           }
