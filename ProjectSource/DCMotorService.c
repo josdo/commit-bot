@@ -4,7 +4,7 @@
 #include "dbprintf.h"
 #include "OptoSensorService.h"
 #include "ButtonService.h"
-
+#include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
 #define EN12 LATBbits.LATB11                            // Enable pin 1,2
@@ -28,13 +28,36 @@ static uint8_t MyPriority;
 uint16_t PWM_PERIOD;                                    // convert to ticks
 static uint8_t DutyCycle = 0;
 static Commands_t currentCommand;
+
+const uint16_t TICKS_PER_uS = 5;
+const uint32_t LOWER_THRESH = 685 * TICKS_PER_uS;       // 1460 Hz
+const uint32_t HIGH_THRESH = 694 * TICKS_PER_uS;        // 1440 Hz
+
+volatile uint32_t beaconPeriod = 0;
+volatile uint8_t beaconCount = 0;
+volatile uint16_t RO = 0;
+
+typedef union{
+    struct{
+        uint16_t CapturedTime;
+        uint16_t RollOver;
+    } ByTime;
+    
+    uint32_t FullLength;
+} TimeTracker;
+
+static volatile TimeTracker CurrentTime;
+static volatile TimeTracker PrevTime;
+
 // ----------------------------------------------------------------------------
 
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
-void decodeCommand(uint16_t command);   // decod the command
-
+void decodeCommand(uint16_t command);   // decode the command
+void initInputCapture(void);            // input capture on RB5 (pin 14)
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
+void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
 // ----------------------------------------------------------------------------
 
 
@@ -133,6 +156,12 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               PostDCMotorService(NewEvent);
           }
           
+          else if ('8' == ThisEvent.EventParam){
+              puts("FIND BEACON command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x20};
+              PostDCMotorService(NewEvent);
+          }
+          
           else if ('9' == ThisEvent.EventParam){
               puts("TAPE command \r\n");
               ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x40};
@@ -205,19 +234,17 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               
               case BEACON:{
                   // TODO
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  IEC0SET = _IEC0_IC3IE_MASK;             // enable ic3 interrupt
+                  
+                  // turn CCW until beacon is found
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
               }
               break;
               
               case TAPE:{
-                  // TODO
-                  ES_Event_t OptoEvent = {ES_READ_OPTO, 0};
-                  PostOptoSensorService(OptoEvent);
+                  ES_Event_t OptoEvent = {ES_READ_OPTO, 0};     
+                  PostOptoSensorService(OptoEvent); // enable opto event checker
                   
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
                   setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
@@ -335,15 +362,7 @@ void decodeCommand(uint16_t command){
     }
 }
 
-void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){
-    //forwards full
-//                      EN12 = 1;
-//                  EN34 = 1;
-//                  A2 = 0; forward
-//                  A4 = 0;
-//                  OC3RS = PWM_PERIOD;
-//                  OC4RS = PWM_PERIOD;
-                  
+void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
     if (0 == dutyCycle){
        EN12 = 0;
        EN34 = 0;
@@ -378,4 +397,99 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
             OC3RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
         }
     }
+}
+
+void initInputCapture(void){
+    // ------------------------ Set Up Input Capture 3 -------------------------
+    __builtin_disable_interrupts();         // turn off global interrupts
+    IC3CONbits.ON = 0;                      // turn of IC3
+    INTCONbits.MVEC = 1;                    // enable multivector mode
+    IC3R = 0b0001;                          // map IC3 to RB5
+    TRISBbits.TRISB5 = 1;                   // set RB5 as input
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Timer 2 -------------------------
+    T2CONbits.ON = 0;                       // turn off timer 2
+    T2CONbits.TCS = 0;                      // source clock is PBCLK
+    T2CONbits.TGATE = 0;                    // turn off gated mode
+    T2CONbits.TCKPS = 0b010;                // prescale of 4
+    T2CONbits.TSIDL = 0;                    // active in idle mode
+    T2CONbits.T32 = 0;                      // 16 bit mode
+    TMR2 = 0;                               // clear timer
+    PR2 = 0xFFFF;                           // max period
+    T2CONbits.ON = 1;                       // turn on timer 2
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Input Capture 3 -------------------------
+    IPC3bits.IC3IP = 7;                     // priority 7
+    IC3CONbits.SIDL = 0;                    // active in idle mode
+    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
+    IC3CONbits.ICTMR = 1;                   // timer 2 is time base
+    IC3CONbits.ICM = 0b011;                 // every rising edge
+    IC3CONbits.C32 = 0;                     // 16 bit mode
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Timer 2 Interrupt -----------------------
+    IPC2bits.T2IP = 6;                      // timer interrupt priority is 6
+    IFS0CLR = _IFS0_T2IF_MASK;              // clear pending interrupts
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Enable Interrupts -----------------------
+    IC2CONbits.ON = 1;                      // turn on timer 2 interrupt
+    IEC0SET = _IEC0_T2IE_MASK;              // enable timer 2 interrupt
+    __builtin_enable_interrupts();          // enable global interrupts
+    // ----------------------------------------------------------------------- 
+}
+
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
+    static uint16_t thisTime = 0;            // current timer value
+    
+    do {
+        thisTime = (uint16_t)IC3BUF;        // read from buffer
+        
+        // if pending rollover flag AND captured time after rollover
+        if ((1 == IFS0bits.T2IF) && (thisTime < 0x8000)){
+            RO++;                           // increment rollover counter
+            IFS0CLR = _IFS0_T2IF_MASK;      // clear timer 2 interrupt flag
+        }
+        CurrentTime.ByTime.RollOver = RO;   // update rollover field
+        CurrentTime.ByTime.CapturedTime = thisTime; // store captured time
+
+        beaconPeriod = CurrentTime.FullLength - PrevTime.FullLength;  // get period
+        PrevTime.FullLength = CurrentTime.FullLength;   // update prev time
+    } while(IC3CONbits.ICBNE != 0);         // loop while not empty
+    
+    IFS0CLR = _IFS0_IC3IF_MASK;             // clear IC3 interrupt flag
+    
+    // see if beacon period is in bounds
+    if ((LOWER_THRESH < beaconPeriod) && (beaconPeriod < HIGH_THRESH)){
+        beaconCount++;                      // increment valid beacon counter
+    }
+    else {
+        beaconCount = 0;                    // reset to 0 if not a valid beacon
+    }
+    
+    if (beaconCount >= 2){                  // if we have 2 valid beacon counts
+        beaconCount = 0;                            // reset count
+        
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);     // stop moving
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);      // stop moving
+        IEC0CLR = _IEC0_IC3IE_MASK;                 // disable ic3 interrupt
+    }
+}
+
+void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){
+    __builtin_disable_interrupts();         // disable global interrupts
+    
+    if (1 == IFS0bits.T2IF){
+        RO++;                               // increment rollover
+        IFS0CLR = _IFS0_T2IF_MASK;          // clear timer 2 interrupt flag
+    }
+    CurrentTime.ByTime.RollOver = RO;       // store new rollover
+    
+    __builtin_enable_interrupts();          // enable global interrupts
 }
