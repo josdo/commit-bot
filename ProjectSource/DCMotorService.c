@@ -15,7 +15,7 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-#define TURN_90 3250
+#define TURN_90 3400
 #define TURN_45 TURN_90/2
 
 #define PBCLK_RATE 20000000L
@@ -152,8 +152,8 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               break;
               
               case CW_90:{
-                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 55);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 55);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
@@ -166,15 +166,15 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               break;
               
               case CCW_90:{
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CCW_45:{
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
