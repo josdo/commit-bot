@@ -9,16 +9,16 @@
 uint16_t LastButtonState;
 
 void InitButtonService(){
-    //puts("InitButtonStatus\r");
-    TRISBbits.TRISB5 = 1;
-    LastButtonState = PORTBbits.RB5;    
+    puts("InitButtonStatus\r\n");
+    TRISBbits.TRISB9 = 1;
+    LastButtonState = PORTBbits.RB9;    
 }
 
 bool CheckButtonEvents(){
     bool returnVal = false;
     uint16_t CurrentButtonState;
     ES_Event_t ReturnEvent;
-    CurrentButtonState = PORTBbits.RB5;
+    CurrentButtonState = PORTBbits.RB9;
     if(CurrentButtonState!=LastButtonState){
         returnVal = true;
         if(CurrentButtonState == 0){
@@ -30,6 +30,7 @@ bool CheckButtonEvents(){
             PostLeaderService(ReturnEvent);
         }
     }
+    
     LastButtonState = CurrentButtonState;
     //printf("%b", returnVal);
     return returnVal;

@@ -18,6 +18,7 @@
 // This is the header for the event checkers for the template project
 #include "EventCheckers.h"
 #include "OptoSensorService.h"
+#include "ButtonService.h"
 
 //#include "MotorStepService.h"
 

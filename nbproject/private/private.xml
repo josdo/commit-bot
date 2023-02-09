@@ -4,10 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/U:/vkackar/Lab8/FrameworkHeaders/ES_Configure.h</file>
-            <file>file:/U:/vkackar/Lab8/FrameworkHeaders/ButtonService.c</file>
-            <file>file:/U:/vkackar/Lab8/ProjectSource/DCMotorService.c</file>
-            <file>file:/U:/vkackar/Lab8/ProjectSource/LeaderService.c</file>
             <file>file:/U:/vkackar/Lab8/ProjectHeaders/DCMotorService.h</file>
+            <file>file:/U:/vkackar/Lab8/ProjectSource/DCMotorService.c</file>
+            <file>file:/U:/vkackar/Lab8/FrameworkSource/PIC32_SPI_HAL.c</file>
+            <file>file:/U:/vkackar/Lab8/ProjectSource/LeaderService.c</file>
+            <file>file:/U:/vkackar/Lab8/FrameworkHeaders/ButtonService.c</file>
             <file>file:/U:/vkackar/Lab8/FrameworkHeaders/OptoSensorService.c</file>
         </group>
     </open-files>

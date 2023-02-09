@@ -59,5 +59,7 @@ Description:
 */
 ES_Event_t RunDCMotorService(ES_Event_t ThisEvent);
 
+void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle);
+
 #endif /* TemplateService_H */
 

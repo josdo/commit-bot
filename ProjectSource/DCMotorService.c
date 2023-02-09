@@ -3,6 +3,7 @@
 #include "DCMotorService.h"
 #include "dbprintf.h"
 #include "OptoSensorService.h"
+#include "ButtonService.h"
 
 
 // ------------------------------- Module Defines ---------------------------
@@ -33,7 +34,7 @@ static Commands_t currentCommand;
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
 void decodeCommand(uint16_t command);   // decod the command
-void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle);
+
 // ----------------------------------------------------------------------------
 
 
@@ -41,6 +42,8 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 bool InitDCMotorService(uint8_t Priority)
 {
   MyPriority = Priority;
+  
+  InitButtonService();
   
   // ----------------------- Set up DC Motor pins ----------------------- 
   TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
