@@ -2934,7 +2934,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 629c942a-6f8e-4978-852f-a7c494bd2d52)
     (property "Reference" "R?" (id 0) (at 38.1 41.91 90))
-    (property "Value" "10k" (id 1) (at 38.1 44.45 90))
+    (property "Value" "220k" (id 1) (at 38.1 44.45 90))
     (property "Footprint" "" (id 2) (at 38.354 47.244 90)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -3874,7 +3874,7 @@
       (reference "R?") (unit 1) (value "10k") (footprint "")
     )
     (path "/629c942a-6f8e-4978-852f-a7c494bd2d52"
-      (reference "R?") (unit 1) (value "10k") (footprint "")
+      (reference "R?") (unit 1) (value "220k") (footprint "")
     )
     (path "/769a2a22-c34d-4b0c-85d2-778f408fab52"
       (reference "R?") (unit 1) (value "10k") (footprint "")
