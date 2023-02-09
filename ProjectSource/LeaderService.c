@@ -67,6 +67,7 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
       {
           if(ThisEvent.EventParam == COMMAND_TIMER)
           {
+//              puts("Sending command: \r\n");
               SPIOperate_SPI1_Send8Wait(0xAA);
               ES_Timer_InitTimer(COMMAND_TIMER, 300);
           }

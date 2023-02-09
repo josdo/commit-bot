@@ -18,6 +18,7 @@ static bool readOpto = false;
 #define FIVE_SEC (ONE_SEC * 5)
 #define HUND_SEC (ONE_SEC / 100)
 #define THRESHOLD 750
+
 uint32_t analog_signal[1];
 
 
