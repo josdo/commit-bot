@@ -14,17 +14,29 @@ static uint8_t MyPriority;
 #define TWO_SEC (ONE_SEC * 2)
 #define FIVE_SEC (ONE_SEC * 5)
 #define HUND_SEC (ONE_SEC / 100)
+#define THRESHOLD 750
 uint32_t analog_signal[1];
 
 
 bool InitOptoSensorService(uint8_t Priority)
 {
-  MyPriority = Priority;
+    MyPriority = Priority;
 
-  // Post successful initialization
-  
-  ES_Event_t ThisEvent = {ES_INIT};
-  return ES_PostToService(MyPriority, ThisEvent);
+    // Post successful initialization
+    //  setting up the analog pins
+    ANSELBbits.ANSB15 = 1;
+    TRISBbits.TRISB15 = 1;
+    ADC_ConfigAutoScan(BIT9HI, 1);
+
+    ES_Event_t ThisEvent = {ES_INIT};
+    if (ES_PostToService(MyPriority, ThisEvent) == true)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
 }
 
 bool PostOptoSensorService(ES_Event_t ThisEvent)
@@ -37,8 +49,37 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
 {
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
-
-  // TODO write service code
-
+  
+  switch (ThisEvent.EventType)
+  {
+    case ES_INIT:
+    {
+//        ES_Timer_InitTimer(ANALOG_READ_TIMER, adjust_analog_signal());
+        DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
+    }
+    break;
+  
+    case ES_TAPE_DETECTED:
+    {
+        // TODO
+        DB_printf("%d\r\n", analog_signal[0]);
+    }
+    break;
+      
+  }
+  
   return ReturnEvent;
+}
+
+bool readOptoSensor(){
+    bool ReturnVal = false;
+    ADC_MultiRead(analog_signal);
+    if(analog_signal[0] > THRESHOLD) {
+        ReturnVal = true;
+        ES_Event_t ReturnEvent;
+        ReturnEvent.EventType = ES_TAPE_DETECTED;
+        PostOptoSensorService(ReturnEvent);  
+    }
+    
+    return ReturnVal;
 }

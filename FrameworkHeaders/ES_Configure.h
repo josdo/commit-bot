@@ -33,7 +33,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 2
+#define NUM_SERVICES 3
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -70,11 +70,11 @@
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "SpeedDialService.h"
+#define SERV_2_HEADER "OptoSensorService.h"
 // the name of the Init function
-#define SERV_2_INIT InitSpeedDialService
+#define SERV_2_INIT InitOptoSensorService
 // the name of the run function
-#define SERV_2_RUN RunSpeedDialService
+#define SERV_2_RUN RunOptoSensorService
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif
@@ -265,6 +265,9 @@ typedef enum
   ES_REVERSE_ROTATION,
   ES_START_COM,
   ES_STOP_COM,
+  ES_TAPE_DETECTED,
+  ES_ButtonDown,
+  ES_ButtonUp,
   ES_NEW_COMMAND
 }ES_EventType_t;
 
@@ -300,7 +303,7 @@ typedef enum
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke
+#define EVENT_CHECK_LIST Check4Keystroke, readOptoSensor
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -324,7 +327,7 @@ typedef enum
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
 #define TIMER14_RESP_FUNC PostLeaderService
-#define TIMER15_RESP_FUNC TIMER_UNUSED
+#define TIMER15_RESP_FUNC PostOptoSensorService
 
 /****************************************************************************/
 // Give the timer numbers symbolc names to make it easier to move them
@@ -336,6 +339,7 @@ typedef enum
 //#define SERVICE0_TIMER 15
 #define TURN_TIMER 0
 #define COMMAND_TIMER 14
+#define OPTO_READ_TIMER 15
 //#define NEXT_STEP_TIMER 0
 //#define DIAL_READ_TIMER 1
 //#define NEXT_DISPLAY_TIMER 2

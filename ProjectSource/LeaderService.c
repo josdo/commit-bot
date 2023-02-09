@@ -101,6 +101,11 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
           }
       }
       break;
+      case ES_ButtonDown:
+      {
+          ThisEvent.EventType = ES_START_COM;
+          PostLeaderService(ThisEvent);
+      }
       
 
   }
