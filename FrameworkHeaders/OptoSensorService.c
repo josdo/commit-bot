@@ -17,7 +17,7 @@ static bool readOpto = false;
 #define TWO_SEC (ONE_SEC * 2)
 #define FIVE_SEC (ONE_SEC * 5)
 #define HUND_SEC (ONE_SEC / 100)
-#define THRESHOLD 750
+#define THRESHOLD 800
 
 uint32_t analog_signal[1];
 
@@ -86,6 +86,8 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
 
 bool readOptoSensor(){
     bool ReturnVal = false;
+    
+//    DB_printf("analog value: %d", ADC_MultiRead(analog_signal););
     
     if (1 == readOpto){
         ADC_MultiRead(analog_signal);
