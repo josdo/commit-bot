@@ -15,7 +15,7 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-#define TURN_90 3400
+#define TURN_90 4000
 #define TURN_45 TURN_90/2
 
 #define PBCLK_RATE 20000000L
@@ -223,7 +223,7 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               
               case FORWARD_FULL:{
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 97);
               }
               break;
               
@@ -245,8 +245,8 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
                   ES_Timer_InitTimer(PERIOD_TIMER, 100);
                   
                   // turn CCW until beacon is found
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 70);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 70);
               }
               break;
               
@@ -254,8 +254,8 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
                   ES_Event_t OptoEvent = {ES_READ_OPTO, 0};     
                   PostOptoSensorService(OptoEvent); // enable opto event checker
                   
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 97);
               }
               break;
           }
