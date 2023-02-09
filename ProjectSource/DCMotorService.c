@@ -67,6 +67,7 @@ bool InitDCMotorService(uint8_t Priority)
   MyPriority = Priority;
   
   InitButtonService();
+  initInputCapture();
   
   // ----------------------- Set up DC Motor pins ----------------------- 
   TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
@@ -115,6 +116,12 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               A4 = 0;
               OC3RS = 0;
               OC4RS = 0;
+          }
+          
+          if (PERIOD_TIMER == ThisEvent.EventParam){
+              DB_printf("Period = %d\r\n", beaconPeriod);
+              
+              ES_Timer_InitTimer(PERIOD_TIMER, 100);
           }
       }
       break;
@@ -235,6 +242,7 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               case BEACON:{
                   // TODO
                   IEC0SET = _IEC0_IC3IE_MASK;             // enable ic3 interrupt
+                  ES_Timer_InitTimer(PERIOD_TIMER, 100);
                   
                   // turn CCW until beacon is found
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
@@ -317,7 +325,7 @@ void setPWM(){
   // turn on the timer 3
   
 }
-\
+
 void decodeCommand(uint16_t command){
     if (0x00 == command){
         currentCommand = STOP;              
@@ -428,6 +436,7 @@ void initInputCapture(void){
     IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
     IC3CONbits.ICTMR = 1;                   // timer 2 is time base
     IC3CONbits.ICM = 0b011;                 // every rising edge
+    IC3CONbits.FEDGE = 1;
     IC3CONbits.C32 = 0;                     // 16 bit mode
     // -----------------------------------------------------------------------
     
@@ -439,7 +448,7 @@ void initInputCapture(void){
     
     
     // ------------------------ Enable Interrupts -----------------------
-    IC2CONbits.ON = 1;                      // turn on timer 2 interrupt
+    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
     IEC0SET = _IEC0_T2IE_MASK;              // enable timer 2 interrupt
     __builtin_enable_interrupts();          // enable global interrupts
     // ----------------------------------------------------------------------- 
@@ -447,6 +456,8 @@ void initInputCapture(void){
 
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
     static uint16_t thisTime = 0;            // current timer value
+    
+    
     
     do {
         thisTime = (uint16_t)IC3BUF;        // read from buffer
@@ -480,6 +491,7 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);      // stop moving
         IEC0CLR = _IEC0_IC3IE_MASK;                 // disable ic3 interrupt
     }
+    
 }
 
 void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){

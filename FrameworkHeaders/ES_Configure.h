@@ -315,7 +315,7 @@ typedef enum
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
 #define TIMER0_RESP_FUNC PostDCMotorService
-#define TIMER1_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC PostDCMotorService
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -340,6 +340,7 @@ typedef enum
 
 //#define SERVICE0_TIMER 15
 #define TURN_TIMER 0
+#define PERIOD_TIMER 1
 #define COMMAND_TIMER 14
 #define OPTO_READ_TIMER 15
 //#define NEXT_STEP_TIMER 0
