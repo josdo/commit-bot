@@ -17,7 +17,7 @@ static bool readOpto = false;
 #define TWO_SEC (ONE_SEC * 2)
 #define FIVE_SEC (ONE_SEC * 5)
 #define HUND_SEC (ONE_SEC / 100)
-#define THRESHOLD 800
+#define THRESHOLD 850
 
 uint32_t analog_signal[1];
 
@@ -60,13 +60,25 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
     {
 //        ES_Timer_InitTimer(ANALOG_READ_TIMER, adjust_analog_signal());
         DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
+        
+        // TODO comment out
+        ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
     }
     break;
     
-      case ES_READ_OPTO:{
-          readOpto = true;
-      }
-      break;
+    case ES_READ_OPTO:{
+        readOpto = true;
+    }
+    break;
+
+    case ES_TIMEOUT:{
+        if (OPTO_READ_TIMER == ThisEvent.EventParam){
+            // DB_printf("Optosensor = %d\r\n", analog_signal[0]);
+            
+            ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
+        }
+    }
+    break;
   
     case ES_TAPE_DETECTED:
     {
@@ -89,10 +101,12 @@ bool readOptoSensor(){
     
 //    DB_printf("analog value: %d", ADC_MultiRead(analog_signal););
     
+    // readOpto = true;
     if (1 == readOpto){
         ADC_MultiRead(analog_signal);
     
         if(analog_signal[0] > THRESHOLD) {
+            // DB_printf("readOptoSensor(): %d\n\r", analog_signal[0]);
             ReturnVal = true;
             ES_Event_t ReturnEvent;
             ReturnEvent.EventType = ES_TAPE_DETECTED;

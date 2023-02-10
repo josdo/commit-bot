@@ -119,7 +119,7 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
           }
           
           if (PERIOD_TIMER == ThisEvent.EventParam){
-              DB_printf("Period = %d\r\n", beaconPeriod);
+            //   DB_printf("Period = %d\r\n", beaconPeriod);
               
               ES_Timer_InitTimer(PERIOD_TIMER, 100);
           }
