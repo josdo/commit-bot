@@ -15,8 +15,8 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-#define TURN_90 4000
-#define TURN_45 TURN_90/2
+#define TURN_90 1200
+#define TURN_45 500
 
 #define PBCLK_RATE 20000000L
 // TIMERx divisor for PWM, standard value is 8, to give maximum resolution
@@ -188,54 +188,54 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               break;
               
               case CW_90:{
-                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 55);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 55);
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CW_45:{
-                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case CCW_90:{
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CCW_45:{
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 55);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 55);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case FORWARD_HALF:{
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 47);
               }
               break;
               
               case FORWARD_FULL:{
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 97);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 95);
               }
               break;
               
               case BACKWARD_HALF:{
                   setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 47);
               }
               break;
               
               case BACKWARD_FULL:{
                   setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 95);
               }
               break;
               
