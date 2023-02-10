@@ -344,7 +344,29 @@ bool SPISetup_MapSSOutput(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
 ****************************************************************************/
 bool SPISetup_MapSDInput(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
 {
-  // not needed for ME218a Labs
+    bool ReturnVal = true;
+    
+    if(false == isSPI_ModuleLegal(WhichModule) || 
+       false == isSDOPinLegal(WhichPin))
+    {
+        ReturnVal = false;
+    }
+    
+    else
+    {
+        selectModuleRegisters(WhichModule);
+        *setTRISRegisters[WhichPin] = mapPinMap2BitPosn[WhichPin];
+        *clrANSELRegisters[WhichPin] = mapPinMap2BitPosn[WhichPin];
+        
+        if (SPI_SPI1 == WhichModule){
+            SDI1R = mapPinMap2INTConst[WhichPin];
+        }
+        else{
+            SDI2R = mapPinMap2INTConst[WhichPin];
+        }
+    }
+    
+    return ReturnVal;
 }
 
 /****************************************************************************
@@ -631,6 +653,8 @@ void SPIOperate_SPI1_Send32(uint32_t TheData)
 void SPIOperate_SPI1_Send8Wait(uint8_t TheData)
 {
   // not needed for ME218a Labs
+    SPI1BUF = TheData;
+    while (false == SPIOperate_HasSS1_Risen()){}
 }
 
 /****************************************************************************

@@ -2,7 +2,9 @@
 #include "ES_Framework.h"
 #include "DCMotorService.h"
 #include "dbprintf.h"
-
+#include "OptoSensorService.h"
+#include "ButtonService.h"
+#include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
 #define EN12 LATBbits.LATB11                            // Enable pin 1,2
@@ -13,8 +15,8 @@
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 1500                                   // in Hz
-#define TURN_90 1000
-#define TURN_45 TURN_90/2
+#define TURN_90 1200
+#define TURN_45 500
 
 #define PBCLK_RATE 20000000L
 // TIMERx divisor for PWM, standard value is 8, to give maximum resolution
@@ -26,12 +28,36 @@ static uint8_t MyPriority;
 uint16_t PWM_PERIOD;                                    // convert to ticks
 static uint8_t DutyCycle = 0;
 static Commands_t currentCommand;
+
+const uint16_t TICKS_PER_uS = 5;
+const uint32_t LOWER_THRESH = 685 * TICKS_PER_uS;       // 1460 Hz
+const uint32_t HIGH_THRESH = 694 * TICKS_PER_uS;        // 1440 Hz
+
+volatile uint32_t beaconPeriod = 0;
+volatile uint8_t beaconCount = 0;
+volatile uint16_t RO = 0;
+
+typedef union{
+    struct{
+        uint16_t CapturedTime;
+        uint16_t RollOver;
+    } ByTime;
+    
+    uint32_t FullLength;
+} TimeTracker;
+
+static volatile TimeTracker CurrentTime;
+static volatile TimeTracker PrevTime;
+
 // ----------------------------------------------------------------------------
 
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
-void decodeCommand(uint16_t command);   // decod the command
+void decodeCommand(uint16_t command);   // decode the command
+void initInputCapture(void);            // input capture on RB5 (pin 14)
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
+void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
 // ----------------------------------------------------------------------------
 
 
@@ -39,6 +65,9 @@ void decodeCommand(uint16_t command);   // decod the command
 bool InitDCMotorService(uint8_t Priority)
 {
   MyPriority = Priority;
+  
+  InitButtonService();
+  initInputCapture();
   
   // ----------------------- Set up DC Motor pins ----------------------- 
   TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
@@ -88,6 +117,12 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               OC3RS = 0;
               OC4RS = 0;
           }
+          
+          if (PERIOD_TIMER == ThisEvent.EventParam){
+            //   DB_printf("Period = %d\r\n", beaconPeriod);
+              
+              ES_Timer_InitTimer(PERIOD_TIMER, 100);
+          }
       }
       break;
       
@@ -115,6 +150,30 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x04};
               PostDCMotorService(NewEvent);
           }
+          
+          else if ('4' == ThisEvent.EventParam){
+              puts("FORWARDS FULL command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x09};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('5' == ThisEvent.EventParam){
+              puts("BACKWARDS FULL command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x11};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('8' == ThisEvent.EventParam){
+              puts("FIND BEACON command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x20};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('9' == ThisEvent.EventParam){
+              puts("TAPE command \r\n");
+              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x40};
+              PostDCMotorService(NewEvent);
+          }
       }
       break;
       
@@ -123,116 +182,80 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
           DB_printf("Current command = %x\r\n", ThisEvent.EventParam);
           switch(currentCommand){
               case STOP:{
-                  EN12 = 0;
-                  EN34 = 0;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
               }
               break;
               
               case CW_90:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 1;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CW_45:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 1;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case CCW_90:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_90);
               }
               break;
               
               case CCW_45:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
                   ES_Timer_InitTimer(TURN_TIMER, TURN_45);
               }
               break;
               
               case FORWARD_HALF:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
               }
               break;
               
               case FORWARD_FULL:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = PWM_PERIOD;
-                  OC4RS = PWM_PERIOD;
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 99);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
               }
               break;
               
               case BACKWARD_HALF:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 1;
-                  OC3RS = PWM_PERIOD/2;
-                  OC4RS = PWM_PERIOD/2;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
               }
               break;
               
               case BACKWARD_FULL:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 1;
-                  A4 = 1;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 99);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
               }
               break;
               
               case BEACON:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  // TODO
+                  IEC0SET = _IEC0_IC3IE_MASK;             // enable ic3 interrupt
+                  ES_Timer_InitTimer(PERIOD_TIMER, 100);
+                  
+                  // turn CCW until beacon is found
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 70);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 70);
               }
               break;
               
               case TAPE:{
-                  EN12 = 1;
-                  EN34 = 1;
-                  A2 = 0;
-                  A4 = 0;
-                  OC3RS = 0;
-                  OC4RS = 0;
+                  ES_Event_t OptoEvent = {ES_READ_OPTO, 0};     
+                  PostOptoSensorService(OptoEvent); // enable opto event checker
+                  
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 97);
               }
               break;
           }
@@ -302,7 +325,7 @@ void setPWM(){
   // turn on the timer 3
   
 }
-\
+
 void decodeCommand(uint16_t command){
     if (0x00 == command){
         currentCommand = STOP;              
@@ -345,4 +368,140 @@ void decodeCommand(uint16_t command){
     else{
         currentCommand = NA;
     }
+}
+
+void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
+    if (0 == dutyCycle){
+       EN12 = 0;
+       EN34 = 0;
+       A2 = 0;
+       A4 = 0;
+       OC3RS = 0;
+       OC4RS = 0;
+    }
+    
+    else if (LEFT_MOTOR == whichMotor){
+        EN34 = 1;
+        A4 = whichDirection;
+        
+        if (FORWARD == whichDirection){
+            OC4RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
+        }
+        
+        else {
+            OC4RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
+        }
+    }
+    
+    else if (RIGHT_MOTOR == whichMotor){
+        EN12 = 1;
+        A2 = whichDirection;
+        
+        if (FORWARD == whichDirection){
+            OC3RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
+        }
+        
+        else {
+            OC3RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
+        }
+    }
+}
+
+void initInputCapture(void){
+    // ------------------------ Set Up Input Capture 3 -------------------------
+    __builtin_disable_interrupts();         // turn off global interrupts
+    IC3CONbits.ON = 0;                      // turn of IC3
+    INTCONbits.MVEC = 1;                    // enable multivector mode
+    IC3R = 0b0001;                          // map IC3 to RB5
+    TRISBbits.TRISB5 = 1;                   // set RB5 as input
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Timer 2 -------------------------
+    T2CONbits.ON = 0;                       // turn off timer 2
+    T2CONbits.TCS = 0;                      // source clock is PBCLK
+    T2CONbits.TGATE = 0;                    // turn off gated mode
+    T2CONbits.TCKPS = 0b010;                // prescale of 4
+    T2CONbits.TSIDL = 0;                    // active in idle mode
+    T2CONbits.T32 = 0;                      // 16 bit mode
+    TMR2 = 0;                               // clear timer
+    PR2 = 0xFFFF;                           // max period
+    T2CONbits.ON = 1;                       // turn on timer 2
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Input Capture 3 -------------------------
+    IPC3bits.IC3IP = 7;                     // priority 7
+    IC3CONbits.SIDL = 0;                    // active in idle mode
+    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
+    IC3CONbits.ICTMR = 1;                   // timer 2 is time base
+    IC3CONbits.ICM = 0b011;                 // every rising edge
+    IC3CONbits.FEDGE = 1;
+    IC3CONbits.C32 = 0;                     // 16 bit mode
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Set Up Timer 2 Interrupt -----------------------
+    IPC2bits.T2IP = 6;                      // timer interrupt priority is 6
+    IFS0CLR = _IFS0_T2IF_MASK;              // clear pending interrupts
+    // -----------------------------------------------------------------------
+    
+    
+    // ------------------------ Enable Interrupts -----------------------
+    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
+    IEC0SET = _IEC0_T2IE_MASK;              // enable timer 2 interrupt
+    __builtin_enable_interrupts();          // enable global interrupts
+    // ----------------------------------------------------------------------- 
+}
+
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
+    static uint16_t thisTime = 0;            // current timer value
+    
+    
+    
+    do {
+        thisTime = (uint16_t)IC3BUF;        // read from buffer
+        
+        // if pending rollover flag AND captured time after rollover
+        if ((1 == IFS0bits.T2IF) && (thisTime < 0x8000)){
+            RO++;                           // increment rollover counter
+            IFS0CLR = _IFS0_T2IF_MASK;      // clear timer 2 interrupt flag
+        }
+        CurrentTime.ByTime.RollOver = RO;   // update rollover field
+        CurrentTime.ByTime.CapturedTime = thisTime; // store captured time
+
+        beaconPeriod = CurrentTime.FullLength - PrevTime.FullLength;  // get period
+        PrevTime.FullLength = CurrentTime.FullLength;   // update prev time
+    } while(IC3CONbits.ICBNE != 0);         // loop while not empty
+    
+    IFS0CLR = _IFS0_IC3IF_MASK;             // clear IC3 interrupt flag
+    
+    // see if beacon period is in bounds
+    if ((LOWER_THRESH < beaconPeriod) && (beaconPeriod < HIGH_THRESH)){
+        beaconCount++;                      // increment valid beacon counter
+    }
+    else {
+        beaconCount = 0;                    // reset to 0 if not a valid beacon
+    }
+    
+    if (beaconCount >= 2){                  // if we have 2 valid beacon counts
+        beaconCount = 0;                            // reset count
+        
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);     // stop moving
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);      // stop moving
+        IEC0CLR = _IEC0_IC3IE_MASK;                 // disable ic3 interrupt
+    }
+    
+}
+
+void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){
+    __builtin_disable_interrupts();         // disable global interrupts
+    
+    if (1 == IFS0bits.T2IF){
+        RO++;                               // increment rollover
+        IFS0CLR = _IFS0_T2IF_MASK;          // clear timer 2 interrupt flag
+    }
+    CurrentTime.ByTime.RollOver = RO;       // store new rollover
+    
+    __builtin_enable_interrupts();          // enable global interrupts
 }
