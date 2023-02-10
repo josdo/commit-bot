@@ -217,25 +217,25 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               
               case FORWARD_HALF:{
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 47);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
               }
               break;
               
               case FORWARD_FULL:{
-                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
-                  setMotorSpeed(LEFT_MOTOR, FORWARD, 95);
+                  setMotorSpeed(RIGHT_MOTOR, FORWARD, 99);
+                  setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
               }
               break;
               
               case BACKWARD_HALF:{
                   setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 47);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
               }
               break;
               
               case BACKWARD_FULL:{
-                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
-                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 95);
+                  setMotorSpeed(RIGHT_MOTOR, BACKWARD, 99);
+                  setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
               }
               break;
               
