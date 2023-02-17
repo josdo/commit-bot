@@ -1,15 +1,16 @@
 {
     "files.associations": {
-        "controllerfsm.h": "c",
-        "stdint.h": "c",
-        "controller.h": "c",
-        "pic32_ad_lib.h": "c",
-        "pic32porthal.h": "c",
-        "es_framework.h": "c",
-        "es_types.h": "c",
-        "es_general.h": "c",
-        "speeddialservice.h": "c",
-        "eventcheckwrapper.h": "c",
-        "motorstepservice.h": "c"
+      "controllerfsm.h": "c",
+      "stdint.h": "c",
+      "controller.h": "c",
+      "pic32_ad_lib.h": "c",
+      "pic32porthal.h": "c",
+      "es_framework.h": "c",
+      "es_types.h": "c",
+      "es_general.h": "c",
+      "speeddialservice.h": "c",
+      "eventcheckwrapper.h": "c",
+      "motorstepservice.h": "c",
+      "templateservice.h": "c"
     }
 }
