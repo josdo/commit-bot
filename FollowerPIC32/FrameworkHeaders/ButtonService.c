@@ -3,7 +3,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "ES_DeferRecall.h"
-#include "LeaderService.h"
+#include "FollowerService.h"
 #include "ButtonService.h"
 
 uint16_t LastButtonState;
@@ -23,11 +23,11 @@ bool CheckButtonEvents(){
         returnVal = true;
         if(CurrentButtonState == 0){
             ReturnEvent.EventType = ES_ButtonDown;
-            PostLeaderService(ReturnEvent);
+            PostFollowerService(ReturnEvent);
         }
         else{
             ReturnEvent.EventType = ES_ButtonUp;
-            PostLeaderService(ReturnEvent);
+            PostFollowerService(ReturnEvent);
         }
     }
     

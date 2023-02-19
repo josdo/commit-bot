@@ -266,8 +266,8 @@ bool SPISetup_SetBitTime(SPI_Module_t WhichModule, uint32_t SPI_ClkPeriodIn_ns) 
    SPI_RPA3, SPI_RPB0, SPI_RPB9, SPI_RPB10,SPI_RPB14.
 ****************************************************************************/
 bool SPISetup_MapSSInput(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
-{
-  // not needed for ME218a Labs
+{  
+    
 }
 
 /****************************************************************************

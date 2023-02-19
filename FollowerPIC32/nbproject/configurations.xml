@@ -25,6 +25,7 @@
       <itemPath>FrameworkHeaders/PIC32PortHAL.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32_AD_Lib.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32_SPI_HAL.h</itemPath>
+      <itemPath>../Shared/ES_Shared_Configure.h</itemPath>
     </logicalFolder>
     <logicalFolder name="FrameworkSource"
                    displayName="FrameworkSource"
@@ -52,9 +53,9 @@
       <itemPath>ProjectHeaders/TestHarnessService0.h</itemPath>
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
       <itemPath>ProjectHeaders/DCMotorService.h</itemPath>
-      <itemPath>ProjectHeaders/LeaderService.h</itemPath>
       <itemPath>FrameworkHeaders/OptoSensorService.h</itemPath>
       <itemPath>FrameworkHeaders/ButtonService.h</itemPath>
+      <itemPath>ProjectHeaders/FollowerService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -68,9 +69,9 @@
       <itemPath>ProjectSource/main.c</itemPath>
       <itemPath>ProjectSource/TemplateService.c</itemPath>
       <itemPath>ProjectSource/DCMotorService.c</itemPath>
-      <itemPath>ProjectSource/LeaderService.c</itemPath>
       <itemPath>FrameworkHeaders/OptoSensorService.c</itemPath>
       <itemPath>FrameworkHeaders/ButtonService.c</itemPath>
+      <itemPath>ProjectSource/FollowerService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -83,6 +84,7 @@
     <Elem>FrameworkSource</Elem>
     <Elem>ProjectSource</Elem>
     <Elem>ProjectHeaders</Elem>
+    <Elem>../Shared</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
