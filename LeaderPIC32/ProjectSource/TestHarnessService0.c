@@ -42,6 +42,7 @@
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
+#include "EventOverSPI.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
@@ -60,13 +61,6 @@
    relevant to the behavior of this service
 */
 
-static void InitLED(void);
-static void BlinkLED(void);
-#ifdef TEST_INT_POST
-static void InitTMR2(void);
-static void StartTMR2(void);
-#endif
-/*---------------------------- Module Variables ---------------------------*/
 // with the introduction of Gen2, we need a module level Priority variable
 static uint8_t MyPriority;
 // add a deferral queue for up to 3 pending deferrals +1 to allow for overhead
@@ -114,13 +108,6 @@ bool InitTestHarnessService0(uint8_t Priority)
    *******************************************/
   // initialize deferral queue for testing Deferal function
   ES_InitDeferralQueueWith(DeferralQueue, ARRAY_SIZE(DeferralQueue));
-  // initialize LED drive for testing/debug output
-  // InitLED();
-#ifdef TEST_INT_POST
-  InitTMR2();
-#endif
-  // initialize the Short timer system for channel A
-  //ES_ShortTimerInit(MyPriority, SHORT_TIMER_UNUSED);
 
   // post the initial transition event
   ThisEvent.EventType = ES_INIT;
@@ -186,126 +173,24 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   {
     case ES_INIT:
     {
-      ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
       puts("Service 00:");
       DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
     }
     break;
-    case ES_TIMEOUT:   // re-start timer & announce
-    {
-      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
-      // DB_printf("ES_TIMEOUT received from Timer %d in Service %d\r\n",
-      //     ThisEvent.EventParam, MyPriority);
-    }
-    break;
-    case ES_SHORT_TIMEOUT:   // lower the line & announce
-    {
-//      puts("\rES_SHORT_TIMEOUT received\r\n");
-    }
-    break;
+
     case ES_NEW_KEY:   // announce
     {
-//      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
-//          (char)ThisEvent.EventParam);
-      if ('d' == ThisEvent.EventParam)
+     DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
+         (char)ThisEvent.EventParam);
+      if ('f' == ThisEvent.EventParam)
       {
-        ThisEvent.EventParam = DeferredChar++;   //
-        if (ES_DeferEvent(DeferralQueue, ThisEvent))
-        {
-//          puts("ES_NEW_KEY deferred in Service 0\r");
-        }
-      }
-      if ('r' == ThisEvent.EventParam)
-      {
-        ThisEvent.EventParam = 'Q';   // This one gets posted normally
-        PostTestHarnessService0(ThisEvent);
-        // but we slide the deferred events under it so it(they) should come out first
-        if (true == ES_RecallEvents(MyPriority, DeferralQueue))
-        {
-//          puts("ES_NEW_KEY(s) recalled in Service 0\r");
-          DeferredChar = '1';
-        }
-      }
-      if ('p' == ThisEvent.EventParam)
-      {
-#ifdef TEST_INT_POST
-        StartTMR2();
-#endif
+        DB_printf("Posting test event to follower\n\r");
+        ES_Event_t e = {ES_TEST_TO_FOLLOWER};
+        PostToFollower(e);
       }
     }
     break;
-    default:
-    {}
-     break;
   }
 
   return ReturnEvent;
 }
-
-/***************************************************************************
- private functions
- ***************************************************************************/
-#define LED LATBbits.LATB6
-static void InitLED(void)
-{
-  LED = 0; //start with it off
-  TRISBbits.TRISB6 = 0; // set RB6 as an output
-}
-
-static void BlinkLED(void)
-{
-  // toggle state of LED
-  LED = ~LED;
-}
-
-#ifdef TEST_INT_POST
-#include <sys/attribs.h> // for ISR macors
-
-// for testing posting from interrupts.
-// Intializes TMR2 to gerenate an interrupt at 100ms
-static void InitTMR2(void)
-{
-  // turn timer off
-  T2CONbits.ON = 0;
-  // Use internal peripheral clock
-  T2CONbits.TCS = 0;
-  // setup for 16 bit mode
-  T2CONbits.T32 = 0;
-  // set prescale to 1:1
-  T2CONbits.TCKPS = 0;
-  // load period value
-  PR2 = 2000-1; // creates a 100ms period with a 20MHz peripheral clock
-  // set priority
-  IPC2bits.T2IP = 2;
-  // clear interrupt flag
-  IFS0bits.T2IF = 0;
-  // enable the timer interrupt
-  IEC0bits.T2IE = 1;
-}
-
-// Clears and Starts TMR2
-static void StartTMR2(void)
-{
-  // clear timer
-  TMR2 = 0;
-  // start timer
-  //LATBbits.LATB14 = 0;
-  T2CONbits.ON = 1;
-}
-
-void __ISR(_TIMER_2_VECTOR, IPL2AUTO) Timer2ISR(void)
-{
-  // clear flag
-  IFS0bits.T2IF = 0;
-  // post event
-  static ES_Event_t interruptEvent = {ES_SHORT_TIMEOUT, 0};
-  PostTestHarnessService0(interruptEvent);
-  
-  // stop timer
-  T2CONbits.ON = 0;
-  return;
-}
-#endif
-/*------------------------------- Footnotes -------------------------------*/
-/*------------------------------ End of file ------------------------------*/
-

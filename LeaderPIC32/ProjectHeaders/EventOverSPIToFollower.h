@@ -1,5 +1,5 @@
-#ifndef FollowerEventOverSPI_H
-#define FollowerEventOverSPI_H
+#ifndef EventOverSPIToFollower_H
+#define EventOverSPIToFollower_H
 
 #include "ES_Types.h"
 #include "ES_Events.h"
@@ -13,7 +13,7 @@ Description:
      Saves away the priority, sets up the initial transition and does any
      other required initialization for this state machine
 */
-bool InitFollowerEventOverSPI(uint8_t Priority);
+bool InitEventOverSPIToFollower(uint8_t Priority);
 
 /*
 Params: 
@@ -23,7 +23,7 @@ Return:
 Description:
   Posts an event to this state machine's queue
 */
-bool PostFollowerEventOverSPI(ES_Event_t ThisEvent);
+bool PostEventOverSPIToFollower(ES_Event_t ThisEvent);
 
 /*
 Params: 
@@ -33,7 +33,7 @@ Return:
 Description:
   returns the current state of the Template state machine
 */
-ES_Event_t RunFollowerEventOverSPI(ES_Event_t ThisEvent);
+ES_Event_t RunEventOverSPIToFollower(ES_Event_t ThisEvent);
 
-#endif /* FollowerEventOverSPI_H */
+#endif /* EventOverSPIToFollower_H */
 
