@@ -2,8 +2,6 @@
 #include "ES_Framework.h"
 #include "DCMotorService.h"
 #include "dbprintf.h"
-#include "OptoSensorService.h"
-#include "ButtonService.h"
 #include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
@@ -14,18 +12,20 @@
 #define A4 LATAbits.LATA4                               // non PWM control pin
 
 #define TIMER_DIV 4                                     // pre scalar on timer
-#define PWM_FREQ 1500                                   // in Hz
+#define PWM_FREQ 10000                                  // in Hz
 #define TURN_90 1200
 #define TURN_45 500
 
 #define PBCLK_RATE 20000000L
+
+const uint16_t PWM_PERIOD = 2000-1;
+
 // TIMERx divisor for PWM, standard value is 8, to give maximum resolution
 // ----------------------------------------------------------------------------
 
 // ------------------------------- Module Variables ---------------------------
 static uint8_t MyPriority;
 
-uint16_t PWM_PERIOD;                                    // convert to ticks
 static uint8_t DutyCycle = 0;
 static Commands_t currentCommand;
 
@@ -54,6 +54,7 @@ static volatile TimeTracker PrevTime;
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
+void initLIDAR(void);               // set up LIDAR Timer
 void decodeCommand(uint16_t command);   // decode the command
 void initInputCapture(void);            // input capture on RB5 (pin 14)
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
@@ -65,9 +66,6 @@ void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
 bool InitDCMotorService(uint8_t Priority)
 {
   MyPriority = Priority;
-  
-  InitButtonService();
-  initInputCapture();
   
   // ----------------------- Set up DC Motor pins ----------------------- 
   TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
@@ -85,6 +83,8 @@ bool InitDCMotorService(uint8_t Priority)
   // --------------------------------------------------------------------
 
   setPWM();                                     // turn on PWM
+  OC3RS = (uint16_t)(PWM_PERIOD/1);
+  OC4RS = (uint16_t)(PWM_PERIOD/1);
   
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -163,17 +163,17 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               PostDCMotorService(NewEvent);
           }
           
-          else if ('8' == ThisEvent.EventParam){
-              puts("FIND BEACON command \r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x20};
-              PostDCMotorService(NewEvent);
-          }
+//          else if ('8' == ThisEvent.EventParam){
+//              puts("FIND BEACON command \r\n");
+//              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x20};
+//              PostDCMotorService(NewEvent);
+//          }
           
-          else if ('9' == ThisEvent.EventParam){
-              puts("TAPE command \r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x40};
-              PostDCMotorService(NewEvent);
-          }
+//          else if ('9' == ThisEvent.EventParam){
+//              puts("TAPE command \r\n");
+//              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x40};
+//              PostDCMotorService(NewEvent);
+//          }
       }
       break;
       
@@ -252,7 +252,6 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
               
               case TAPE:{
                   ES_Event_t OptoEvent = {ES_READ_OPTO, 0};     
-                  PostOptoSensorService(OptoEvent); // enable opto event checker
                   
                   setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
                   setMotorSpeed(LEFT_MOTOR, FORWARD, 97);
@@ -267,7 +266,7 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
 }
 
 // ---------------------------- Private Functions -----------------------------
-void setPWM(){
+void setPWM(void){
     // --------------------- Timer 3 --------------------- 
   //switching the timer 3 off
   T3CONbits.ON = 0;
@@ -278,7 +277,8 @@ void setPWM(){
   // clear the timer register
   TMR3 = 0;
   // -------------------------------------------------------
-  PWM_PERIOD = PBCLK_RATE/TIMER_DIV/PWM_FREQ-1;
+  
+  
   // --------------------- Channel 3 --------------------- 
   // switching off the output compare module
   OC3CONbits.ON = 0;
@@ -315,15 +315,22 @@ void setPWM(){
   
   // switch on the output compare module
   OC3CONbits.ON = 1;
+  
   // switch on the output compare module
   OC4CONbits.ON = 1;
-  T3CONbits.ON = 1;
-  // setting period on the timer
   
-  PR3 = PWM_PERIOD;
-          
   // turn on the timer 3
+  T3CONbits.ON = 1;
   
+  // setting period on the timer
+  PR3 = PWM_PERIOD;
+  
+}
+
+void initLIDAR(void){
+    // ---------------------- Set Up Timer 1 --------------------------
+    
+    // ----------------------------------------------------------------
 }
 
 void decodeCommand(uint16_t command){
@@ -456,9 +463,7 @@ void initInputCapture(void){
 
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
     static uint16_t thisTime = 0;            // current timer value
-    
-    
-    
+ 
     do {
         thisTime = (uint16_t)IC3BUF;        // read from buffer
         

@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 3
+#define NUM_SERVICES 1
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -43,11 +43,11 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
-#define SERV_0_HEADER "LeaderService.h"
+#define SERV_0_HEADER "DCMotorService.h"
 // the name of the Init function
-#define SERV_0_INIT InitLeaderService
+#define SERV_0_INIT InitDCMotorService
 // the name of the run function
-#define SERV_0_RUN RunLeaderService
+#define SERV_0_RUN RunDCMotorService
 // How big should this services Queue be?
 #define SERV_0_QUEUE_SIZE 5
 
@@ -282,7 +282,7 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, readOptoSensor, CheckButtonEvents
+#define EVENT_CHECK_LIST Check4Keystroke
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -305,8 +305,8 @@
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC PostLeaderService
-#define TIMER15_RESP_FUNC PostOptoSensorService
+#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER15_RESP_FUNC TIMER_UNUSED
 
 /****************************************************************************/
 // Give the timer numbers symbolc names to make it easier to move them
