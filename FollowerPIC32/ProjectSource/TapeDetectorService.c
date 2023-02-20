@@ -52,10 +52,6 @@ bool InitTapeDetectorService(uint8_t Priority)
     }
 }
 
-bool PostTapeDetectorService(ES_Event_t ThisEvent)
-{
-  return ES_PostToService(MyPriority, ThisEvent);
-}
 
 ES_Event_t RunTapeDetectorService(ES_Event_t ThisEvent)
 {
@@ -86,8 +82,6 @@ ES_Event_t RunTapeDetectorService(ES_Event_t ThisEvent)
     break;
     
   }
-  
-  
   return ReturnEvent;
 }
 

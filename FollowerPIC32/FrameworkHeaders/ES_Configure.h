@@ -33,7 +33,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 3
+#define NUM_SERVICES 1
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -57,26 +57,26 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "TapeDetectorService.h"
+#define SERV_3_HEADER "TestHarnessService1.h"
 // the name of the Init function
-#define SERV_1_INIT InitTapeDetectorService
+#define SERV_3_INIT InitTestHarnessService1
 // the name of the run function
-#define SERV_1_RUN RunTapeDetectorService
+#define SERV_3_RUN RunTestHarnessService1
 // How big should this services Queue be?
-#define SERV_1_QUEUE_SIZE 3
+#define SERV_3_QUEUE_SIZE 3
 #endif
 
 /****************************************************************************/
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "DistanceSensorService.h"
+#define SERV_3_HEADER "TestHarnessService2.h"
 // the name of the Init function
-#define SERV_2_INIT InitDistanceSensorService
+#define SERV_3_INIT InitTestHarnessService2
 // the name of the run function
-#define SERV_2_RUN RunDistanceSensorService
+#define SERV_3_RUN RunTestHarnessService2
 // How big should this services Queue be?
-#define SERV_2_QUEUE_SIZE 3
+#define SERV_3_QUEUE_SIZE 3
 #endif
 
 /****************************************************************************/
@@ -319,7 +319,7 @@ typedef enum
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC PostTapeDetectorService
+#define TIMER14_RESP_FUNC TIMER_UNUSED
 #define TIMER15_RESP_FUNC PostTestHarnessService0
 
 /****************************************************************************/

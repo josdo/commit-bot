@@ -55,8 +55,9 @@
       <itemPath>ProjectHeaders/LeaderService.h</itemPath>
       <itemPath>FrameworkHeaders/OptoSensorService.h</itemPath>
       <itemPath>FrameworkHeaders/ButtonService.h</itemPath>
-      <itemPath>ProjectHeaders/DistanceSensorService.h</itemPath>
       <itemPath>ProjectHeaders/TapeDetectorService.h</itemPath>
+      <itemPath>ProjectHeaders/DistanceSensor.h</itemPath>
+      <itemPath>FrameworkHeaders/TapeSensor.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -73,8 +74,9 @@
       <itemPath>ProjectSource/LeaderService.c</itemPath>
       <itemPath>FrameworkHeaders/OptoSensorService.c</itemPath>
       <itemPath>FrameworkHeaders/ButtonService.c</itemPath>
-      <itemPath>ProjectSource/DistanceSensorService.c</itemPath>
       <itemPath>ProjectSource/TapeDetectorService.c</itemPath>
+      <itemPath>ProjectSource/DistanceSensor.c</itemPath>
+      <itemPath>FrameworkHeaders/TapeSensor.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -269,12 +271,56 @@
         <property key="wpo-lto" value="false"/>
       </C32Global>
       <item path="FrameworkHeaders/ButtonService.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="FrameworkHeaders/OptoSensorService.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="ProjectHeaders/DCMotorService.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
-      <item path="ProjectHeaders/TestHarnessService0.h" ex="true" overriding="false">
+      <item path="ProjectHeaders/TapeDetectorService.h" ex="true" overriding="false">
+      </item>
+      <item path="ProjectHeaders/TestHarnessService0.h" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>
@@ -291,8 +337,38 @@
         </C32Global>
       </item>
       <item path="ProjectSource/DCMotorService.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="ProjectSource/LeaderService.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="ProjectSource/TapeDetectorService.c" ex="true" overriding="false">
       </item>
       <item path="ProjectSource/TestHarnessService0.c" ex="false" overriding="false">
         <C32>

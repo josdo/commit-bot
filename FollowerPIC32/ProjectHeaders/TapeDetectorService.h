@@ -2,12 +2,6 @@
 #define TapeDetectorService_H
 
 #include "ES_Types.h"
-typedef enum {
-    NoTape = 0,
-    Tape1,
-    Tape2,
-    Tape3
-}Tape;
 
 typedef struct {
     bool TapeState;

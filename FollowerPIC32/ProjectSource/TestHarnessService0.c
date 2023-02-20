@@ -1,6 +1,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "DistanceSensorService.h"
+#include "DistanceSensor.h"
+#include "TapeSensor.h"
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
@@ -28,8 +29,10 @@ bool InitTestHarnessService0(uint8_t Priority)
 
   MyPriority = Priority;
 
- 
-
+  // initialising everything
+  InitDistanceSensor();
+  InitTapeSensor();
+  
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
   {
@@ -65,7 +68,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-            DB_printf("Distance Period is: %d\r\n", getDistance());
+//            DB_printf("Distance Period is: %d\r\n", getDistance());
+            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
+            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
             ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
         }
     }

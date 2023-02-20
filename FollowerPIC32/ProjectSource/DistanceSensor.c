@@ -1,6 +1,6 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "DistanceSensorService.h"
+#include "DistanceSensor.h"
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
@@ -10,13 +10,6 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 
-
-static uint8_t MyPriority;
-#define ONE_SEC 1000
-#define HALF_SEC (ONE_SEC / 2)
-#define TWO_SEC (ONE_SEC * 2)
-#define FIVE_SEC (ONE_SEC * 5)
-#define HUND_SEC (ONE_SEC / 100)
 
 static void InitTimer(void);
 static void InitIC(void);
@@ -34,11 +27,9 @@ typedef union{
 
 volatile static global_time gl;
 
-bool InitDistanceSensorService(uint8_t Priority)
+bool InitDistanceSensor()
 {
-    ES_Event_t ThisEvent;
     
-    MyPriority = Priority;
   /********************************************
    in here you write your initialization code
    *******************************************/
@@ -52,38 +43,10 @@ bool InitDistanceSensorService(uint8_t Priority)
     InitIC();
     // Starting time from 0
     gl.time_var.rollover = 0;
-    ThisEvent.EventType = ES_INIT;
-    if (ES_PostToService(MyPriority, ThisEvent) == true)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    DB_printf("\rES_INIT received in Distance Sensor Service %d\r\n");
 }
 
-bool PostDistanceSensorService(ES_Event_t ThisEvent)
-{
-    return ES_PostToService(MyPriority, ThisEvent);
-}
 
-ES_Event_t RunDistanceSensorService(ES_Event_t ThisEvent)
-{
-    ES_Event_t ReturnEvent;
-    ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
-    /********************************************
-     in here you write your service code
-     ***********************s********************/
-    switch(ThisEvent.EventType){
-        case ES_INIT:
-        {
-            DB_printf("\rES_INIT received in Distance Sensor Service %d\r\n", MyPriority);
-        }
-        break; 
-    }
-    return ReturnEvent;
-}
 
 void InitTimer(){
     // INPUT CAPTURE
