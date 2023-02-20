@@ -42,7 +42,11 @@
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
-#include "EventOverSPI.h"
+// #include "../../Shared/EventOverSPI.h"
+#include "PIC32_SPI_HAL.h"
+#include "PIC32PortHAL.h"
+#include <sys/attribs.h>
+
 
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
@@ -63,8 +67,6 @@
 
 // with the introduction of Gen2, we need a module level Priority variable
 static uint8_t MyPriority;
-// add a deferral queue for up to 3 pending deferrals +1 to allow for overhead
-static ES_Event_t DeferralQueue[3 + 1];
 
 /*------------------------------ Module Code ------------------------------*/
 /****************************************************************************
@@ -88,26 +90,49 @@ static ES_Event_t DeferralQueue[3 + 1];
 bool InitTestHarnessService0(uint8_t Priority)
 {
   ES_Event_t ThisEvent;
-
   MyPriority = Priority;
-
-  // When doing testing, it is useful to announce just which program
-  // is running.
   clrScrn();
   puts("\rStarting Test Harness for \r");
   DB_printf( "the 2nd Generation Events & Services Framework V2.4\r\n");
   DB_printf( "compiled at %s on %s\n", __TIME__, __DATE__);
   DB_printf( "\n\r\n");
-  DB_printf( "Press any key to post key-stroke events to Service 0\n\r");
-  DB_printf( "Press 'd' to test event deferral \n\r");
-  DB_printf( "Press 'r' to test event recall \n\r");
-  DB_printf( "Press 'p' to test posting from an interrupt \n\r");
+  DB_printf( "Press any key to post key-stroke events\n\r");
 
-  /********************************************
-   in here you write your initialization code
-   *******************************************/
-  // initialize deferral queue for testing Deferal function
-  ES_InitDeferralQueueWith(DeferralQueue, ARRAY_SIZE(DeferralQueue));
+  // InitEventOverSPI(true);
+  SPI_Module_t Module = SPI_SPI1;
+  SPI_SamplePhase_t Phase = SPI_SMP_END;
+  uint32_t SPI_ClkPeriodIn_ns = 10000;
+  SPI_PinMap_t SSPin = SPI_RPA0;
+  SPI_PinMap_t SDIPin = SPI_RPB8;
+  SPI_PinMap_t SDOPin = SPI_RPA1;
+  SPI_Clock_t WhichState = SPI_CLK_HI;
+  SPI_ActiveEdge_t WhichEdge = SPI_SECOND_EDGE;
+  SPI_XferWidth_t DataWidth = SPI_16BIT;
+
+  
+  SPISetup_BasicConfig(Module);
+  SPISetup_SetLeader(Module, Phase);
+  SPISetup_SetBitTime(Module, SPI_ClkPeriodIn_ns);
+  SPISetup_MapSSOutput(Module, SSPin);
+  SPISetup_MapSDInput(Module, SDIPin);
+  SPISetup_MapSDOutput(Module, SDOPin);
+  SPISetup_SetClockIdleState(Module, WhichState);
+  SPISetup_SetActiveEdge(Module, WhichEdge);
+  SPISetup_SetXferWidth(Module, DataWidth);
+  SPISetEnhancedBuffer(Module, false);
+  SPISetup_EnableSPI(Module);
+
+  // Setting the interrupts
+//  __builtin_disable_interrupts();
+//  IFS1CLR = _IFS1_SPI1RXIF_MASK;
+//  IEC1SET = _IEC1_SPI1RXIE_MASK;
+//  // multivector is enabled
+//  INTCONbits.MVEC = 1;                // enable multivector mode
+//  IPC7bits.SPI1IP = 7;                // interrupt priority is 7
+//  __builtin_enable_interrupts();
+
+  PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
+  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
 
   // post the initial transition event
   ThisEvent.EventType = ES_INIT;
@@ -182,11 +207,14 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     {
      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
          (char)ThisEvent.EventParam);
-      if ('f' == ThisEvent.EventParam)
+      if ('d' == ThisEvent.EventParam)
       {
         DB_printf("Posting test event to follower\n\r");
+//        for(uint32_t i=0; i<=0xffffff; i++){}
         ES_Event_t e = {ES_TEST_TO_FOLLOWER};
-        PostToFollower(e);
+        // SPIOperate_SPI1_Send8Wait(0xf2);
+        SPIOperate_SPI1_Send16Wait(0xFFFF);
+        // PostToOther(e);
       }
     }
     break;
@@ -194,3 +222,19 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
   return ReturnEvent;
 }
+
+// void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
+//     IFS1CLR = _IFS1_SPI1RXIF_MASK;              // clear the flag
+    
+// //     currentCommand = SPI1BUF;                   // read the buffer
+// // //    puts("hello");
+// //     if (currentCommand != lastCommand){
+// //         lastCommand = currentCommand;           // store previous command
+// // //        DB_printf("com: %x\r\n", currentCommand);
+// //         ES_Event_t NewEvent;
+// //         NewEvent.EventType = ES_NEW_COMMAND;
+// //         NewEvent.EventParam = currentCommand;
+// //         PostDCMotorService(NewEvent);            // post the command
+// //     }
+    
+// }

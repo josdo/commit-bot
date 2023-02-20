@@ -5,10 +5,12 @@
 #include "ES_Framework.h"
 #include "dbprintf.h"
 #include "PIC32_SPI_HAL.h"
+#include <xc.h>
+#include <sys/attribs.h>
 
 static bool leaderMode;
 
-union SPI_Event
+typedef union
 {
   struct
   {
@@ -16,7 +18,7 @@ union SPI_Event
     uint8_t EventParam;
   };
   uint16_t w;
-};
+} SPI_Event_t;
 
 static bool FitsIn8Bits(uint16_t data);
 
@@ -39,15 +41,22 @@ void InitEventOverSPI(bool is_leader)
   if (leaderMode)
     SPISetup_SetLeader(Module, Phase);
   else
-    SPISetup_SetFollower(Module)
+    SPISetup_SetFollower(Module);
   SPISetup_SetBitTime(Module, SPI_ClkPeriodIn_ns);
-  SPISetup_MapSSOutput(Module, SSPin);
+  if (leaderMode)
+    SPISetup_MapSSOutput(Module, SSPin);
+  else
+  {
+    DB_printf("ERROR: EventOverSPI.c, follower mode not implemented yet.\r\n");
+    SPISetup_MapSSInput(Module, SSPin); // TODO
+  }
   SPISetup_MapSDInput(Module, SDIPin);
   SPISetup_MapSDOutput(Module, SDOPin);
   SPISetup_SetClockIdleState(Module, WhichState);
   SPISetup_SetActiveEdge(Module, WhichEdge);
   SPISetup_SetXferWidth(Module, DataWidth);
-  SPISetEnhancedBuffer(Module, true);
+  // SPISetEnhancedBuffer(Module, true);
+  SPISetEnhancedBuffer(Module, false);
   SPISetup_EnableSPI(Module);
 
   __builtin_disable_interrupts();
@@ -70,15 +79,16 @@ bool PostToOther(ES_Event_t e)
     return false;
   }
   
-  SPI_Event se = {(uint8_t) e.EventType, (uint8_t) e.EventParam};
-  SPIOperate_SPI1_Send16(se.w);
+  SPI_Event_t se = {(uint8_t) e.EventType, (uint8_t) e.EventParam};
+  SPIOperate_SPI1_Send16Wait(0xf2);
+//  SPIOperate_SPI1_Send16Wait(se);
   return true;
 }
 
 /* Decode event from SPI buf and post to all. Returns true if successful, false otherwise. */
 bool PostFromOther(uint16_t word)
 {
-  SPI_Event se;
+  SPI_Event_t se;
   se.w = word;
   ES_Event_t e = {(ES_EventType_t) se.EventType, (uint16_t) se.EventParam};
   return ES_PostAll(e);
@@ -90,7 +100,7 @@ static bool FitsIn8Bits(uint16_t data)
 }
 
 /* Notify service that an event from the other PIC has arrived. */
-void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void){
+void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
 {
   while (!SPI1STATbits.SPIRBE)
   {

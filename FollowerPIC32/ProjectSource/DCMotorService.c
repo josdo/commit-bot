@@ -110,6 +110,11 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
         DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
       }
       break;
+      case ES_TEST_TO_FOLLOWER:
+      {
+        DB_printf("SUCCESS: received follower event over SPI with param %i", ThisEvent.EventParam);
+      }
+      break;
       case ES_TIMEOUT:{
           if (TURN_TIMER == ThisEvent.EventParam){
               A2 = 0;
