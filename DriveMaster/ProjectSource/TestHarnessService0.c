@@ -9,6 +9,10 @@
 #include "dbprintf.h"
 #include "../../Shared/EventOverSPI.h"
 
+#include "../../Shared/PIC32_SPI_HAL.h"
+#include <xc.h>
+#include <sys/attribs.h>
+
 static uint8_t MyPriority;
 
 bool InitTestHarnessService0(uint8_t Priority)
@@ -16,6 +20,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   ES_Event_t ThisEvent;
   MyPriority = Priority;
   clrScrn();
+
   puts("\rStarting Test Harness for \r");
   DB_printf( "the 2nd Generation Events & Services Framework V2.4\r\n");
   DB_printf( "compiled at %s on %s\n", __TIME__, __DATE__);
@@ -61,6 +66,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       if ('f' == ThisEvent.EventParam)
       {
         DB_printf("Posting test event to follower\n\r");
+        // SPIOperate_SPI1_Send16Wait(0x1300);
         ES_Event_t e = {ES_TEST_TO_FOLLOWER};
         PostToOther(e);
       }
@@ -70,3 +76,11 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
   return ReturnEvent;
 }
+
+
+// /* Notify service that an event from the other PIC has arrived. */
+// void __ISR(_SPI_1_VECTOR, IPL7SOFT) ISR_EventOverSPI(void)
+// {
+//   IFS1CLR = _IFS1_SPI1RXIF_MASK;
+//   uint16_t word = SPI1BUF;
+// }

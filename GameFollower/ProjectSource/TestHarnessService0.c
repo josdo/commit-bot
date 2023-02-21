@@ -22,7 +22,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   DB_printf( "\n\r\n");
   DB_printf( "Press any key to post key-stroke events\n\r");
 
-  InitEventOverSPI(false);
+  // InitEventOverSPI(false);
 
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)

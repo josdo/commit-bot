@@ -1,10 +1,8 @@
-// #include "ES_Types.h"
-// #include "../Shared/ES_Shared_Configure.h"
-// #include "ES_Events.h"
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "dbprintf.h"
 #include "PIC32_SPI_HAL.h"
+#include "PIC32PortHAL.h"
 #include <xc.h>
 #include <sys/attribs.h>
 
@@ -79,8 +77,8 @@ void InitEventOverSPI(bool isDriveMaster)
   IPC7bits.SPI1IP = 7;                // interrupt priority is 7
   __builtin_enable_interrupts();
   
-  // PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
-  // PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
+  PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
+  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
 }
 
 /* Encode event into 16 bits and send over SPI. Return true if successful, false otherwise. */
@@ -111,10 +109,10 @@ static bool FitsIn8Bits(uint16_t data)
 }
 
 /* Notify service that an event from the other PIC has arrived. */
-void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
+void __ISR(_SPI_1_VECTOR, IPL7SOFT) ISR_EventOverSPI(void)
 {
-  uint16_t word = SPI1BUF;
   IFS1CLR = _IFS1_SPI1RXIF_MASK;
+  uint16_t word = SPI1BUF;
 
   SPI_Event_t se;
   se.w = word;
