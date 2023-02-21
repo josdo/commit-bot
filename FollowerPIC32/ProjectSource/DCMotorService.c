@@ -49,16 +49,29 @@ typedef union{
 static volatile TimeTracker CurrentTime;
 static volatile TimeTracker PrevTime;
 
+static volatile TimeTracker T3CurrentTime = 0;
+static volatile TimeTracker T3PrevTime = 0;
+static volatile uint16_t T3RO = 0;
+
+static volatile uint32_t rightPeriod = 0;
+static volatile uint32_t leftPeriod = 0;
 // ----------------------------------------------------------------------------
 
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
-void initLIDAR(void);               // set up LIDAR Timer
 void decodeCommand(uint16_t command);   // decode the command
-void initInputCapture(void);            // input capture on RB5 (pin 14)
-void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
+
+void initRightEncoderISR(void);         // IC1 on RA2
+void initLeftEncoderISR(void);          // IC3 on RB5
+
+void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
+void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
+
+//void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
+//void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
+//void initInputCapture(void);            // input capture on RB5 (pin 14)
 // ----------------------------------------------------------------------------
 
 
@@ -267,7 +280,7 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
 
 // ---------------------------- Private Functions -----------------------------
 void setPWM(void){
-    // --------------------- Timer 3 --------------------- 
+  // --------------------- Timer 3 --------------------- 
   //switching the timer 3 off
   T3CONbits.ON = 0;
   //selecting timer source 
@@ -324,13 +337,6 @@ void setPWM(void){
   
   // setting period on the timer
   PR3 = PWM_PERIOD;
-  
-}
-
-void initLIDAR(void){
-    // ---------------------- Set Up Timer 1 --------------------------
-    
-    // ----------------------------------------------------------------
 }
 
 void decodeCommand(uint16_t command){
@@ -414,99 +420,170 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
     }
 }
 
-void initInputCapture(void){
-    // ------------------------ Set Up Input Capture 3 -------------------------
-    __builtin_disable_interrupts();         // turn off global interrupts
+
+void initRightEncoderISR(void){
+    // -------------------------- IC 1 -----------------------------------
+    __builtin_disable_interrupts();         // disable global interrupts
+    IC1CONbits.ON = 0;                      // turn of IC3
+    INTCONbits.MVEC = 1;                    // enable multivector mode
+    IC1R = 0b0000;                          // map IC1 to RA2
+    TRISAbits.TRISA4 = 1;                   // set RA2 as input
+    IPC1bits.IC1IP = 7;                     // priority 7
+    IC1CONbits.SIDL = 0;                    // active in idle mode
+    IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
+    IC1CONbits.ICTMR = 0;                   // timer 3 is time base
+    IC1CONbits.ICM = 0b011;                 // every rising edge
+    IC1CONbits.FEDGE = 1;                   // first edge is rising
+    IC1CONbits.C32 = 0;                     // 16 bit mode
+    IC1CONbits.ON = 1;                      // turn on IC1 interrupt
+    __builtin_enable_interrupts();          // enable global interrupts
+    // -------------------------------------------------------------------
+}
+
+void initLeftEncoderISR(void){
+    // -------------------------- IC 3 -----------------------------------
+    __builtin_disable_interrupts();         // disable global interrupts
     IC3CONbits.ON = 0;                      // turn of IC3
     INTCONbits.MVEC = 1;                    // enable multivector mode
     IC3R = 0b0001;                          // map IC3 to RB5
-    TRISBbits.TRISB5 = 1;                   // set RB5 as input
-    // -----------------------------------------------------------------------
-    
-    
-    // ------------------------ Set Up Timer 2 -------------------------
-    T2CONbits.ON = 0;                       // turn off timer 2
-    T2CONbits.TCS = 0;                      // source clock is PBCLK
-    T2CONbits.TGATE = 0;                    // turn off gated mode
-    T2CONbits.TCKPS = 0b010;                // prescale of 4
-    T2CONbits.TSIDL = 0;                    // active in idle mode
-    T2CONbits.T32 = 0;                      // 16 bit mode
-    TMR2 = 0;                               // clear timer
-    PR2 = 0xFFFF;                           // max period
-    T2CONbits.ON = 1;                       // turn on timer 2
-    // -----------------------------------------------------------------------
-    
-    
-    // ------------------------ Set Up Input Capture 3 -------------------------
+    TRISBbits.TRISB5 = 1;                   // set RA2 as input
     IPC3bits.IC3IP = 7;                     // priority 7
     IC3CONbits.SIDL = 0;                    // active in idle mode
     IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
-    IC3CONbits.ICTMR = 1;                   // timer 2 is time base
+    IC3CONbits.ICTMR = 0;                   // timer 3 is time base
     IC3CONbits.ICM = 0b011;                 // every rising edge
-    IC3CONbits.FEDGE = 1;
+    IC3CONbits.FEDGE = 1;                   // first edge is rising
     IC3CONbits.C32 = 0;                     // 16 bit mode
-    // -----------------------------------------------------------------------
-    
-    
-    // ------------------------ Set Up Timer 2 Interrupt -----------------------
-    IPC2bits.T2IP = 6;                      // timer interrupt priority is 6
-    IFS0CLR = _IFS0_T2IF_MASK;              // clear pending interrupts
-    // -----------------------------------------------------------------------
-    
-    
-    // ------------------------ Enable Interrupts -----------------------
     IC3CONbits.ON = 1;                      // turn on IC3 interrupt
-    IEC0SET = _IEC0_T2IE_MASK;              // enable timer 2 interrupt
     __builtin_enable_interrupts();          // enable global interrupts
-    // ----------------------------------------------------------------------- 
+    // -------------------------------------------------------------------
 }
 
-void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
-    static uint16_t thisTime = 0;            // current timer value
- 
+void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
+    
+}
+
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
+    static uint16_t thisTime = 0;           // current timer value
+    
     do {
-        thisTime = (uint16_t)IC3BUF;        // read from buffer
+        thisTime = (uint16_t)IC3BUF;        // read the buffer
         
-        // if pending rollover flag AND captured time after rollover
-        if ((1 == IFS0bits.T2IF) && (thisTime < 0x8000)){
-            RO++;                           // increment rollover counter
-            IFS0CLR = _IFS0_T2IF_MASK;      // clear timer 2 interrupt flag
+        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
+            IC3RO++;                        // increment rollover counter
+            IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
         }
-        CurrentTime.ByTime.RollOver = RO;   // update rollover field
-        CurrentTime.ByTime.CapturedTime = thisTime; // store captured time
-
-        beaconPeriod = CurrentTime.FullLength - PrevTime.FullLength;  // get period
-        PrevTime.FullLength = CurrentTime.FullLength;   // update prev time
-    } while(IC3CONbits.ICBNE != 0);         // loop while not empty
-    
-    IFS0CLR = _IFS0_IC3IF_MASK;             // clear IC3 interrupt flag
-    
-    // see if beacon period is in bounds
-    if ((LOWER_THRESH < beaconPeriod) && (beaconPeriod < HIGH_THRESH)){
-        beaconCount++;                      // increment valid beacon counter
-    }
-    else {
-        beaconCount = 0;                    // reset to 0 if not a valid beacon
-    }
-    
-    if (beaconCount >= 2){                  // if we have 2 valid beacon counts
-        beaconCount = 0;                            // reset count
+        IC3CurrentTime.ByTime.RollOver = T3RO;  // update rollover
+        IC3CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
         
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);     // stop moving
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);      // stop moving
-        IEC0CLR = _IEC0_IC3IE_MASK;                 // disable ic3 interrupt
-    }
-    
+    } while(IC3CONbits.ICBNE != 0);
 }
 
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){
+void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
     __builtin_disable_interrupts();         // disable global interrupts
     
-    if (1 == IFS0bits.T2IF){
-        RO++;                               // increment rollover
-        IFS0CLR = _IFS0_T2IF_MASK;          // clear timer 2 interrupt flag
+    if (1 == IFS0bits.T3IF){
+        T3RO++;                               // increment rollover
+        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
     }
-    CurrentTime.ByTime.RollOver = RO;       // store new rollover
+    T3CurrentTime.ByTime.RollOver = T3RO;       // store new rollover
     
     __builtin_enable_interrupts();          // enable global interrupts
 }
+
+//void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){
+//    __builtin_disable_interrupts();         // disable global interrupts
+//    
+//    if (1 == IFS0bits.T2IF){
+//        RO++;                               // increment rollover
+//        IFS0CLR = _IFS0_T2IF_MASK;          // clear timer 2 interrupt flag
+//    }
+//    CurrentTime.ByTime.RollOver = RO;       // store new rollover
+//    
+//    __builtin_enable_interrupts();          // enable global interrupts
+//}
+
+//void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void){
+//    static uint16_t thisTime = 0;            // current timer value
+// 
+//    do {
+//        thisTime = (uint16_t)IC3BUF;        // read from buffer
+//        
+//        // if pending rollover flag AND captured time after rollover
+//        if ((1 == IFS0bits.T2IF) && (thisTime < 0x8000)){
+//            RO++;                           // increment rollover counter
+//            IFS0CLR = _IFS0_T2IF_MASK;      // clear timer 2 interrupt flag
+//        }
+//        CurrentTime.ByTime.RollOver = RO;   // update rollover field
+//        CurrentTime.ByTime.CapturedTime = thisTime; // store captured time
+//
+//        beaconPeriod = CurrentTime.FullLength - PrevTime.FullLength;  // get period
+//        PrevTime.FullLength = CurrentTime.FullLength;   // update prev time
+//    } while(IC3CONbits.ICBNE != 0);         // loop while not empty
+//    
+//    IFS0CLR = _IFS0_IC3IF_MASK;             // clear IC3 interrupt flag
+//    
+//    // see if beacon period is in bounds
+//    if ((LOWER_THRESH < beaconPeriod) && (beaconPeriod < HIGH_THRESH)){
+//        beaconCount++;                      // increment valid beacon counter
+//    }
+//    else {
+//        beaconCount = 0;                    // reset to 0 if not a valid beacon
+//    }
+//    
+//    if (beaconCount >= 2){                  // if we have 2 valid beacon counts
+//        beaconCount = 0;                            // reset count
+//        
+//        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);     // stop moving
+//        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);      // stop moving
+//        IEC0CLR = _IEC0_IC3IE_MASK;                 // disable ic3 interrupt
+//    }
+//    
+//}
+
+//void initInputCapture(void){
+//    // ------------------------ Set Up Input Capture 3 -------------------------
+//    __builtin_disable_interrupts();         // turn off global interrupts
+//    IC3CONbits.ON = 0;                      // turn of IC3
+//    INTCONbits.MVEC = 1;                    // enable multivector mode
+//    IC3R = 0b0001;                          // map IC3 to RB5
+//    TRISBbits.TRISB5 = 1;                   // set RB5 as input
+//    // -----------------------------------------------------------------------
+//    
+//    
+//    // ------------------------ Set Up Timer 2 -------------------------
+//    T2CONbits.ON = 0;                       // turn off timer 2
+//    T2CONbits.TCS = 0;                      // source clock is PBCLK
+//    T2CONbits.TGATE = 0;                    // turn off gated mode
+//    T2CONbits.TCKPS = 0b010;                // prescale of 4
+//    T2CONbits.TSIDL = 0;                    // active in idle mode
+//    T2CONbits.T32 = 0;                      // 16 bit mode
+//    TMR2 = 0;                               // clear timer
+//    PR2 = 0xFFFF;                           // max period
+//    T2CONbits.ON = 1;                       // turn on timer 2
+//    // -----------------------------------------------------------------------
+//    
+//    
+//    // ------------------------ Set Up Input Capture 3 -------------------------
+//    IPC3bits.IC3IP = 7;                     // priority 7
+//    IC3CONbits.SIDL = 0;                    // active in idle mode
+//    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
+//    IC3CONbits.ICTMR = 1;                   // timer 2 is time base
+//    IC3CONbits.ICM = 0b011;                 // every rising edge
+//    IC3CONbits.FEDGE = 1;
+//    IC3CONbits.C32 = 0;                     // 16 bit mode
+//    // -----------------------------------------------------------------------
+//    
+//    
+//    // ------------------------ Set Up Timer 2 Interrupt -----------------------
+//    IPC2bits.T2IP = 6;                      // timer interrupt priority is 6
+//    IFS0CLR = _IFS0_T2IF_MASK;              // clear pending interrupts
+//    // -----------------------------------------------------------------------
+//    
+//    
+//    // ------------------------ Enable Interrupts -----------------------
+//    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
+//    IEC0SET = _IEC0_T2IE_MASK;              // enable timer 2 interrupt
+//    __builtin_enable_interrupts();          // enable global interrupts
+//    // ----------------------------------------------------------------------- 
+//}
