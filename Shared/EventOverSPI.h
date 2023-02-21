@@ -1,9 +1,8 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 
-void InitEventOverSPI(bool is_leader);
+void InitEventOverSPI(bool isDriveMaster);
 void PostToOther(ES_Event_t e);
-bool PostFromOther(uint16_t word);
 
 /* Usage
 leader event > pump > follower no event
@@ -49,6 +48,8 @@ Drive manager receiver ISR:
 * If got something other than 0xFFFF:
   * Don't do anything, but print warning message about noisy signal coming across.
 
+
+------------------------
 Leader's polling service
   Every 100ms, call EOS_PostToOther(ES_QueryFollowerForEvent)
 
@@ -59,20 +60,25 @@ EOS_PostToOther(ES_Event_t e)
   Else:
     Queue word, which will get sent by the ISR
 
-EOS_NextWordToLeader()
-  return next word in queue, or 0xFFFF if queue is empty
+EOS_QueryFollowerForEvent
+  Send query word.
+
+// EOS_NextWordToLeader()
+//   return next word in queue, or 0xFFFF if queue is empty
 
 EOS_ISR()
   Read word from buffer and reset RXIF
+  Decode word into event
   If isLeader:
-    If received an event (word.EventType is valid):
+    If a valid event (word.EventType is valid):
       Post to all
-      Get any more queued events (EOS_PostToOther(ES_QueryFollowerForEvent))
+      Query for another event
+      // Get any more queued events (EOS_PostToOther(ES_QueryFollowerForEvent))
     Else:
       Ignore since not an event
       But print warning message if not 0xFFFF, since that means noise
   Else:
-    If received an event (word.EventType is valid):
+    If a valid event (word.EventType is valid):
       If not ES_QueryFollowerForEvent:
         Post to all
       EOS_PostToOther(NextWordToLeader())
