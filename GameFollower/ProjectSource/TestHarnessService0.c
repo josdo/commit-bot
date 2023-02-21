@@ -22,7 +22,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   DB_printf( "\n\r\n");
   DB_printf( "Press any key to post key-stroke events\n\r");
 
-  // InitEventOverSPI(false);
+  InitEventOverSPI(false);
 
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
@@ -56,7 +56,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
     case ES_TEST_TO_FOLLOWER:
     {
-      DB_printf("SUCCESS: received follower event over SPI with param %i", ThisEvent.EventParam);
+      DB_printf("SUCCESS: received follower event over SPI with param %u\n\r", ThisEvent.EventParam);
     }
     break;
 

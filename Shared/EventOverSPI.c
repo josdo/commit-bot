@@ -121,15 +121,15 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
   se.w = word;
   ES_Event_t e = {(ES_EventType_t) se.EventType, (uint16_t) se.EventParam};
 
+  if (word == NO_EVENT_WORD)
+    return;
+
   if (isLeader)
   {
     // Post event from follower and query follower for any more events
-    if (word != NO_EVENT_WORD)
-    {
-      ES_PostAll(e);
-      // TODO: logic incorrect
-      // SPIOperate_SPI1_Send16Wait(QUERY_FOLLOWER_WORD);
-    }
+    ES_PostAll(e);
+    // TODO: logic incorrect
+    // SPIOperate_SPI1_Send16Wait(QUERY_FOLLOWER_WORD);
   }
   else
   {
@@ -140,11 +140,6 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
     }
 
     // Post a queued event to leader
-    // if (wordQueueSize == 0)
-    // {
-    //   SPIOperate_SPI1_Send16Wait(NO_EVENT_WORD);
-    // }
-    // else
     if (wordQueueSize > 0)
     {
       SPIOperate_SPI1_Send16Wait(wordQueue[0]);
