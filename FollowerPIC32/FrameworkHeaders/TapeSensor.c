@@ -17,7 +17,7 @@ static uint16_t CurrentAnalogValueLeft = 0;
 static uint16_t CurrentAnalogValueMiddle = 0;
 static uint16_t CurrentAnalogValueRight = 0;
 
-bool InitTapeSensor()
+void InitTapeSensor()
 {
     DB_printf("ES_INIT received in Tape Sensor Service %d\r\n");
     // pins setup

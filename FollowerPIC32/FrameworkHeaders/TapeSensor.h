@@ -3,7 +3,7 @@
 
 #include "ES_Types.h"
 
-bool InitTapeSensor();
+void InitTapeSensor();
 
 typedef enum {
     MiddleTapeSensor = 0,  //B13

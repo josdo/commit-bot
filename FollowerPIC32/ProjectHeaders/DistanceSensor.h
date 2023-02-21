@@ -5,6 +5,6 @@
 
 // Public Function Prototypes
 
-bool InitDistanceSensor(void);
+void InitDistanceSensor(void);
 uint32_t getDistance(void);
 #endif /* ServTemplate_H */

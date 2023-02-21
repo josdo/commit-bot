@@ -9,72 +9,30 @@
 #include "PIC32_AD_Lib.h"
 #include <xc.h>            
 #include <sys/attribs.h>
+#include "InitTimer2.h"
 
-
-static void InitTimer(void);
-static void InitIC(void);
+static void InitIC2(void);
 static void Period2Distance(void);
 
 volatile static uint32_t distance_period;
 static uint32_t distance;
-typedef union{
-    uint32_t actual_time;
-    struct{
-        uint16_t local_time;
-        uint16_t rollover;
-    }time_var;
-}global_time;
+volatile extern global_time gl;
 
-volatile static global_time gl;
 
-bool InitDistanceSensor()
-{
-    
-  /********************************************
-   in here you write your initialization code
-   *******************************************/
-  // post the initial transition event
-    
+void InitDistanceSensor()
+{  
     // B9 is the distance sensor
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_9);
-    // Initialize the timer
-    InitTimer();
+    // Initialize the timer 2
+    InitTimer2();
     // Initialize the IC
-    InitIC();
-    // Starting time from 0
-    gl.time_var.rollover = 0;
+    InitIC2();
+    
     DB_printf("\rES_INIT received in Distance Sensor Service %d\r\n");
 }
 
 
-
-void InitTimer(){
-    // INPUT CAPTURE
-    //switching the timer off
-    T2CONbits.ON = 0;
-    //selecting timer source
-    T2CONbits.TCS = 0;
-    // gated accumulation is off
-    T2CONbits.TGATE = 0;
-    // selecting a prescaler 2 for the timer
-    T2CONbits.TCKPS = 0b001;
-    // set the period on the timer    
-    PR2 = 0xFFFF;
-    // clear the timer flag
-    IFS0CLR = _IFS0_T2IF_MASK;
-    // enable the timer interrupts
-    IEC0SET = _IEC0_T2IE_MASK;
-    // setting timer priority
-    IPC2bits.INT2IP = 6;
-    // starting from 0
-    TMR2 = 0;
-    // turn on the timer 2
-    T2CONbits.ON = 1;
-
-}
-
-
-void InitIC(){
+void InitIC2(){
     // disable interrupts
     __builtin_disable_interrupts();         
     // switch off the input capture module
@@ -89,7 +47,7 @@ void InitIC(){
     // 16 bit capture
     IC2CONbits.C32 = 0;
     // First edge captured in rising
-    // IC1CONbits.FEDGE = 1;
+    IC1CONbits.FEDGE = 1;
     // Select timer 2
     IC2CONbits.ICTMR = 1;
     // interrupt on every capture
@@ -114,37 +72,38 @@ void Period2Distance(){
     distance = (uint32_t)(4 * ((0.1 * distance_period) - 1000));
 }
 
+
+
 uint32_t getDistance(){
     return distance;
 }
 
-static uint32_t lastTime;
-
+volatile static uint32_t lastTime;
+volatile static uint32_t temp;
+volatile static bool isRising = 1;
 // Function ISR to get the period out of the distance sensor and convert it into
 // actual distance
 void __ISR(_INPUT_CAPTURE_2_VECTOR, IPL7SOFT) DistanceSensor(void){
-    static uint16_t thisTime;
+    volatile static uint16_t thisTime;
+    isRising = !isRising;
     do{
         thisTime = (uint16_t)IC2BUF;
-        
-        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
+        temp = lastTime;
+        if((IFS0bits.T2IF == 1) && (thisTime < 0x8000)){
             ++(gl.time_var.rollover);
             IFS0CLR = _IFS0_T2IF_MASK;
         }
         gl.time_var.local_time = thisTime;
-        distance_period = (gl.actual_time - lastTime);
+        if (isRising % 2){
+            distance_period = (gl.actual_time - lastTime);
+        }
+        
         lastTime = gl.actual_time;
         
     }while(IC2CONbits.ICBNE != 0);
-    Period2Distance();
+    if (isRising % 2){
+        Period2Distance();
+    }
     IFS0CLR = _IFS0_IC2IF_MASK;
 }
 
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
-    __builtin_disable_interrupts();
-    if(IFS0bits.T2IF == 1){
-        ++(gl.time_var.rollover);
-        IFS0CLR = _IFS0_T2IF_MASK;
-    }
-    __builtin_enable_interrupts();
-}
