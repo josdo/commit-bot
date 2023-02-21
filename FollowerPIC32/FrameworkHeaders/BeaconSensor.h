@@ -10,5 +10,7 @@ typedef enum {
     LongRangeBeaconSensor
 }BeaconSensor_t;
 
+uint32_t getBeconSensorFreq(BeaconSensor_t);
+
 #endif
 

@@ -10,13 +10,20 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 #include "InitTimer2.h"
+#include "BeaconSensor.h"
 
 void InitIC5(void);
 void InitIC4(void);
 
 volatile static uint32_t short_range_period;
 volatile static uint32_t long_range_period;
-volatile extern global_time gl;
+static uint32_t short_range_freq;
+static uint32_t long_range_freq;
+
+extern volatile global_time gl;
+
+void Period2Freq(BeaconSensor_t);
+
 
 void InitBeaconSensor(){
     // Short range
@@ -105,25 +112,56 @@ void InitIC4(){
 static uint32_t lastTimeShort;
 static uint32_t lastTimeLong;
 
+uint32_t getBeconSensorFreq(BeaconSensor_t whichSensor){
+    if (whichSensor == ShortRangeBeaconSensor){
+        return short_range_freq;
+    }
+    else if (whichSensor == LongRangeBeaconSensor){
+        return long_range_freq;
+    }
+}
+
+void Period2Freq(BeaconSensor_t whichSensor){
+    if (whichSensor == ShortRangeBeaconSensor){
+        short_range_freq = (uint32_t)(0.2 * short_range_period);
+    }
+    else if(whichSensor == LongRangeBeaconSensor){
+        long_range_freq = (uint32_t)(0.2 * long_range_period);
+    }
+} 
+
 // ISR for short range sensor
-//void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
-//    static uint16_t thisTime;
-//    do{
-//        thisTime = (uint16_t)IC5BUF;
-//        
-//        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
-//            ++(gl.time_var.rollover);
-//            IFS0CLR = _IFS0_T2IF_MASK;
-//        }
-//        gl.time_var.local_time = thisTime;
-//        short_range_period = (gl.actual_time - lastTimeShort);
-//        lastTimeShort = gl.actual_time;
-//    }while(IC5CONbits.ICBNE != 0);
-//    
-//    IFS0CLR = _IFS0_IC5IF_MASK;
-//}
+void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
+    volatile static uint16_t thisTime;
+    do{
+        thisTime = (uint16_t)IC5BUF;
+        
+        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
+            ++(gl.time_var.rollover);
+            IFS0CLR = _IFS0_T2IF_MASK;
+        }
+        gl.time_var.local_time = thisTime;
+        short_range_period = (gl.actual_time - lastTimeShort);
+        lastTimeShort = gl.actual_time;
+    }while(IC5CONbits.ICBNE != 0);
+    Period2Freq(ShortRangeBeaconSensor);
+    IFS0CLR = _IFS0_IC5IF_MASK;
+}
 
 // ISR for long range
 void __ISR(_INPUT_CAPTURE_4_VECTOR, IPL7SOFT) LongRangeIRSensor(void){
-    
+    volatile static uint16_t thisTime;
+    do{
+        thisTime = (uint16_t)IC4BUF;
+        
+        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
+            ++(gl.time_var.rollover);
+            IFS0CLR = _IFS0_T2IF_MASK;
+        }
+        gl.time_var.local_time = thisTime;
+        long_range_period = (gl.actual_time - lastTimeLong);
+        lastTimeLong = gl.actual_time;
+    }while(IC4CONbits.ICBNE != 0);
+    Period2Freq(LongRangeBeaconSensor);
+    IFS0CLR = _IFS0_IC4IF_MASK;
 }

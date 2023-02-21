@@ -11,6 +11,7 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 #include "TestHarnessService0.h"
+#include "BeaconSensor.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
@@ -25,6 +26,7 @@ static uint8_t MyPriority;
 
 bool InitTestHarnessService0(uint8_t Priority)
 {
+  clrScrn();
   ES_Event_t ThisEvent;
 
   MyPriority = Priority;
@@ -32,7 +34,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   // initialising everything
   InitDistanceSensor();
   InitTapeSensor();
-  
+  InitBeaconSensor();
   
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
@@ -69,9 +71,10 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-            DB_printf("Distance Period is: %d\r\n", getDistance());
+//            DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
+            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
             ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
         }
     }
