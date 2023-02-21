@@ -1,5 +1,5 @@
 #include "ES_Configure.h"
-#include "ES_Shared_Configure.h"
+#include "../../Shared/ES_Shared_Configure.h"
 #include "ES_Framework.h"
 #include "PIC32_SPI_HAL.h"
 #include "ES_DeferRecall.h"
@@ -13,6 +13,8 @@
 
 // ----------------------------- Module Functions ------------------------
 void setFollowerMode(void);
+void setSPIInterrupt(void);
+void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void);
 // -----------------------------------------------------------------------
 
 // -------------------- Define SPI parameters -------------------- 
@@ -20,13 +22,14 @@ SPI_Module_t Module = SPI_SPI1;
 SPI_SamplePhase_t Phase = SPI_SMP_END;
 uint32_t SPI_ClkPeriodIn_ns = 10000;
 SPI_PinMap_t SDIPin = SPI_RPA1;
-SPI_PinMap_t SDOPin = SPI_RPA1; // CHANGE THIS
+SPI_PinMap_t SDOPin = SPI_RPB8; 
 SPI_Clock_t WhichState = SPI_CLK_HI;
 SPI_ActiveEdge_t WhichEdge = SPI_SECOND_EDGE;
 SPI_XferWidth_t DataWidth = SPI_16BIT;
 // ---------------------------------------------------------------
 
 // ----------------------- SPI variables --------------------------
+const
 volatile uint8_t newCommand;
 volatile uint8_t lastCommand = 0xFF;
 static Follower_Response_t followerResponse = ExecutingCommand;
@@ -47,7 +50,10 @@ bool InitFollowerService(uint8_t Priority)
 {
   MyPriority = Priority;
   clrScrn();
+  
   setFollowerMode();
+  setSPIInterrupt();
+  
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
   return ES_PostToService(MyPriority, ThisEvent);
@@ -137,29 +143,29 @@ void setFollowerMode(){
     
     // SDI_1 = RA1
     SPISetup_MapSDInput(Module, SDIPin);
+    ANSELAbits.ANSA1 = 0;           // digital
+    TRISAbits.TRISA1 = 1;           // input
     
-    // SDO_1 = 
+    // SDO_1 = RP8
     SPISetup_MapSDOutput(Module, SDOPin);
-    
+    TRISBbits.TRISB8 = 1;           // input
     
     SPISetup_SetClockIdleState(Module, WhichState);
     SPISetup_SetActiveEdge(Module, WhichEdge);
     SPISetup_SetXferWidth(Module, DataWidth);
     SPISetEnhancedBuffer(Module, false);
     SPISetup_EnableSPI(Module);
-    
+}
+
+void setSPIInterrupt(void){
     // Setting the interrupts
     __builtin_disable_interrupts();
-    IFS1CLR = _IFS1_SPI1RXIF_MASK;
-    IEC1SET = _IEC1_SPI1RXIE_MASK;
+    IFS1CLR = _IFS1_SPI1RXIF_MASK;      // clear pending RX flags
+    IEC1SET = _IEC1_SPI1RXIE_MASK;      // enable RX interrupt
     // multivector is enabled
     INTCONbits.MVEC = 1;                // enable multivector mode
     IPC7bits.SPI1IP = 7;                // interrupt priority is 7
-//    IPC7 = 7;
-    __builtin_enable_interrupts();
-    
-    PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
-    PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
+    __builtin_enable_interrupts();      // enable global interrupts
 }
 
 void __ISR(_SPI_1_VECTOR, IPL7SOFT) ReceiverISR(void){
