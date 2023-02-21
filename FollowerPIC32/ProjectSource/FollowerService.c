@@ -107,21 +107,21 @@ ES_Event_t RunLeaderService(ES_Event_t ThisEvent)
           // Start the communication with command gen
           if ('s' == ThisEvent.EventParam){
               ThisEvent.EventType = ES_START_COM;
-              PostLeaderService(ThisEvent);
+//              PostLeaderService(ThisEvent);
               
           }
           
           // Stop the communication with command generator
           if ('o' == ThisEvent.EventParam){
               ThisEvent.EventType = ES_STOP_COM;
-              PostLeaderService(ThisEvent);
+//              PostLeaderService(ThisEvent);
           }
       }
       break;
       case ES_ButtonDown:
       {
           ThisEvent.EventType = ES_START_COM;
-          PostLeaderService(ThisEvent);
+//          PostLeaderService(ThisEvent);
       }
       
 

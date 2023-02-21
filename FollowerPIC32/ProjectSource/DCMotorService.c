@@ -49,8 +49,8 @@ typedef union{
 static volatile TimeTracker CurrentTime;
 static volatile TimeTracker PrevTime;
 
-static volatile TimeTracker T3CurrentTime = 0;
-static volatile TimeTracker T3PrevTime = 0;
+static volatile TimeTracker T3CurrentTime;
+static volatile TimeTracker T3PrevTime;
 static volatile uint16_t T3RO = 0;
 
 static volatile uint32_t rightPeriod = 0;
@@ -62,12 +62,12 @@ static volatile uint32_t leftPeriod = 0;
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
 void decodeCommand(uint16_t command);   // decode the command
 
-void initRightEncoderISR(void);         // IC1 on RA2
-void initLeftEncoderISR(void);          // IC3 on RB5
-
-void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
-void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
-void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
+//void initRightEncoderISR(void);         // IC1 on RA2
+//void initLeftEncoderISR(void);          // IC3 on RB5
+//
+//void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
+//void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
+//void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
 
 //void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void);
 //void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_InputCapture(void);
@@ -86,8 +86,8 @@ bool InitDCMotorService(uint8_t Priority)
   ANSELBCLR = _ANSELB_ANSB12_MASK;              // set rb12 as digital (EN 34)
   TRISBCLR = _TRISB_TRISB12_MASK;               // set rb12 as output (EN 34)
   
-  TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (4A)
-  TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (2A)
+  TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (A4)
+  TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (B4)
   
   EN12 = 1;                                     // enable the first motor
   EN34 = 1;                                     // enable the second motor
@@ -96,8 +96,8 @@ bool InitDCMotorService(uint8_t Priority)
   // --------------------------------------------------------------------
 
   setPWM();                                     // turn on PWM
-  OC3RS = (uint16_t)(PWM_PERIOD/1);
-  OC4RS = (uint16_t)(PWM_PERIOD/1);
+  OC3RS = (uint16_t)(PWM_PERIOD/4);
+  OC4RS = (uint16_t)(PWM_PERIOD/4);
   
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -142,37 +142,43 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
       case ES_NEW_KEY:{
           if ('0' == ThisEvent.EventParam){
               puts("STOP command\r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x00};
+              ES_Event_t NewEvent = {ES_STOP_MOTORS, 0x00};
               PostDCMotorService(NewEvent);
           }
           
           else if ('1' == ThisEvent.EventParam){
-              puts("CW 90 command\r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x02};
+              puts("CW command\r\n");
+              ES_Event_t NewEvent = {ES_TURN_CW, 50};
               PostDCMotorService(NewEvent);
           }
           
           else if ('2' == ThisEvent.EventParam){
-              puts("CW 45 command\r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x03};
+              puts("CCW command\r\n");
+              ES_Event_t NewEvent = {ES_TURN_CCW, 50};
               PostDCMotorService(NewEvent);
           }
           
           else if ('3' == ThisEvent.EventParam){
-              puts("CCW 90 command\r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x04};
+              puts("FORWARDS FULL command\r\n");
+              ES_Event_t NewEvent = {ES_FORWARD, 100};
               PostDCMotorService(NewEvent);
           }
           
           else if ('4' == ThisEvent.EventParam){
-              puts("FORWARDS FULL command \r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x09};
+              puts("FORWARDS HALF command \r\n");
+              ES_Event_t NewEvent = {ES_FORWARD, 50};
               PostDCMotorService(NewEvent);
           }
           
           else if ('5' == ThisEvent.EventParam){
               puts("BACKWARDS FULL command \r\n");
-              ES_Event_t NewEvent = {ES_NEW_COMMAND, 0x11};
+              ES_Event_t NewEvent = {ES_REVERSE, 100};
+              PostDCMotorService(NewEvent);
+          }
+          
+          else if ('6' == ThisEvent.EventParam){
+              puts("BACKWARDS HALF command \r\n");
+              ES_Event_t NewEvent = {ES_REVERSE, 50};
               PostDCMotorService(NewEvent);
           }
           
@@ -190,6 +196,36 @@ ES_Event_t RunDCMotorService(ES_Event_t ThisEvent)
       }
       break;
       
+      case ES_STOP_MOTORS:{
+          setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+          setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+      }
+      break;
+      
+      case ES_TURN_CCW:{
+          setMotorSpeed(RIGHT_MOTOR, FORWARD, ThisEvent.EventParam);
+          setMotorSpeed(LEFT_MOTOR, BACKWARD, ThisEvent.EventParam);
+      }
+      break;
+      
+      case ES_TURN_CW:{
+          setMotorSpeed(RIGHT_MOTOR, BACKWARD, ThisEvent.EventParam);
+          setMotorSpeed(LEFT_MOTOR, FORWARD, ThisEvent.EventParam);
+      }
+      break;
+      
+      case ES_FORWARD:{
+          setMotorSpeed(RIGHT_MOTOR, FORWARD, ThisEvent.EventParam);
+          setMotorSpeed(LEFT_MOTOR, FORWARD, ThisEvent.EventParam);
+      }
+      break;
+      
+      case ES_REVERSE:{
+          setMotorSpeed(RIGHT_MOTOR, BACKWARD, ThisEvent.EventParam);
+          setMotorSpeed(LEFT_MOTOR, BACKWARD, ThisEvent.EventParam);
+      }
+      break;
+
       case ES_NEW_COMMAND:{          
           decodeCommand(ThisEvent.EventParam);      // decode the command
           DB_printf("Current command = %x\r\n", ThisEvent.EventParam);
@@ -421,75 +457,75 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 }
 
 
-void initRightEncoderISR(void){
-    // -------------------------- IC 1 -----------------------------------
-    __builtin_disable_interrupts();         // disable global interrupts
-    IC1CONbits.ON = 0;                      // turn of IC3
-    INTCONbits.MVEC = 1;                    // enable multivector mode
-    IC1R = 0b0000;                          // map IC1 to RA2
-    TRISAbits.TRISA4 = 1;                   // set RA2 as input
-    IPC1bits.IC1IP = 7;                     // priority 7
-    IC1CONbits.SIDL = 0;                    // active in idle mode
-    IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
-    IC1CONbits.ICTMR = 0;                   // timer 3 is time base
-    IC1CONbits.ICM = 0b011;                 // every rising edge
-    IC1CONbits.FEDGE = 1;                   // first edge is rising
-    IC1CONbits.C32 = 0;                     // 16 bit mode
-    IC1CONbits.ON = 1;                      // turn on IC1 interrupt
-    __builtin_enable_interrupts();          // enable global interrupts
-    // -------------------------------------------------------------------
-}
-
-void initLeftEncoderISR(void){
-    // -------------------------- IC 3 -----------------------------------
-    __builtin_disable_interrupts();         // disable global interrupts
-    IC3CONbits.ON = 0;                      // turn of IC3
-    INTCONbits.MVEC = 1;                    // enable multivector mode
-    IC3R = 0b0001;                          // map IC3 to RB5
-    TRISBbits.TRISB5 = 1;                   // set RA2 as input
-    IPC3bits.IC3IP = 7;                     // priority 7
-    IC3CONbits.SIDL = 0;                    // active in idle mode
-    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
-    IC3CONbits.ICTMR = 0;                   // timer 3 is time base
-    IC3CONbits.ICM = 0b011;                 // every rising edge
-    IC3CONbits.FEDGE = 1;                   // first edge is rising
-    IC3CONbits.C32 = 0;                     // 16 bit mode
-    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
-    __builtin_enable_interrupts();          // enable global interrupts
-    // -------------------------------------------------------------------
-}
-
-void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
-    
-}
-
-void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
-    static uint16_t thisTime = 0;           // current timer value
-    
-    do {
-        thisTime = (uint16_t)IC3BUF;        // read the buffer
-        
-        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
-            IC3RO++;                        // increment rollover counter
-            IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
-        }
-        IC3CurrentTime.ByTime.RollOver = T3RO;  // update rollover
-        IC3CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
-        
-    } while(IC3CONbits.ICBNE != 0);
-}
-
-void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
-    __builtin_disable_interrupts();         // disable global interrupts
-    
-    if (1 == IFS0bits.T3IF){
-        T3RO++;                               // increment rollover
-        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
-    }
-    T3CurrentTime.ByTime.RollOver = T3RO;       // store new rollover
-    
-    __builtin_enable_interrupts();          // enable global interrupts
-}
+//void initRightEncoderISR(void){
+//    // -------------------------- IC 1 -----------------------------------
+//    __builtin_disable_interrupts();         // disable global interrupts
+//    IC1CONbits.ON = 0;                      // turn of IC3
+//    INTCONbits.MVEC = 1;                    // enable multivector mode
+//    IC1R = 0b0000;                          // map IC1 to RA2
+//    TRISAbits.TRISA4 = 1;                   // set RA2 as input
+//    IPC1bits.IC1IP = 7;                     // priority 7
+//    IC1CONbits.SIDL = 0;                    // active in idle mode
+//    IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
+//    IC1CONbits.ICTMR = 0;                   // timer 3 is time base
+//    IC1CONbits.ICM = 0b011;                 // every rising edge
+//    IC1CONbits.FEDGE = 1;                   // first edge is rising
+//    IC1CONbits.C32 = 0;                     // 16 bit mode
+//    IC1CONbits.ON = 1;                      // turn on IC1 interrupt
+//    __builtin_enable_interrupts();          // enable global interrupts
+//    // -------------------------------------------------------------------
+//}
+//
+//void initLeftEncoderISR(void){
+//    // -------------------------- IC 3 -----------------------------------
+//    __builtin_disable_interrupts();         // disable global interrupts
+//    IC3CONbits.ON = 0;                      // turn of IC3
+//    INTCONbits.MVEC = 1;                    // enable multivector mode
+//    IC3R = 0b0001;                          // map IC3 to RB5
+//    TRISBbits.TRISB5 = 1;                   // set RA2 as input
+//    IPC3bits.IC3IP = 7;                     // priority 7
+//    IC3CONbits.SIDL = 0;                    // active in idle mode
+//    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
+//    IC3CONbits.ICTMR = 0;                   // timer 3 is time base
+//    IC3CONbits.ICM = 0b011;                 // every rising edge
+//    IC3CONbits.FEDGE = 1;                   // first edge is rising
+//    IC3CONbits.C32 = 0;                     // 16 bit mode
+//    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
+//    __builtin_enable_interrupts();          // enable global interrupts
+//    // -------------------------------------------------------------------
+//}
+//
+//void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
+//    
+//}
+//
+//void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
+//    static uint16_t thisTime = 0;           // current timer value
+//    
+//    do {
+//        thisTime = (uint16_t)IC3BUF;        // read the buffer
+//        
+//        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
+//            IC3RO++;                        // increment rollover counter
+//            IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
+//        }
+//        IC3CurrentTime.ByTime.RollOver = T3RO;  // update rollover
+//        IC3CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
+//        
+//    } while(IC3CONbits.ICBNE != 0);
+//}
+//
+//void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
+//    __builtin_disable_interrupts();         // disable global interrupts
+//    
+//    if (1 == IFS0bits.T3IF){
+//        T3RO++;                               // increment rollover
+//        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
+//    }
+//    T3CurrentTime.ByTime.RollOver = T3RO;       // store new rollover
+//    
+//    __builtin_enable_interrupts();          // enable global interrupts
+//}
 
 //void __ISR(_TIMER_2_VECTOR, IPL6SOFT) ISR_RollOver(void){
 //    __builtin_disable_interrupts();         // disable global interrupts
