@@ -19,7 +19,8 @@ typedef union
 } SPI_Event_t;
 
 static uint16_t QUERY_FOLLOWER_WORD = 0xAAAA;
-static uint16_t NO_EVENT_WORD = 0xAAAA;
+/* SDI line is idle-high, which is indicated by 0xFFFF. */
+static uint16_t NO_EVENT_WORD = 0xFFFF;
 
 /* Queue for follower events to leader. */
 static uint16_t wordQueue[100];
@@ -73,8 +74,10 @@ void InitEventOverSPI(bool isDriveMaster)
   __builtin_disable_interrupts();
   IFS1CLR = _IFS1_SPI1RXIF_MASK;
   IEC1SET = _IEC1_SPI1RXIE_MASK;
-  INTCONbits.MVEC = 1;                // enable multivector mode
-  IPC7bits.SPI1IP = 7;                // interrupt priority is 7
+  // enable multivector mode
+  INTCONbits.MVEC = 1;
+  // Interrupt priority. Match with IPL of ISR.
+  IPC7bits.SPI1IP = 6;
   __builtin_enable_interrupts();
   
   PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
@@ -109,7 +112,7 @@ static bool FitsIn8Bits(uint16_t data)
 }
 
 /* Notify service that an event from the other PIC has arrived. */
-void __ISR(_SPI_1_VECTOR, IPL7SOFT) ISR_EventOverSPI(void)
+void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
 {
   IFS1CLR = _IFS1_SPI1RXIF_MASK;
   uint16_t word = SPI1BUF;
@@ -124,7 +127,8 @@ void __ISR(_SPI_1_VECTOR, IPL7SOFT) ISR_EventOverSPI(void)
     if (word != NO_EVENT_WORD)
     {
       ES_PostAll(e);
-      SPIOperate_SPI1_Send16Wait(QUERY_FOLLOWER_WORD);
+      // TODO: logic incorrect
+      // SPIOperate_SPI1_Send16Wait(QUERY_FOLLOWER_WORD);
     }
   }
   else
@@ -136,11 +140,12 @@ void __ISR(_SPI_1_VECTOR, IPL7SOFT) ISR_EventOverSPI(void)
     }
 
     // Post a queued event to leader
-    if (wordQueueSize == 0)
-    {
-      SPIOperate_SPI1_Send16Wait(NO_EVENT_WORD);
-    }
-    else
+    // if (wordQueueSize == 0)
+    // {
+    //   SPIOperate_SPI1_Send16Wait(NO_EVENT_WORD);
+    // }
+    // else
+    if (wordQueueSize > 0)
     {
       SPIOperate_SPI1_Send16Wait(wordQueue[0]);
       // TODO expensive, use circular buffer?
