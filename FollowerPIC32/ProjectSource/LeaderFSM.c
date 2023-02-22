@@ -18,7 +18,7 @@ bool InitLeaderFSM(uint8_t Priority)
 {
   MyPriority = Priority;
   CurrentState = InitPState_LeaderFSM;
-
+  
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
   return ES_PostToService(MyPriority, ThisEvent);
@@ -71,6 +71,7 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
     case AlignWithBeacon_LeaderFSM:{
       if (ES_NEW_KEY == ThisEvent.EventType){
         if ('a' == ThisEvent.EventParam){
+            puts("a was pressed, now aligning with beacon\r\n");
           NextState = AlignWithBeacon_LeaderFSM;        // stay in current state
 
           ES_Event_t AlignEvent = {ES_BEGIN_ALIGN};
@@ -93,6 +94,7 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
       }
 
       else if (ES_BEGIN_ALIGN == ThisEvent.EventType){
+          puts("asdfasdfds\r\n");
         NextState = AlignWithBeacon_LeaderFSM;          // stay in current state
 
         // turn CW until local beacon is found
@@ -105,7 +107,7 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
       else if (ES_FOUND_BEACON_B == ThisEvent.EventType){
         // turn off motors
         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 25);
 
         NextState = Idle_LeaderFSM;                     // next state is idling
 
@@ -115,7 +117,7 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
       else if (ES_FOUND_BEACON_C == ThisEvent.EventType){
         // turn off motors
         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
 
         NextState = Idle_LeaderFSM;                     // next state is idling
 

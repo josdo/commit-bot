@@ -59,7 +59,6 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
 
 void InitDCMotor()
 {
-  
   // ----------------------- Set up DC Motor pins ----------------------- 
   TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (L2)
   TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (R2)
@@ -72,20 +71,25 @@ void InitDCMotor()
   // ------------------------------- PWM ----------------------------------
   setPWM();                                     // turn on PWM
   OC3RS = (uint16_t)(0);                        // initial speed is 0
-  OC4RS = (uint16_t)(0);                        // initial speed is 0
+  OC2RS = (uint16_t)(0);                        // initial speed is 0
   // ----------------------------------------------------------------------
   
   
   // ---------------------------- Init IC for encoders ---------------------
-  initRightEncoderISR();         // IC1 on RA2
-  initLeftEncoderISR();          // IC3 on RB5
+//  initRightEncoderISR();         // IC1 on RA2
+//  initLeftEncoderISR();          // IC3 on RB5
   // ----------------------------------------------------------------------
   DB_printf("\rES_INIT received in DC Motor  %d\r\n");
-
 }
 
 // ---------------------------- Private Functions -----------------------------
 void setPWM(void){
+    // -------------------- Set PWM pins as digital output ----------------
+    TRISBbits.TRISB10 = 0;                  // RB10 is output R
+    TRISBbits.TRISB11 = 0;                  // RB11 is output L
+    // --------------------------------------------------------------------
+    
+    
   // --------------------- Timer 3 --------------------- 
   //switching the timer 3 off
   T3CONbits.ON = 0;
@@ -113,36 +117,36 @@ void setPWM(void){
   OC3RS = 0;
   // -------------------------------------------------------
   
-  // --------------------- Channel 4 --------------------- 
+  // --------------------- Channel 2 --------------------- 
   // switching off the output compare module
-  OC4CONbits.ON = 0;
+  OC2CONbits.ON = 0;
   // selecting timer for the output compare mode
-  OC4CONbits.OCTSEL = 1;
+  OC2CONbits.OCTSEL = 1;
   // set PWM mode with no fault
-  OC4CONbits.OCM = 0b110;
+  OC2CONbits.OCM = 0b110;
   // set the timer to 16 bits
-  OC4CONbits.OC32 = 0;
+  OC2CONbits.OC32 = 0;
   // set the initial cycle 
-  OC4R = 0;
+  OC2R = 0;
   // set the repeating cycle
-  OC4RS = 0;
+  OC2RS = 0;
   // -------------------------------------------------------
   
   // mapping output compare channel to pins
-  RPB10R = 0b0101;                          // pin 21
-  RPB13R = 0b0101;                          // pin 24
+  RPB10R = 0b0101;                          // RB10 (pin 21) to OC3 RIGHT
+  RPB11R = 0b0101;                          // RB11 (pin 22) to OC2 LEFT
   
   // switch on the output compare module
   OC3CONbits.ON = 1;
   
   // switch on the output compare module
-  OC4CONbits.ON = 1;
-  
-  // turn on the timer 3
-  T3CONbits.ON = 1;
+  OC2CONbits.ON = 1;
   
   // setting period on the timer
   PR3 = PWM_PERIOD;
+  
+  // turn on the timer 3
+  T3CONbits.ON = 1; 
 }
 
 
@@ -152,18 +156,18 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
        R2 = 0;
        L2 = 0;
        OC3RS = 0;
-       OC4RS = 0;
+       OC2RS = 0;
     }
     
     else if (LEFT_MOTOR == whichMotor){
         L2 = whichDirection;
         
         if (FORWARD == whichDirection){
-            OC4RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
+            OC2RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
         }
         
         else {
-            OC4RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
+            OC2RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
         }
     }
     

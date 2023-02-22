@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 1
+#define NUM_SERVICES 2
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -43,6 +43,7 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
+
 #define SERV_0_HEADER "TestHarnessService0.h"
 // the name of the Init function
 #define SERV_0_INIT InitTestHarnessService0
@@ -59,13 +60,13 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "DCMotorService.h"
+#define SERV_1_HEADER "LeaderFSM.h"
 // the name of the Init function
-#define SERV_1_INIT InitDCMotorService
+#define SERV_1_INIT InitLeaderFSM
 // the name of the run function
-#define SERV_1_RUN RunDCMotorService
+#define SERV_1_RUN RunLeaderFSM
 // How big should this services Queue be?
-#define SERV_1_QUEUE_SIZE 3
+#define SERV_1_QUEUE_SIZE 4
 #endif
 
 /****************************************************************************/
