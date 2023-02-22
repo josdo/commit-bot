@@ -5,15 +5,11 @@
 #include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
-#define EN12 LATBbits.LATB11                            // Enable pin 1,2
-#define EN34 LATBbits.LATB12                            // Enable pin 3,4
-
-#define A2 LATBbits.LATB4                               // non PWM control pin
-#define A4 LATAbits.LATA4                               // non PWM control pin
+#define R2 LATBbits.LATB4                               // right direction pin
+#define L2 LATAbits.LATA4                               // left direction pin
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 10000                                  // in Hz
-
 
 #define PBCLK_RATE 20000000L
 
@@ -65,18 +61,11 @@ void InitDCMotor()
 {
   
   // ----------------------- Set up DC Motor pins ----------------------- 
-  TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
+  TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (L2)
+  TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (R2)
   
-  ANSELBCLR = _ANSELB_ANSB12_MASK;              // set rb12 as digital (EN 34)
-  TRISBCLR = _TRISB_TRISB12_MASK;               // set rb12 as output (EN 34)
-  
-  TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (A4)
-  TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (B4)
-  
-  EN12 = 1;                                     // enable the first motor
-  EN34 = 1;                                     // enable the second motor
-  A2 = 0;
-  A4 = 0;
+  R2 = 0;                                       // right direction
+  L2 = 0;                                       // left direction
   // --------------------------------------------------------------------
 
   
@@ -160,17 +149,14 @@ void setPWM(void){
 
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
     if (0 == dutyCycle){
-       EN12 = 0;
-       EN34 = 0;
-       A2 = 0;
-       A4 = 0;
+       R2 = 0;
+       L2 = 0;
        OC3RS = 0;
        OC4RS = 0;
     }
     
     else if (LEFT_MOTOR == whichMotor){
-        EN34 = 1;
-        A4 = whichDirection;
+        L2 = whichDirection;
         
         if (FORWARD == whichDirection){
             OC4RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
@@ -182,8 +168,7 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
     }
     
     else if (RIGHT_MOTOR == whichMotor){
-        EN12 = 1;
-        A2 = whichDirection;
+        R2 = whichDirection;
         
         if (FORWARD == whichDirection){
             OC3RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
