@@ -60,6 +60,8 @@
       <itemPath>FrameworkHeaders/TapeSensor.h</itemPath>
       <itemPath>FrameworkHeaders/BeaconSensor.h</itemPath>
       <itemPath>FrameworkHeaders/InitTimer2.h</itemPath>
+      <itemPath>FrameworkHeaders/LeaderFSM.h</itemPath>
+      <itemPath>ProjectHeaders/TemplateFSM.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -81,6 +83,8 @@
       <itemPath>FrameworkHeaders/TapeSensor.c</itemPath>
       <itemPath>FrameworkHeaders/BeaconSensor.c</itemPath>
       <itemPath>FrameworkHeaders/InitTimer2.c</itemPath>
+      <itemPath>ProjectSource/TemplateFSM.c</itemPath>
+      <itemPath>FrameworkHeaders/LeaderFSM.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
