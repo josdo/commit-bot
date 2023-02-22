@@ -3,10 +3,16 @@
 #include "LeaderFSM.h"
 #include "../Shared/ES_Shared_Configure.h"
 
+// ----------------------------- module vars ----------------------------
 static LeaderFSMState_t CurrentState;
 static LeaderFSMState_t NextState;
 
 static uint8_t MyPriority;
+
+const uint8_t NUM_VALID_BEACON_PULSE = 2;     // num of valid beacon pulses
+static uint8_t numBeaconA = 0;                // num valid beacon A pulses
+static uint8_t numBeaconB = 0;                // num valid beacon B pulses
+// -----------------------------------------------------------------------
 
 bool InitLeaderFSM(uint8_t Priority)
 {
