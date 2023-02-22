@@ -9,7 +9,7 @@
 #include "dbprintf.h"
 #include <sys/attribs.h>
 #include "FollowerService.h"
-#include "DCMotorService.h"
+#include "DCMotor.h"
 
 // ----------------------------- Module Functions ------------------------
 void setFollowerMode(void);

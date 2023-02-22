@@ -1,22 +1,8 @@
-#ifndef DCMotorService_H
-#define DCMotorService_H
+#ifndef DCMotor_H
+#define DCMotor_H
 
 #include "ES_Types.h"
 
-typedef enum{
-    STOP = 0,
-    CW_90,
-    CW_45,
-    CCW_90,
-    CCW_45,
-    FORWARD_HALF,
-    FORWARD_FULL,
-    BACKWARD_HALF,
-    BACKWARD_FULL,
-    BEACON,  
-    TAPE,
-    NA
-} Commands_t;
 
 typedef enum{
     LEFT_MOTOR = 0,
@@ -37,7 +23,7 @@ Description:
      Saves away the priority, sets up the initial transition and does any
      other required initialization for this state machine
 */
-bool InitDCMotorService(uint8_t Priority);
+void InitDCMotor(void);
 
 /*
 Params: 
@@ -47,7 +33,6 @@ Return:
 Description:
   Posts an event to this state machine's queue
 */
-bool PostDCMotorService(ES_Event_t ThisEvent);
 
 /*
 Params: 
@@ -57,9 +42,9 @@ Return:
 Description:
   returns the current state of the Template state machine
 */
-ES_Event_t RunDCMotorService(ES_Event_t ThisEvent);
 
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle);
 
+float getVelError(void);
 #endif /* TemplateService_H */
 

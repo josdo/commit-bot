@@ -43,11 +43,11 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
-#define SERV_0_HEADER "DCMotorService.h"
+#define SERV_0_HEADER "TestHarnessService0.h"
 // the name of the Init function
-#define SERV_0_INIT InitDCMotorService
+#define SERV_0_INIT InitTestHarnessService0
 // the name of the run function
-#define SERV_0_RUN RunDCMotorService
+#define SERV_0_RUN RunTestHarnessService0
 // How big should this services Queue be?
 #define SERV_0_QUEUE_SIZE 5
 

@@ -12,7 +12,7 @@
 
 #include "ES_Configure.h"
 
-#include SERV_0_HEADER
+DCMotor
 
 #if NUM_SERVICES > 1
 #include SERV_1_HEADER
