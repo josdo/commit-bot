@@ -26,7 +26,9 @@ typedef enum
   ES_STOP_OPTO,
   ES_FOLLOWER_SPI_EVENT,
   ES_TEST_TO_FOLLOWER,
-  ES_TEST_TO_LEADER
+  ES_TEST_TO_LEADER,
+  /* Keep at the end of enum for knowing valid events in EventOverSPI. */
+  NUM_ES_EVENTS
 }ES_EventType_t;
 
 #endif

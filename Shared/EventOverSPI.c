@@ -12,11 +12,10 @@ static bool isLeader;
 /* Word that leader sends to pump any event stored in the follower. */
 static uint16_t QUERY_WORD = 0xAAAA;
 /* The default word in the follower's SPIBUF when no event is to be sent. 
-   This value is also the default high value when the follower PIC is off
+   This value is also the default low value when the follower PIC is off
    so it should be robust to the follower being off. 
    TODO: test this robustness. */
-// static uint16_t NO_LEFTOVER_WORD = 0xFFFF;
-static uint16_t NO_LEFTOVER_WORD = 0xDDDD;
+static uint16_t NO_LEFTOVER_WORD = 0;
 
 /* True if a follower event is stored in the SPIBUF. */
 static bool followerBUFIsEmpty = true;
@@ -105,19 +104,24 @@ bool PostEventOverSPI(ES_Event_t e)
   if (isLeader)
   {
     SPIOperate_SPI1_Send16Wait(se.w);
+    // SPIOperate_SPI1_Send16Wait(QUERY_WORD);
   }
   else
   {
     if (followerBUFIsEmpty)
     {
+      // SPISetup_DisableSPI(SPI_SPI1);
       SPI1BUF = se.w;
-      DB_printf("SPI1BUF after being set: %d\r\n", (uint16_t) SPI1BUF);
+      // SPISetup_EnableSPI(SPI_SPI1);
+      DB_printf("PostEventOverSPI, follower: set BUF to %x\r\n", se.w);
       followerBUFIsEmpty = false;
     }
     else
     {
       followerQueue[followerQueueSize] = se.w;
       followerQueueSize++;
+      DB_printf("PostEventOverSPI, follower: queued %x\r\n", se.w);
+      DB_printf("PostEventOverSPI, follower: queue size now %d\r\n", followerQueueSize);
     }
   }
   return true;
@@ -146,9 +150,15 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
   {
     if (word == NO_LEFTOVER_WORD)
     {
-      // DB_printf("ISR_EventOverSPI, leader: got NO_LEFTOVER_WORD.\r\n");
+      DB_printf("ISR_EventOverSPI, leader: got NO_LEFTOVER_WORD.\r\n");
       return;
     }
+    else if (e.EventType >= NUM_ES_EVENTS)
+    {
+      DB_printf("ISR_EventOverSPI, leader: got invalid word %x.\r\n", word);
+      return;
+    }
+    DB_printf("ISR_EventOverSPI, leader: got word %x\r\n", word);
 
     ES_PostAll(e);
     SPIOperate_SPI1_Send16Wait(QUERY_WORD);
@@ -161,23 +171,32 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
     }
 
     /* At this point, any event that was stored into the SPIBUF has already 
-       been pumped out with the receipt of thee current word from the leader,
+       been pumped out with the receipt of the current word from the leader,
        so the SPIBUF can store the next word to send the leader. */
+
     if (followerQueueSize == 0)
     {
+      // SPISetup_DisableSPI(SPI_SPI1);
       SPI1BUF = NO_LEFTOVER_WORD;
+      // SPISetup_EnableSPI(SPI_SPI1);
+      DB_printf("ISR_EventOverSPI, follower: SPI1BUF set to NO_LEFTOVER_WORD %x\r\n", NO_LEFTOVER_WORD);
       followerBUFIsEmpty = true;
     }
     else
     {
+      // SPISetup_DisableSPI(SPI_SPI1);
       SPI1BUF = followerQueue[0];
+      // SPISetup_EnableSPI(SPI_SPI1);
+      DB_printf("ISR_EventOverSPI, follower: SPI1BUF set to %x\r\n", followerQueue[0]);
       followerBUFIsEmpty = false;
       // TODO expensive operation on the follower PIC, use circular buffer?
+      followerQueueSize--;
       for (uint32_t i = 0; i < followerQueueSize; i++)
       {
+        DB_printf("  Shifted queue up\r\n");
         followerQueue[i] = followerQueue[i + 1];
       }
-      followerQueueSize--;
+      DB_printf("ISR_EventOverSPI, follower: queue size now %d\r\n", followerQueueSize);
     }
   }
 }

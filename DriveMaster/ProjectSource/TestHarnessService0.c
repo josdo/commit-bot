@@ -68,7 +68,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
     case ES_NEW_KEY:   // announce
     {
-     DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
+     DB_printf("\n\r\n\rES_NEW_KEY received with -> %c <- in Service 0\r\n",
          (char)ThisEvent.EventParam);
       if ('f' == ThisEvent.EventParam)
       {
