@@ -49,7 +49,7 @@
 // the name of the run function
 #define SERV_0_RUN RunTestHarnessService0
 // How big should this services Queue be?
-#define SERV_0_QUEUE_SIZE 5
+#define SERV_0_QUEUE_SIZE 20
 
 /****************************************************************************/
 // The following sections are used to define the parameters for each of the

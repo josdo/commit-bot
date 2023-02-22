@@ -78,6 +78,13 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       }
     }
     break;
+
+    default:
+    {
+      /* Likely received an erroneous event over SPI. */
+      DB_printf("TestHarness ERROR: Unrecognized event received (word %2x%2x) (evt %d) \r\n", 
+          ThisEvent.EventType, ThisEvent.EventParam, ThisEvent.EventType);
+    }
   }
 
   return ReturnEvent;
