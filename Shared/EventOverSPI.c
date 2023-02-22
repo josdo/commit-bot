@@ -16,9 +16,10 @@ static uint16_t QUERY_WORD = 0xAAAA;
    This value is also the default low value when the follower is not sending. */
 static uint16_t NO_LEFTOVER_WORD = 0;
 
-/* Queue for follower events. */
+/* Queue for follower events. Dequeuing exclusively in the ISR. */
 static uint16_t followerQueue[100];
 static uint32_t followerQueueSize = 0;
+static uint32_t followerQueueFront = 0; // Owned and reset by the ISR.
 
 static bool FitsIn8Bits(uint16_t data);
 
@@ -35,7 +36,7 @@ void InitEventOverSPI(bool isDriveMaster)
   // SPI setup
   SPI_Module_t Module = SPI_SPI1;
   SPI_SamplePhase_t Phase = SPI_SMP_MID;
-  // uint32_t SPI_ClkPeriodIn_ns = 10000;
+  // uint32_t SPI_ClkPeriodIn_ns = 10000; // 100 KHz clock
   uint32_t SPI_ClkPeriodIn_ns = 100000; // 10 KHz clock
   SPI_PinMap_t SSPin = SPI_RPA0;
   SPI_PinMap_t SDIPin = SPI_RPB8;
@@ -133,18 +134,20 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
   {
     if (word == NO_LEFTOVER_WORD)
     {
-      DB_printf("ISR_EventOverSPI, leader: got NO_LEFTOVER_WORD.\r\n");
+      // DB_printf("ISR_EventOverSPI, leader: got NO_LEFTOVER_WORD.\r\n");
       return;
     }
     else if (e.EventType >= NUM_ES_EVENTS)
     {
-      DB_printf("ISR_EventOverSPI, leader: got invalid word %x.\r\n", word);
+      // DB_printf("ISR_EventOverSPI, leader: got invalid word %x.\r\n", word);
       return;
     }
-    DB_printf("ISR_EventOverSPI, leader: got word %x\r\n", word);
+    // for(int32_t i = 0; i < 2000; i++){};
+    // DB_printf("ISR_EventOverSPI, leader: got word %x\r\n", word);
 
     ES_PostAll(e);
-    SPIOperate_SPI1_Send16Wait(QUERY_WORD);
+    // SPIOperate_SPI1_Send16Wait(QUERY_WORD);
+    SPIOperate_SPI1_Send16(QUERY_WORD);
   }
   else
   {
@@ -157,22 +160,19 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
        been pumped out with the receipt of the current word from the leader,
        so the SPIBUF can store the next word to send the leader. */
 
-    if (followerQueueSize == 0)
+    if (followerQueueSize == followerQueueFront)
     {
       SPI1BUF = NO_LEFTOVER_WORD;
+      followerQueueSize = 0;
+      followerQueueFront = 0;
       // DB_printf("ISR_EventOverSPI, follower: SPI1BUF set to NO_LEFTOVER_WORD %x\r\n", NO_LEFTOVER_WORD);
     }
     else
     {
-      SPI1BUF = followerQueue[0];
+      SPI1BUF = followerQueue[followerQueueFront];
       // DB_printf("ISR_EventOverSPI, follower: SPI1BUF set to %x\r\n", followerQueue[0]);
-      // TODO expensive operation on the follower PIC, use circular buffer?
-      followerQueueSize--;
-      for (uint32_t i = 0; i < followerQueueSize; i++)
-      {
-        followerQueue[i] = followerQueue[i + 1];
-      }
-      // DB_printf("ISR_EventOverSPI, follower: queue size now %d\r\n", followerQueueSize);
+
+      followerQueueFront++;
     }
   }
 }
