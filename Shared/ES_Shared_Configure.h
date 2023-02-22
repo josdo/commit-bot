@@ -31,6 +31,7 @@ typedef enum
   ES_TURN_CW,
   ES_FORWARD,
   ES_REVERSE,
+  ES_BEGIN_ALIGN
 }ES_EventType_t;
 
 #endif
