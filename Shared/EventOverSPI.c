@@ -9,17 +9,26 @@
 
 static bool isLeader;
 
-static uint16_t QUERY_FOLLOWER_WORD = 0xAAAA;
-/* SDI line is idle-high, which is indicated by 0xFFFF. */
-static uint16_t NO_EVENT_WORD = 0xFFFF;
+/* Word that leader sends to pump any event stored in the follower. */
+static uint16_t QUERY_WORD = 0xAAAA;
+/* The default word in the follower's SPIBUF when no event is to be sent. 
+   This value is also the default high value when the follower PIC is off
+   so it should be robust to the follower being off. 
+   TODO: test this robustness. */
+// static uint16_t NO_LEFTOVER_WORD = 0xFFFF;
+static uint16_t NO_LEFTOVER_WORD = 0xDDDD;
 
-/* Queue for follower events to leader. */
-static uint16_t wordQueue[100];
-static uint32_t wordQueueSize = 0;
+/* True if a follower event is stored in the SPIBUF. */
+static bool followerBUFIsEmpty = true;
+
+/* Queue for additional follower events after the one stored in the SPIBUF.
+   The total number of events to send is followerBUFIsEmpty + followerQueueSize. */
+static uint16_t followerQueue[100];
+static uint32_t followerQueueSize = 0;
 
 static bool FitsIn8Bits(uint16_t data);
 
-/* Initialize SPI 1 to leader or follower mode with 16 bit data 
+/* Initialize SPI 1 to leader or follower mode with 16 bit words, 100 kHz clock, 
    and enhanced mode on. */
 void InitEventOverSPI(bool isDriveMaster)
 {
@@ -60,6 +69,9 @@ void InitEventOverSPI(bool isDriveMaster)
   SPISetup_SetActiveEdge(Module, WhichEdge);
   SPISetup_SetXferWidth(Module, DataWidth);
   SPISetEnhancedBuffer(Module, false);
+  // /* Initialize SPIBUF to empty status. */
+  // // TODO: make work
+  // SPI1BUF = NO_LEFTOVER_WORD;
   SPISetup_EnableSPI(Module);
 
   __builtin_disable_interrupts();
@@ -73,10 +85,15 @@ void InitEventOverSPI(bool isDriveMaster)
   
   PortSetup_ConfigureDigitalOutputs(_Port_A, _Pin_0 | _Pin_1);
   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_8);
+
 }
 
-/* Encode event into 16 bits and send over SPI. Return true if successful, false otherwise. */
-bool PostToOther(ES_Event_t e)
+/* Posts the event to the other PIC. If a leader, sends the event immediately.
+   If a follower, queues the event directly into the SPIBUF or into a separate queue
+   that the ISR_EventOverSPI will send to the leader.
+
+   Encodes event into 16 bits. Return true if successful, false otherwise. */
+bool PostEventOverSPI(ES_Event_t e)
 {
   if (!FitsIn8Bits(e.EventParam) || !FitsIn8Bits(e.EventType))
   {
@@ -91,8 +108,17 @@ bool PostToOther(ES_Event_t e)
   }
   else
   {
-    wordQueue[wordQueueSize] = se.w;
-    wordQueueSize++;
+    if (followerBUFIsEmpty)
+    {
+      SPI1BUF = se.w;
+      DB_printf("SPI1BUF after being set: %d\r\n", (uint16_t) SPI1BUF);
+      followerBUFIsEmpty = false;
+    }
+    else
+    {
+      followerQueue[followerQueueSize] = se.w;
+      followerQueueSize++;
+    }
   }
   return true;
 }
@@ -102,7 +128,11 @@ static bool FitsIn8Bits(uint16_t data)
   return (0 <= data <= 0xff);
 }
 
-/* Notify service that an event from the other PIC has arrived. */
+/* Posts the received event over SPI to all services on this PIC.
+   On interrupt, the follower writes its next queued up event to the SPIBUF, or
+   NO_LEFTOVER_WORD when it runs out.
+   On interrupt, the leader checks if it is NO_LEFTOVER_WORD. If not, the leader 
+   sends QUERY_WORD in case any more events are queued up in the follower. */
 void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
 {
   uint16_t word = SPI1BUF;
@@ -112,34 +142,42 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
   se.w = word;
   ES_Event_t e = {(ES_EventType_t) se.EventType, (uint16_t) se.EventParam};
 
-  if (word == NO_EVENT_WORD)
-    return;
-
   if (isLeader)
   {
-    // Post event from follower and query follower for any more events
+    if (word == NO_LEFTOVER_WORD)
+    {
+      // DB_printf("ISR_EventOverSPI, leader: got NO_LEFTOVER_WORD.\r\n");
+      return;
+    }
+
     ES_PostAll(e);
-    // TODO: logic incorrect
-    // SPIOperate_SPI1_Send16Wait(QUERY_FOLLOWER_WORD);
+    SPIOperate_SPI1_Send16Wait(QUERY_WORD);
   }
   else
   {
-    // Post event from leader
-    if (word != QUERY_FOLLOWER_WORD)
+    if (word != QUERY_WORD)
     {
       ES_PostAll(e);
     }
 
-    // Post a queued event to leader
-    if (wordQueueSize > 0)
+    /* At this point, any event that was stored into the SPIBUF has already 
+       been pumped out with the receipt of thee current word from the leader,
+       so the SPIBUF can store the next word to send the leader. */
+    if (followerQueueSize == 0)
     {
-      SPIOperate_SPI1_Send16Wait(wordQueue[0]);
-      // TODO expensive, use circular buffer?
-      for (uint32_t i = 0; i < wordQueueSize - 1; i++)
+      SPI1BUF = NO_LEFTOVER_WORD;
+      followerBUFIsEmpty = true;
+    }
+    else
+    {
+      SPI1BUF = followerQueue[0];
+      followerBUFIsEmpty = false;
+      // TODO expensive operation on the follower PIC, use circular buffer?
+      for (uint32_t i = 0; i < followerQueueSize; i++)
       {
-        wordQueue[i] = wordQueue[i + 1];
+        followerQueue[i] = followerQueue[i + 1];
       }
-      wordQueueSize--;
+      followerQueueSize--;
     }
   }
 }

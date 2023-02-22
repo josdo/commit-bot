@@ -59,6 +59,13 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     }
     break;
 
+    case ES_TEST_TO_LEADER:
+    {
+      DB_printf("ES_TEST_TO_LEADER received with param -> %u <-\r\n",
+          ThisEvent.EventParam);
+    }
+    break;
+
     case ES_NEW_KEY:   // announce
     {
      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
@@ -67,7 +74,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       {
         DB_printf("Posting test event to follower\n\r");
         ES_Event_t e = {ES_TEST_TO_FOLLOWER, 204};
-        PostToOther(e);
+        PostEventOverSPI(e);
       }
     }
     break;

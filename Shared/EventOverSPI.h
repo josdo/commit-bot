@@ -12,4 +12,4 @@ typedef union
 } SPI_Event_t;
 
 void InitEventOverSPI(bool isDriveMaster);
-bool PostToOther(ES_Event_t e);
+bool PostEventOverSPI(ES_Event_t e);

@@ -60,7 +60,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
     case ES_TEST_TO_FOLLOWER:
     {
-      DB_printf("SUCCESS: received follower event over SPI with param %u\n\r", ThisEvent.EventParam);
+      DB_printf("ES_TEST_TO_FOLLOWER received with param -> %u <-\r\n",
+          ThisEvent.EventParam);
     }
     break;
 
@@ -68,6 +69,12 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     {
      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
          (char)ThisEvent.EventParam);
+      
+      if (ThisEvent.EventParam == 'q') {
+        DB_printf("TestHarnessService0: post test event to leader\r\n");
+        ES_Event_t followerEvent = {ES_TEST_TO_LEADER, 234};
+        PostEventOverSPI(followerEvent);
+      }
     }
     break;
   }
