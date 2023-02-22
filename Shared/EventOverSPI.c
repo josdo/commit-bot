@@ -36,8 +36,7 @@ void InitEventOverSPI(bool isDriveMaster)
   // SPI setup
   SPI_Module_t Module = SPI_SPI1;
   SPI_SamplePhase_t Phase = SPI_SMP_MID;
-  // uint32_t SPI_ClkPeriodIn_ns = 10000; // 100 KHz clock
-  uint32_t SPI_ClkPeriodIn_ns = 100000; // 10 KHz clock
+  uint32_t SPI_ClkPeriodIn_ns = 50000; // 50 KHz clock
   SPI_PinMap_t SSPin = SPI_RPA0;
   SPI_PinMap_t SDIPin = SPI_RPB8;
   SPI_PinMap_t SDOPin = SPI_RPA1;
@@ -64,9 +63,11 @@ void InitEventOverSPI(bool isDriveMaster)
   SPISetup_SetActiveEdge(Module, WhichEdge);
   SPISetup_SetXferWidth(Module, DataWidth);
   SPISetEnhancedBuffer(Module, false);
-  /* Initialize SPIBUF to empty status. */
-  SPI1BUF = NO_LEFTOVER_WORD;
   SPISetup_EnableSPI(Module);
+
+  /* Initialize SPIBUF to empty status. */
+  if (!isLeader)
+    SPI1BUF = NO_LEFTOVER_WORD;
 
   __builtin_disable_interrupts();
   IFS1CLR = _IFS1_SPI1RXIF_MASK;
