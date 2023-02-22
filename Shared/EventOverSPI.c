@@ -1,3 +1,4 @@
+#include "EventOverSPI.h"
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "dbprintf.h"
@@ -7,16 +8,6 @@
 #include <sys/attribs.h>
 
 static bool isLeader;
-
-typedef union
-{
-  struct
-  {
-    uint8_t EventType;
-    uint8_t EventParam;
-  };
-  uint16_t w;
-} SPI_Event_t;
 
 static uint16_t QUERY_FOLLOWER_WORD = 0xAAAA;
 /* SDI line is idle-high, which is indicated by 0xFFFF. */
@@ -114,8 +105,8 @@ static bool FitsIn8Bits(uint16_t data)
 /* Notify service that an event from the other PIC has arrived. */
 void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
 {
-  IFS1CLR = _IFS1_SPI1RXIF_MASK;
   uint16_t word = SPI1BUF;
+  IFS1CLR = _IFS1_SPI1RXIF_MASK;
 
   SPI_Event_t se;
   se.w = word;

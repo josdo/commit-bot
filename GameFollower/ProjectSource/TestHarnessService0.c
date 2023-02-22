@@ -9,6 +9,10 @@
 #include "dbprintf.h"
 #include "../../Shared/EventOverSPI.h"
 
+// #include "../../Shared/PIC32_SPI_HAL.h"
+// #include <xc.h>
+// #include <sys/attribs.h>
+
 static uint8_t MyPriority;
 
 bool InitTestHarnessService0(uint8_t Priority)
