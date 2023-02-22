@@ -1,8 +1,10 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "LeaderFSM.h"
+#include "dbprintf.h"
 
-static leaderFSMState_t CuurentState;
+
+static LeaderFSMState_t CurrentState;
 
 static uint8_t MyPriority;
 
@@ -32,7 +34,7 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
     {
       if (ThisEvent.EventType = ES_INIT)
       {
-          DB_printf("\rES_INIT received in Leader FSM%d\r\n");
+          DB_printf("\rES_INIT received in Leader FSM\r\n");
       }
     } 
     break;
@@ -43,4 +45,9 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
   }
 
   return ReturnEvent;
+}
+
+LeaderFSMState_t QueryLeaderFSM(void)
+{
+  return CurrentState;
 }

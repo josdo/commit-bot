@@ -10,11 +10,11 @@ typedef enum
 {
   InitPState_LeaderFSM,
   AlignAtStart_LeaderFSM
-}leaderFSMState_t;
+}LeaderFSMState_t;
 
 bool InitLeaderFSM(uint8_t Priority);
 bool PostLeaderFSM(ES_Event_t ThisEvent);
 ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent);
 
-LeaderState_t QueryLeaderFSM(void);
+LeaderFSMState_t QueryLeaderFSM(void);
 #endif
