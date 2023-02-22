@@ -55,7 +55,7 @@ Return:
 Description:
   Returns the current state of the Template state machine
 */
-LeaderState_t QueryLeaderFSM(void);
+LeaderFSMState_t QueryLeaderFSM(void);
 
 #endif /* TemplateFSM_H */
 

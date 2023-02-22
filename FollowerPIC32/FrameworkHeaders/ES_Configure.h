@@ -291,8 +291,8 @@
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC PostDCMotorService
-#define TIMER1_RESP_FUNC PostDCMotorService
+#define TIMER0_RESP_FUNC PostTestHarnessService0
+#define TIMER1_RESP_FUNC TIMER_UNUSED
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -306,7 +306,7 @@
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
 #define TIMER14_RESP_FUNC TIMER_UNUSED
-#define TIMER15_RESP_FUNC TIMER_UNUSED
+#define TIMER15_RESP_FUNC PostTestHarnessService0
 
 /****************************************************************************/
 // Give the timer numbers symbolc names to make it easier to move them
@@ -315,11 +315,12 @@
 // the timer number matches where the timer event will be routed
 // These symbolic names should be changed to be relevant to your application
 
-//#define SERVICE0_TIMER 15
-#define TURN_TIMER 0
-#define PERIOD_TIMER 1
-#define COMMAND_TIMER 14
-#define OPTO_READ_TIMER 15
+#define FREQ_TIMER 0
+#define SERVICE0_TIMER 15
+//#define TURN_TIMER 0
+//#define PERIOD_TIMER 1
+//#define COMMAND_TIMER 14
+//#define OPTO_READ_TIMER 15
 //#define NEXT_STEP_TIMER 0
 //#define DIAL_READ_TIMER 1
 //#define NEXT_DISPLAY_TIMER 2

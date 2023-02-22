@@ -1,6 +1,6 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "TapeSensor.h"
+//#include "TapeSensor.h"
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
@@ -34,7 +34,7 @@ const uint16_t BEACON_C_TICKS = 6793;           // ticks for beacon c
 void Period2Freq(BeaconSensor_t);
 
 
-void InitBeaconSensor(){
+void InitBeaconSensor(void){
     // Short range
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_2);
     // Long Range
@@ -91,7 +91,8 @@ void InitIC5(){
     // interrupt on every capture
     IC5CONbits.ICI = 0b00;
     // set mode on input capture to every rising edge
-    IC5CONbits.ICM = 0b001;
+//    IC5CONbits.ICM = 0b001;
+    IC5CONbits.ICM = 0b011;
     // set priority
     IPC5bits.IC5IP = 7;
     // multivector is enabled
@@ -153,6 +154,15 @@ uint32_t getBeconSensorFreq(BeaconSensor_t whichSensor){
     }
 }
 
+uint32_t getBeaconSensorTick(BeaconSensor_t whichSensor){
+    if (whichSensor == ShortRangeBeaconSensor){
+        return short_range_period;
+    }
+    else if (whichSensor == LongRangeBeaconSensor){
+        return long_range_period;
+    }
+}
+
 void Period2Freq(BeaconSensor_t whichSensor){
     if (whichSensor == ShortRangeBeaconSensor){
         short_range_freq = (uint32_t)(0.2 * short_range_period);
@@ -175,20 +185,22 @@ void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
         gl.time_var.local_time = thisTime;
         short_range_period = (gl.actual_time - lastTimeShort);
         lastTimeShort = gl.actual_time;
+//        DB_printf("short range period = %d\r\n", short_range_period);
     }while(IC5CONbits.ICBNE != 0);
+    // VISHALS CODE
     // Period2Freq(ShortRangeBeaconSensor);
     IFS0CLR = _IFS0_IC5IF_MASK;
 
     // ------------------ VISHALS CODE --------------------------------
     // if within 10% of beacon b increment counter
-    if ((uint16_t)(0.9*BEACON_B_TICKS) < BEACON_B_TICKS && 
-        BEACON_B_TICKS < (uint16_t)(1.1*BEACON_B_TICKS)){
+    if ((uint16_t)(0.9*BEACON_B_TICKS) < short_range_period && 
+        short_range_period < (uint16_t)(1.1*BEACON_B_TICKS)){
           numBeaconB++;  
         }
 
     // if within 10% of beacon c increment counter
-    else if ((uint16_t)(0.9*BEACON_C_TICKS) < BEACON_B_TICKS && 
-        BEACON_B_TICKS < (uint16_t)(1.1*BEACON_C_TICKS)){
+    else if ((uint16_t)(0.9*BEACON_C_TICKS) < short_range_period && 
+        short_range_period < (uint16_t)(1.1*BEACON_C_TICKS)){
             numBeaconC++;
     }
 

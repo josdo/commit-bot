@@ -28,6 +28,8 @@
 /*----------------------------- Include Files -----------------------------*/
 // This module
 #include "../ProjectHeaders/TestHarnessService0.h"
+#include "BeaconSensor.h"
+#include "../../Shared/ES_Shared_Configure.h"
 
 // debugging printf()
 
@@ -102,12 +104,6 @@ bool InitTestHarnessService0(uint8_t Priority)
   clrScrn();
   puts("\rStarting Test Harness for \r");
   DB_printf( "the 2nd Generation Events & Services Framework V2.4\r\n");
-  DB_printf( "compiled at %s on %s\n", __TIME__, __DATE__);
-  DB_printf( "\n\r\n");
-  DB_printf( "Press any key to post key-stroke events to Service 0\n\r");
-  DB_printf( "Press 'd' to test event deferral \n\r");
-  DB_printf( "Press 'r' to test event recall \n\r");
-  DB_printf( "Press 'p' to test posting from an interrupt \n\r");
 
   /********************************************
    in here you write your initialization code
@@ -186,14 +182,20 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   {
     case ES_INIT:
     {
-      ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
-      puts("Service 00:");
-      DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
+//      ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
+      puts("Test Harness Service 0");
+//      DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
     }
     break;
     case ES_TIMEOUT:   // re-start timer & announce
     {
-      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
+        if (FREQ_TIMER == ThisEvent.EventParam){
+            DB_printf("Frequency on sensor = %d\r\n", 
+                        getBeaconSensorTick(ShortRangeBeaconSensor));
+            
+            ES_Timer_InitTimer(FREQ_TIMER, ONE_SEC);
+        }
+//      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
       // DB_printf("ES_TIMEOUT received from Timer %d in Service %d\r\n",
       //     ThisEvent.EventParam, MyPriority);
     }
@@ -203,10 +205,32 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 //      puts("\rES_SHORT_TIMEOUT received\r\n");
     }
     break;
+    
+      case ES_FOUND_BEACON_B:{
+          puts("Beacon B was found!\r\n");
+          ES_Timer_StopTimer(FREQ_TIMER);
+      }
+      break;
+      
+      case ES_FOUND_BEACON_C:{
+          puts("Beacon C was found!\r\n");
+          ES_Timer_StopTimer(FREQ_TIMER);
+      }
+      break;
+    
     case ES_NEW_KEY:   // announce
     {
-//      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
-//          (char)ThisEvent.EventParam);
+      DB_printf("ES_NEW_KEY received with -> %c <- in Service 0\r\n",
+          (char)ThisEvent.EventParam);
+      
+      if ('i' == ThisEvent.EventParam){
+          puts("Init short range IR beacon ISR\r\n");
+          InitBeaconSensor();
+          IEC0SET = _IEC0_IC5IE_MASK;
+          
+          ES_Timer_InitTimer(FREQ_TIMER, ONE_SEC);
+      }
+      
       if ('d' == ThisEvent.EventParam)
       {
         ThisEvent.EventParam = DeferredChar++;   //
@@ -215,6 +239,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 //          puts("ES_NEW_KEY deferred in Service 0\r");
         }
       }
+      
       if ('r' == ThisEvent.EventParam)
       {
         ThisEvent.EventParam = 'Q';   // This one gets posted normally

@@ -1,7 +1,9 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "LeaderFSM.h"
-#include "../Shared/ES_Shared_Configure.h"
+#include "../../Shared/ES_Shared_Configure.h"
+#include "DCMotor.h"
+#include "BeaconSensor.h"
 
 // ----------------------------- module vars ----------------------------
 static LeaderFSMState_t CurrentState;
@@ -47,19 +49,19 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
 
       else if (ES_NEW_KEY == ThisEvent.EventType){
         if ('0' == ThisEvent.EventParam){
-          puts('STOP motors\r\n');
+          puts("STOP motors\r\n");
           setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
           setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
         }
 
         else if ('1' == ThisEvent.EventParam){
-          puts('FORWARD full speed\r\n');
+          puts("FORWARD full speed\r\n");
           setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
           setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
         }
 
         else if ('2' == ThisEvent.EventParam){
-          puts('REVERSE full speed\r\n');
+          puts("REVERSE full speed\r\n");
           setMotorSpeed(LEFT_MOTOR, BACKWARD, 100);
           setMotorSpeed(RIGHT_MOTOR, BACKWARD, 100);
         }
