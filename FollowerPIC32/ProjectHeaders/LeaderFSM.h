@@ -10,7 +10,8 @@
 typedef enum
 {
   InitPState_LeaderFSM = 0,
-  AlignWithBeacon_LeaderFSM
+  AlignWithBeacon_LeaderFSM,
+  Idle_LeaderFSM
 }LeaderFSMState_t;
 
 // Public Function Prototypes

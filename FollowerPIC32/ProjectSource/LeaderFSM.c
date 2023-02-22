@@ -9,9 +9,7 @@ static LeaderFSMState_t NextState;
 
 static uint8_t MyPriority;
 
-const uint8_t NUM_VALID_BEACON_PULSE = 2;     // num of valid beacon pulses
-static uint8_t numBeaconA = 0;                // num valid beacon A pulses
-static uint8_t numBeaconB = 0;                // num valid beacon B pulses
+
 // -----------------------------------------------------------------------
 
 bool InitLeaderFSM(uint8_t Priority)
@@ -41,7 +39,9 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
     {
       if (ThisEvent.EventType == ES_INIT)
       {
+        puts("In LeaderFSM init\r\n");
         InitDCMotor();            // init the DC motors
+        InitBeaconSensor();       // init the beacon sensor
         NextState = AlignWithBeacon_LeaderFSM;  // next state is aligning
       }
 
@@ -69,17 +69,55 @@ ES_Event_t RunLeaderFSM(ES_Event_t ThisEvent)
     case AlignWithBeacon_LeaderFSM:{
       if (ES_NEW_KEY == ThisEvent.EventType){
         if ('a' == ThisEvent.EventParam){
+          NextState = AlignWithBeacon_LeaderFSM;        // stay in current state
+
           ES_Event_t AlignEvent = {ES_BEGIN_ALIGN};
           PostLeaderFSM(AlignEvent);
         }
+
+        else if ('b' == ThisEvent.EventParam){
+          NextState = AlignWithBeacon_LeaderFSM;        // stay in current state
+          
+          ES_Event_t BeaconBEvent = {ES_FOUND_BEACON_B};  // post found beacon B
+          PostLeaderFSM(BeaconBEvent);
+        }
+
+        else if ('c' == ThisEvent.EventParam){
+          NextState = AlignWithBeacon_LeaderFSM;        // stay in current state
+          
+          ES_Event_t BeaconCEvent = {ES_FOUND_BEACON_C};  // post found beacon B
+          PostLeaderFSM(BeaconCEvent);
+        }
       }
 
-      if (ES_BEGIN_ALIGN == ThisEvent.EventType){
-        // turn CCW
+      else if (ES_BEGIN_ALIGN == ThisEvent.EventType){
+        NextState = AlignWithBeacon_LeaderFSM;          // stay in current state
+
+        // turn CW until local beacon is found
         setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
         setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
 
-        IEC0SET = _IEC0_IC3IE_MASK;
+        IEC0SET = _IEC0_IC5IE_MASK;                     // turn on the short range beacon ISR
+      }
+
+      else if (ES_FOUND_BEACON_B == ThisEvent.EventType){
+        // turn off motors
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+
+        NextState = Idle_LeaderFSM;                     // next state is idling
+
+        puts("Aligned with beacon B\r\n");
+      }
+
+      else if (ES_FOUND_BEACON_C == ThisEvent.EventType){
+        // turn off motors
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+
+        NextState = Idle_LeaderFSM;                     // next state is idling
+
+        puts("Aligned with beacon C\r\n");
       }
       
     }
