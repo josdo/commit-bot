@@ -29,9 +29,9 @@ void InitEventOverSPI(bool isDriveMaster)
   isLeader = isDriveMaster;
 
   if (isLeader)
-    DB_printf("Initializing EventOverSPI to leader mode.\r\n");
+    DB_printf("\r\nEventOverSPI init'd to LEADER mode.\r\n");
   else
-    DB_printf("Initializing EventOverSPI to follower mode.\r\n");
+    DB_printf("\r\nEventOverSPI init'd to FOLLOWER mode.\r\n");
 
   // SPI setup
   SPI_Module_t Module = SPI_SPI1;
@@ -54,7 +54,6 @@ void InitEventOverSPI(bool isDriveMaster)
     SPISetup_MapSSOutput(Module, SSPin);
   else
   {
-    DB_printf("WARMING: EventOverSPI.c, follower mode not tested yet.\r\n");
     SPISetup_MapSSInput(Module, SSPin);
   }
   SPISetup_MapSDInput(Module, SDIPin);
@@ -143,11 +142,9 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
       // DB_printf("ISR_EventOverSPI, leader: got invalid word %x.\r\n", word);
       return;
     }
-    // for(int32_t i = 0; i < 2000; i++){};
     // DB_printf("ISR_EventOverSPI, leader: got word %x\r\n", word);
 
     ES_PostAll(e);
-    // SPIOperate_SPI1_Send16Wait(QUERY_WORD);
     SPIOperate_SPI1_Send16(QUERY_WORD);
   }
   else

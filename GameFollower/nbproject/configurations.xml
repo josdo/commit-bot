@@ -81,6 +81,7 @@
     <Elem>ProjectSource</Elem>
     <Elem>ProjectHeaders</Elem>
     <Elem>../Shared</Elem>
+    <Elem>//testarossa/Users$/kindled/final_218b/Shared</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

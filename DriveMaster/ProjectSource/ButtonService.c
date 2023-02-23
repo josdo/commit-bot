@@ -22,14 +22,15 @@ bool CheckButtonEvents(){
         returnVal = true;
         if(CurrentButtonState == 0){
             ReturnEvent.EventType = ES_ButtonDown;
-            // TODO: post to some service
+            // PostFollowerService(ReturnEvent);
         }
         else{
             ReturnEvent.EventType = ES_ButtonUp;
-            // TODO: post to some service
+            // PostFollowerService(ReturnEvent);
         }
     }
     
     LastButtonState = CurrentButtonState;
+    //printf("%b", returnVal);
     return returnVal;
 }

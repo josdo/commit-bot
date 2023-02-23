@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 3
+#define NUM_SERVICES 2
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -43,6 +43,7 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
+
 #define SERV_0_HEADER "TestHarnessService0.h"
 // the name of the Init function
 #define SERV_0_INIT InitTestHarnessService0
@@ -59,13 +60,13 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "DCMotorService.h"
+#define SERV_1_HEADER "LeaderFSM.h"
 // the name of the Init function
-#define SERV_1_INIT InitDCMotorService
+#define SERV_1_INIT InitLeaderFSM
 // the name of the run function
-#define SERV_1_RUN RunDCMotorService
+#define SERV_1_RUN RunLeaderFSM
 // How big should this services Queue be?
-#define SERV_1_QUEUE_SIZE 3
+#define SERV_1_QUEUE_SIZE 4
 #endif
 
 /****************************************************************************/
@@ -282,7 +283,7 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, readOptoSensor, CheckButtonEvents
+#define EVENT_CHECK_LIST Check4Keystroke
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -291,8 +292,8 @@
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC PostDCMotorService
-#define TIMER1_RESP_FUNC PostDCMotorService
+#define TIMER0_RESP_FUNC PostTestHarnessService0
+#define TIMER1_RESP_FUNC TIMER_UNUSED
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -305,8 +306,8 @@
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC TIMER_UNUSED
-#define TIMER14_RESP_FUNC PostTestHarnessService0
-#define TIMER15_RESP_FUNC PostOptoSensorService
+#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER15_RESP_FUNC PostTestHarnessService0
 
 /****************************************************************************/
 // Give the timer numbers symbolc names to make it easier to move them
@@ -315,11 +316,12 @@
 // the timer number matches where the timer event will be routed
 // These symbolic names should be changed to be relevant to your application
 
-//#define SERVICE0_TIMER 15
-#define TURN_TIMER 0
-#define PERIOD_TIMER 1
-#define COMMAND_TIMER 14
-#define OPTO_READ_TIMER 15
+#define FREQ_TIMER 0
+#define SERVICE0_TIMER 15
+//#define TURN_TIMER 0
+//#define PERIOD_TIMER 1
+//#define COMMAND_TIMER 14
+//#define OPTO_READ_TIMER 15
 //#define NEXT_STEP_TIMER 0
 //#define DIAL_READ_TIMER 1
 //#define NEXT_DISPLAY_TIMER 2

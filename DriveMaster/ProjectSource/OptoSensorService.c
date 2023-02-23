@@ -5,7 +5,7 @@
 #include "PIC32_AD_Lib.h"
 #include "dbprintf.h"
 #include "PIC32PortHAL.h"
-#include "DCMotorService.h"
+#include "DCMotor.h"
 
 
 
@@ -62,7 +62,7 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
         DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
         
         // TODO comment out
-        ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
+        // ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
     }
     break;
     
@@ -72,11 +72,11 @@ ES_Event_t RunOptoSensorService(ES_Event_t ThisEvent)
     break;
 
     case ES_TIMEOUT:{
-        if (OPTO_READ_TIMER == ThisEvent.EventParam){
-            // DB_printf("Optosensor = %d\r\n", analog_signal[0]);
+        // if (OPTO_READ_TIMER == ThisEvent.EventParam){
+        //     DB_printf("Optosensor = %d\r\n", analog_signal[0]);
             
-            ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
-        }
+        //     ES_Timer_InitTimer(OPTO_READ_TIMER, 100);
+        // }
     }
     break;
   

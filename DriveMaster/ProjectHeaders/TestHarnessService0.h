@@ -1,3 +1,10 @@
+/****************************************************************************
+
+  Header file for Test Harness Service0
+  based on the Gen 2 Events and Services Framework
+
+ ****************************************************************************/
+
 #ifndef TestHarnessService0_H
 #define TestHarnessService0_H
 
@@ -6,6 +13,7 @@
 
 #include "ES_Events.h"
 #include "ES_Port.h"                // needed for definition of REENTRANT
+// Public Function Prototypes
 
 bool InitTestHarnessService0(uint8_t Priority);
 bool PostTestHarnessService0(ES_Event_t ThisEvent);

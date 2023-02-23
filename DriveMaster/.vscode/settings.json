@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "templatefsm.h": "c",
+        "leaderfsm.h": "c"
+    }
+}

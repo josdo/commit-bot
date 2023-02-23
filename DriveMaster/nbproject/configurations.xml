@@ -49,9 +49,13 @@
       <itemPath>ProjectHeaders/EventCheckers.h</itemPath>
       <itemPath>ProjectHeaders/TestHarnessService0.h</itemPath>
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
-      <itemPath>ProjectHeaders/DCMotorService.h</itemPath>
-      <itemPath>FrameworkHeaders/OptoSensorService.h</itemPath>
-      <itemPath>FrameworkHeaders/ButtonService.h</itemPath>
+      <itemPath>ProjectHeaders/FollowerService.h</itemPath>
+      <itemPath>ProjectHeaders/DCMotor.h</itemPath>
+      <itemPath>ProjectHeaders/BeaconSensor.h</itemPath>
+      <itemPath>ProjectHeaders/InitTimer2.h</itemPath>
+      <itemPath>ProjectHeaders/LeaderFSM.h</itemPath>
+      <itemPath>ProjectHeaders/OptoSensorService.h</itemPath>
+      <itemPath>ProjectHeaders/ButtonService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -71,9 +75,13 @@
       <itemPath>ProjectSource/TestHarnessService0.c</itemPath>
       <itemPath>ProjectSource/main.c</itemPath>
       <itemPath>ProjectSource/TemplateService.c</itemPath>
-      <itemPath>ProjectSource/DCMotorService.c</itemPath>
-      <itemPath>FrameworkHeaders/OptoSensorService.c</itemPath>
-      <itemPath>FrameworkHeaders/ButtonService.c</itemPath>
+      <itemPath>ProjectSource/FollowerService.c</itemPath>
+      <itemPath>ProjectSource/DCMotor.c</itemPath>
+      <itemPath>ProjectSource/BeaconSensor.c</itemPath>
+      <itemPath>ProjectSource/InitTimer2.c</itemPath>
+      <itemPath>ProjectSource/LeaderFSM.c</itemPath>
+      <itemPath>ProjectSource/OptoSensorService.c</itemPath>
+      <itemPath>ProjectSource/ButtonService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -82,11 +90,9 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>FrameworkHeaders</Elem>
-    <Elem>FrameworkSource</Elem>
-    <Elem>ProjectSource</Elem>
-    <Elem>ProjectHeaders</Elem>
     <Elem>../Shared</Elem>
+    <Elem>//testarossa/Users$/kindled/final_218b/Shared</Elem>
+    <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -268,7 +274,39 @@
         <property key="stack-smashing" value=""/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
-      <item path="ProjectHeaders/TestHarnessService0.h" ex="false" overriding="false">
+      <item path="ProjectHeaders/FollowerService.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="ProjectHeaders/TestHarnessService0.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="ProjectSource/FollowerService.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AR>

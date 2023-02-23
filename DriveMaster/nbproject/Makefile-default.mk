@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=FrameworkSource/ES_CheckEvents.c FrameworkSource/ES_DeferRecall.c FrameworkSource/ES_Framework.c FrameworkSource/ES_LookupTables.c FrameworkSource/ES_Port.c FrameworkSource/ES_PostList.c FrameworkSource/ES_Queue.c FrameworkSource/ES_Timers.c FrameworkSource/terminal.c FrameworkSource/circular_buffer_no_modulo_threadsafe.c FrameworkSource/dbprintf.c FrameworkSource/PIC32PortHAL.c FrameworkSource/PIC32_AD_Lib.c ProjectSource/EventCheckers.c ProjectSource/TestHarnessService0.c ProjectSource/main.c ProjectSource/TemplateService.c ProjectSource/DCMotorService.c FrameworkHeaders/OptoSensorService.c FrameworkHeaders/ButtonService.c ../Shared/EventOverSPI.c ../Shared/PIC32_SPI_HAL.c
+SOURCEFILES_QUOTED_IF_SPACED=FrameworkSource/ES_CheckEvents.c FrameworkSource/ES_DeferRecall.c FrameworkSource/ES_Framework.c FrameworkSource/ES_LookupTables.c FrameworkSource/ES_Port.c FrameworkSource/ES_PostList.c FrameworkSource/ES_Queue.c FrameworkSource/ES_Timers.c FrameworkSource/terminal.c FrameworkSource/circular_buffer_no_modulo_threadsafe.c FrameworkSource/dbprintf.c FrameworkSource/PIC32PortHAL.c FrameworkSource/PIC32_AD_Lib.c ../Shared/EventOverSPI.c ../Shared/PIC32_SPI_HAL.c ProjectSource/EventCheckers.c ProjectSource/TestHarnessService0.c ProjectSource/main.c ProjectSource/TemplateService.c ProjectSource/DCMotor.c ProjectSource/BeaconSensor.c ProjectSource/InitTimer2.c ProjectSource/LeaderFSM.c ProjectSource/OptoSensorService.c ProjectSource/ButtonService.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o ${OBJECTDIR}/FrameworkSource/ES_Framework.o ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o ${OBJECTDIR}/FrameworkSource/ES_Port.o ${OBJECTDIR}/FrameworkSource/ES_PostList.o ${OBJECTDIR}/FrameworkSource/ES_Queue.o ${OBJECTDIR}/FrameworkSource/ES_Timers.o ${OBJECTDIR}/FrameworkSource/terminal.o ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o ${OBJECTDIR}/FrameworkSource/dbprintf.o ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o ${OBJECTDIR}/ProjectSource/EventCheckers.o ${OBJECTDIR}/ProjectSource/TestHarnessService0.o ${OBJECTDIR}/ProjectSource/main.o ${OBJECTDIR}/ProjectSource/TemplateService.o ${OBJECTDIR}/ProjectSource/DCMotorService.o ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o ${OBJECTDIR}/FrameworkHeaders/ButtonService.o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o.d ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o.d ${OBJECTDIR}/FrameworkSource/ES_Framework.o.d ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o.d ${OBJECTDIR}/FrameworkSource/ES_Port.o.d ${OBJECTDIR}/FrameworkSource/ES_PostList.o.d ${OBJECTDIR}/FrameworkSource/ES_Queue.o.d ${OBJECTDIR}/FrameworkSource/ES_Timers.o.d ${OBJECTDIR}/FrameworkSource/terminal.o.d ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o.d ${OBJECTDIR}/FrameworkSource/dbprintf.o.d ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o.d ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o.d ${OBJECTDIR}/ProjectSource/EventCheckers.o.d ${OBJECTDIR}/ProjectSource/TestHarnessService0.o.d ${OBJECTDIR}/ProjectSource/main.o.d ${OBJECTDIR}/ProjectSource/TemplateService.o.d ${OBJECTDIR}/ProjectSource/DCMotorService.o.d ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o.d ${OBJECTDIR}/FrameworkHeaders/ButtonService.o.d ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o ${OBJECTDIR}/FrameworkSource/ES_Framework.o ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o ${OBJECTDIR}/FrameworkSource/ES_Port.o ${OBJECTDIR}/FrameworkSource/ES_PostList.o ${OBJECTDIR}/FrameworkSource/ES_Queue.o ${OBJECTDIR}/FrameworkSource/ES_Timers.o ${OBJECTDIR}/FrameworkSource/terminal.o ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o ${OBJECTDIR}/FrameworkSource/dbprintf.o ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ${OBJECTDIR}/ProjectSource/EventCheckers.o ${OBJECTDIR}/ProjectSource/TestHarnessService0.o ${OBJECTDIR}/ProjectSource/main.o ${OBJECTDIR}/ProjectSource/TemplateService.o ${OBJECTDIR}/ProjectSource/DCMotor.o ${OBJECTDIR}/ProjectSource/BeaconSensor.o ${OBJECTDIR}/ProjectSource/InitTimer2.o ${OBJECTDIR}/ProjectSource/LeaderFSM.o ${OBJECTDIR}/ProjectSource/OptoSensorService.o ${OBJECTDIR}/ProjectSource/ButtonService.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o.d ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o.d ${OBJECTDIR}/FrameworkSource/ES_Framework.o.d ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o.d ${OBJECTDIR}/FrameworkSource/ES_Port.o.d ${OBJECTDIR}/FrameworkSource/ES_PostList.o.d ${OBJECTDIR}/FrameworkSource/ES_Queue.o.d ${OBJECTDIR}/FrameworkSource/ES_Timers.o.d ${OBJECTDIR}/FrameworkSource/terminal.o.d ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o.d ${OBJECTDIR}/FrameworkSource/dbprintf.o.d ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o.d ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o.d ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d ${OBJECTDIR}/ProjectSource/EventCheckers.o.d ${OBJECTDIR}/ProjectSource/TestHarnessService0.o.d ${OBJECTDIR}/ProjectSource/main.o.d ${OBJECTDIR}/ProjectSource/TemplateService.o.d ${OBJECTDIR}/ProjectSource/DCMotor.o.d ${OBJECTDIR}/ProjectSource/BeaconSensor.o.d ${OBJECTDIR}/ProjectSource/InitTimer2.o.d ${OBJECTDIR}/ProjectSource/LeaderFSM.o.d ${OBJECTDIR}/ProjectSource/OptoSensorService.o.d ${OBJECTDIR}/ProjectSource/ButtonService.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o ${OBJECTDIR}/FrameworkSource/ES_Framework.o ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o ${OBJECTDIR}/FrameworkSource/ES_Port.o ${OBJECTDIR}/FrameworkSource/ES_PostList.o ${OBJECTDIR}/FrameworkSource/ES_Queue.o ${OBJECTDIR}/FrameworkSource/ES_Timers.o ${OBJECTDIR}/FrameworkSource/terminal.o ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o ${OBJECTDIR}/FrameworkSource/dbprintf.o ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o ${OBJECTDIR}/ProjectSource/EventCheckers.o ${OBJECTDIR}/ProjectSource/TestHarnessService0.o ${OBJECTDIR}/ProjectSource/main.o ${OBJECTDIR}/ProjectSource/TemplateService.o ${OBJECTDIR}/ProjectSource/DCMotorService.o ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o ${OBJECTDIR}/FrameworkHeaders/ButtonService.o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o
+OBJECTFILES=${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o ${OBJECTDIR}/FrameworkSource/ES_DeferRecall.o ${OBJECTDIR}/FrameworkSource/ES_Framework.o ${OBJECTDIR}/FrameworkSource/ES_LookupTables.o ${OBJECTDIR}/FrameworkSource/ES_Port.o ${OBJECTDIR}/FrameworkSource/ES_PostList.o ${OBJECTDIR}/FrameworkSource/ES_Queue.o ${OBJECTDIR}/FrameworkSource/ES_Timers.o ${OBJECTDIR}/FrameworkSource/terminal.o ${OBJECTDIR}/FrameworkSource/circular_buffer_no_modulo_threadsafe.o ${OBJECTDIR}/FrameworkSource/dbprintf.o ${OBJECTDIR}/FrameworkSource/PIC32PortHAL.o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ${OBJECTDIR}/ProjectSource/EventCheckers.o ${OBJECTDIR}/ProjectSource/TestHarnessService0.o ${OBJECTDIR}/ProjectSource/main.o ${OBJECTDIR}/ProjectSource/TemplateService.o ${OBJECTDIR}/ProjectSource/DCMotor.o ${OBJECTDIR}/ProjectSource/BeaconSensor.o ${OBJECTDIR}/ProjectSource/InitTimer2.o ${OBJECTDIR}/ProjectSource/LeaderFSM.o ${OBJECTDIR}/ProjectSource/OptoSensorService.o ${OBJECTDIR}/ProjectSource/ButtonService.o
 
 # Source Files
-SOURCEFILES=FrameworkSource/ES_CheckEvents.c FrameworkSource/ES_DeferRecall.c FrameworkSource/ES_Framework.c FrameworkSource/ES_LookupTables.c FrameworkSource/ES_Port.c FrameworkSource/ES_PostList.c FrameworkSource/ES_Queue.c FrameworkSource/ES_Timers.c FrameworkSource/terminal.c FrameworkSource/circular_buffer_no_modulo_threadsafe.c FrameworkSource/dbprintf.c FrameworkSource/PIC32PortHAL.c FrameworkSource/PIC32_AD_Lib.c ProjectSource/EventCheckers.c ProjectSource/TestHarnessService0.c ProjectSource/main.c ProjectSource/TemplateService.c ProjectSource/DCMotorService.c FrameworkHeaders/OptoSensorService.c FrameworkHeaders/ButtonService.c ../Shared/EventOverSPI.c ../Shared/PIC32_SPI_HAL.c
+SOURCEFILES=FrameworkSource/ES_CheckEvents.c FrameworkSource/ES_DeferRecall.c FrameworkSource/ES_Framework.c FrameworkSource/ES_LookupTables.c FrameworkSource/ES_Port.c FrameworkSource/ES_PostList.c FrameworkSource/ES_Queue.c FrameworkSource/ES_Timers.c FrameworkSource/terminal.c FrameworkSource/circular_buffer_no_modulo_threadsafe.c FrameworkSource/dbprintf.c FrameworkSource/PIC32PortHAL.c FrameworkSource/PIC32_AD_Lib.c ../Shared/EventOverSPI.c ../Shared/PIC32_SPI_HAL.c ProjectSource/EventCheckers.c ProjectSource/TestHarnessService0.c ProjectSource/main.c ProjectSource/TemplateService.c ProjectSource/DCMotor.c ProjectSource/BeaconSensor.c ProjectSource/InitTimer2.c ProjectSource/LeaderFSM.c ProjectSource/OptoSensorService.c ProjectSource/ButtonService.c
 
 
 
@@ -185,6 +185,18 @@ ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o: FrameworkSource/PIC32_AD_Lib.c  .ge
 	@${RM} ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o.d" -o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o FrameworkSource/PIC32_AD_Lib.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
+${OBJECTDIR}/_ext/1735361612/EventOverSPI.o: ../Shared/EventOverSPI.c  .generated_files/flags/default/54d2452ccb912330a7b661c5482d8f56c21d4f .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d" -o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ../Shared/EventOverSPI.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o: ../Shared/PIC32_SPI_HAL.c  .generated_files/flags/default/9aef2eed642e3b1a7862387268dd5ce61e500ea4 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d" -o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ../Shared/PIC32_SPI_HAL.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
 ${OBJECTDIR}/ProjectSource/EventCheckers.o: ProjectSource/EventCheckers.c  .generated_files/flags/default/4ace1c5285645264c49bb53ff0112a4acadac815 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
 	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
 	@${RM} ${OBJECTDIR}/ProjectSource/EventCheckers.o.d 
@@ -209,35 +221,41 @@ ${OBJECTDIR}/ProjectSource/TemplateService.o: ProjectSource/TemplateService.c  .
 	@${RM} ${OBJECTDIR}/ProjectSource/TemplateService.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/TemplateService.o.d" -o ${OBJECTDIR}/ProjectSource/TemplateService.o ProjectSource/TemplateService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/ProjectSource/DCMotorService.o: ProjectSource/DCMotorService.c  .generated_files/flags/default/b069b9fcdbbd81369c372879c8733d645db46c10 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+${OBJECTDIR}/ProjectSource/DCMotor.o: ProjectSource/DCMotor.c  .generated_files/flags/default/869ca92e371283cc615cb0359962f3673e45f8cb .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
 	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
-	@${RM} ${OBJECTDIR}/ProjectSource/DCMotorService.o.d 
-	@${RM} ${OBJECTDIR}/ProjectSource/DCMotorService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/DCMotorService.o.d" -o ${OBJECTDIR}/ProjectSource/DCMotorService.o ProjectSource/DCMotorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	@${RM} ${OBJECTDIR}/ProjectSource/DCMotor.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/DCMotor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/DCMotor.o.d" -o ${OBJECTDIR}/ProjectSource/DCMotor.o ProjectSource/DCMotor.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o: FrameworkHeaders/OptoSensorService.c  .generated_files/flags/default/378c7617b8432d8ceeb03152a809e9579246a8e6 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/FrameworkHeaders" 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o.d 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o.d" -o ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o FrameworkHeaders/OptoSensorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/BeaconSensor.o: ProjectSource/BeaconSensor.c  .generated_files/flags/default/b77a055e57217cbe339d746681908aeb1daf32bf .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/BeaconSensor.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/BeaconSensor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/BeaconSensor.o.d" -o ${OBJECTDIR}/ProjectSource/BeaconSensor.o ProjectSource/BeaconSensor.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/FrameworkHeaders/ButtonService.o: FrameworkHeaders/ButtonService.c  .generated_files/flags/default/1dcddf65085d085c63dec714ade92fe56dc9e768 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/FrameworkHeaders" 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/ButtonService.o.d 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/ButtonService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkHeaders/ButtonService.o.d" -o ${OBJECTDIR}/FrameworkHeaders/ButtonService.o FrameworkHeaders/ButtonService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/InitTimer2.o: ProjectSource/InitTimer2.c  .generated_files/flags/default/5c8e95dd07d416f016b4d2128ac8bee1fdc33a36 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/InitTimer2.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/InitTimer2.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/InitTimer2.o.d" -o ${OBJECTDIR}/ProjectSource/InitTimer2.o ProjectSource/InitTimer2.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/_ext/1735361612/EventOverSPI.o: ../Shared/EventOverSPI.c  .generated_files/flags/default/54d2452ccb912330a7b661c5482d8f56c21d4f .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d" -o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ../Shared/EventOverSPI.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/LeaderFSM.o: ProjectSource/LeaderFSM.c  .generated_files/flags/default/53c4c4f44f4de086910bc30f80900b4436e74a37 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/LeaderFSM.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/LeaderFSM.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/LeaderFSM.o.d" -o ${OBJECTDIR}/ProjectSource/LeaderFSM.o ProjectSource/LeaderFSM.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o: ../Shared/PIC32_SPI_HAL.c  .generated_files/flags/default/9aef2eed642e3b1a7862387268dd5ce61e500ea4 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d" -o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ../Shared/PIC32_SPI_HAL.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/OptoSensorService.o: ProjectSource/OptoSensorService.c  .generated_files/flags/default/6095f0fdd7e4989753acfa6910f86be473959018 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/OptoSensorService.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/OptoSensorService.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/OptoSensorService.o.d" -o ${OBJECTDIR}/ProjectSource/OptoSensorService.o ProjectSource/OptoSensorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/ProjectSource/ButtonService.o: ProjectSource/ButtonService.c  .generated_files/flags/default/acb880959a7a08036d5ca466c329c72ea37ec027 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/ButtonService.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/ButtonService.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG   -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/ButtonService.o.d" -o ${OBJECTDIR}/ProjectSource/ButtonService.o ProjectSource/ButtonService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
 else
 ${OBJECTDIR}/FrameworkSource/ES_CheckEvents.o: FrameworkSource/ES_CheckEvents.c  .generated_files/flags/default/c62262752e86fdd6ace3d131d866a23c6f5c8147 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
@@ -318,6 +336,18 @@ ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o: FrameworkSource/PIC32_AD_Lib.c  .ge
 	@${RM} ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o.d" -o ${OBJECTDIR}/FrameworkSource/PIC32_AD_Lib.o FrameworkSource/PIC32_AD_Lib.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
+${OBJECTDIR}/_ext/1735361612/EventOverSPI.o: ../Shared/EventOverSPI.c  .generated_files/flags/default/2afef68545942e140e2f6faac56fdba88d4ca209 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d" -o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ../Shared/EventOverSPI.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o: ../Shared/PIC32_SPI_HAL.c  .generated_files/flags/default/b636cb9881088a4e117b1aaf0c11ac84e8d7bdba .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d" -o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ../Shared/PIC32_SPI_HAL.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
 ${OBJECTDIR}/ProjectSource/EventCheckers.o: ProjectSource/EventCheckers.c  .generated_files/flags/default/1bd5978472372c9959f8255ac2bdf17905ad79d0 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
 	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
 	@${RM} ${OBJECTDIR}/ProjectSource/EventCheckers.o.d 
@@ -342,35 +372,41 @@ ${OBJECTDIR}/ProjectSource/TemplateService.o: ProjectSource/TemplateService.c  .
 	@${RM} ${OBJECTDIR}/ProjectSource/TemplateService.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/TemplateService.o.d" -o ${OBJECTDIR}/ProjectSource/TemplateService.o ProjectSource/TemplateService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/ProjectSource/DCMotorService.o: ProjectSource/DCMotorService.c  .generated_files/flags/default/a5034792ceb3e463667ae7d8b5c6d915d4f21b00 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+${OBJECTDIR}/ProjectSource/DCMotor.o: ProjectSource/DCMotor.c  .generated_files/flags/default/b79435c487742c9172d91dc1021573b77ad89d23 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
 	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
-	@${RM} ${OBJECTDIR}/ProjectSource/DCMotorService.o.d 
-	@${RM} ${OBJECTDIR}/ProjectSource/DCMotorService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/DCMotorService.o.d" -o ${OBJECTDIR}/ProjectSource/DCMotorService.o ProjectSource/DCMotorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	@${RM} ${OBJECTDIR}/ProjectSource/DCMotor.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/DCMotor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/DCMotor.o.d" -o ${OBJECTDIR}/ProjectSource/DCMotor.o ProjectSource/DCMotor.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o: FrameworkHeaders/OptoSensorService.c  .generated_files/flags/default/e4bf7d36d2f49155e9ab3276457bc0e750b994b3 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/FrameworkHeaders" 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o.d 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o.d" -o ${OBJECTDIR}/FrameworkHeaders/OptoSensorService.o FrameworkHeaders/OptoSensorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/BeaconSensor.o: ProjectSource/BeaconSensor.c  .generated_files/flags/default/e55028616adf7b238d0aba4d6a180e8d61bceaaf .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/BeaconSensor.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/BeaconSensor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/BeaconSensor.o.d" -o ${OBJECTDIR}/ProjectSource/BeaconSensor.o ProjectSource/BeaconSensor.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/FrameworkHeaders/ButtonService.o: FrameworkHeaders/ButtonService.c  .generated_files/flags/default/b55539fd8613f230298ba3c00b2b4707e819482b .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/FrameworkHeaders" 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/ButtonService.o.d 
-	@${RM} ${OBJECTDIR}/FrameworkHeaders/ButtonService.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/FrameworkHeaders/ButtonService.o.d" -o ${OBJECTDIR}/FrameworkHeaders/ButtonService.o FrameworkHeaders/ButtonService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/InitTimer2.o: ProjectSource/InitTimer2.c  .generated_files/flags/default/7d37b21854b2d4a71fada53f194b0fde06cc97af .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/InitTimer2.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/InitTimer2.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/InitTimer2.o.d" -o ${OBJECTDIR}/ProjectSource/InitTimer2.o ProjectSource/InitTimer2.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/_ext/1735361612/EventOverSPI.o: ../Shared/EventOverSPI.c  .generated_files/flags/default/2afef68545942e140e2f6faac56fdba88d4ca209 .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/EventOverSPI.o.d" -o ${OBJECTDIR}/_ext/1735361612/EventOverSPI.o ../Shared/EventOverSPI.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/LeaderFSM.o: ProjectSource/LeaderFSM.c  .generated_files/flags/default/246dcf9b5a35b049d8d12851e8484ac715af06ed .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/LeaderFSM.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/LeaderFSM.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/LeaderFSM.o.d" -o ${OBJECTDIR}/ProjectSource/LeaderFSM.o ProjectSource/LeaderFSM.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o: ../Shared/PIC32_SPI_HAL.c  .generated_files/flags/default/b636cb9881088a4e117b1aaf0c11ac84e8d7bdba .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
-	@${MKDIR} "${OBJECTDIR}/_ext/1735361612" 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o.d" -o ${OBJECTDIR}/_ext/1735361612/PIC32_SPI_HAL.o ../Shared/PIC32_SPI_HAL.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+${OBJECTDIR}/ProjectSource/OptoSensorService.o: ProjectSource/OptoSensorService.c  .generated_files/flags/default/b255f40aabea4f2f5b8de7f306381c2d4c6f12ca .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/OptoSensorService.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/OptoSensorService.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/OptoSensorService.o.d" -o ${OBJECTDIR}/ProjectSource/OptoSensorService.o ProjectSource/OptoSensorService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/ProjectSource/ButtonService.o: ProjectSource/ButtonService.c  .generated_files/flags/default/828af9e4e586c85bba72f2e7922f602725a960c .generated_files/flags/default/444dd6797b527ec6f4a935221adf8da7c2494839
+	@${MKDIR} "${OBJECTDIR}/ProjectSource" 
+	@${RM} ${OBJECTDIR}/ProjectSource/ButtonService.o.d 
+	@${RM} ${OBJECTDIR}/ProjectSource/ButtonService.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -I"FrameworkHeaders" -I"ProjectHeaders" -fno-common -MP -MMD -MF "${OBJECTDIR}/ProjectSource/ButtonService.o.d" -o ${OBJECTDIR}/ProjectSource/ButtonService.o ProjectSource/ButtonService.c    -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
 endif
 
