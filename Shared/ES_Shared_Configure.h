@@ -25,7 +25,18 @@ typedef enum
   ES_READ_OPTO,
   ES_STOP_OPTO,
   ES_FOLLOWER_SPI_EVENT,
-  ES_TEST_TO_FOLLOWER
+  ES_TEST_TO_FOLLOWER,
+  ES_TEST_TO_LEADER,
+  ES_STOP_MOTORS,
+  ES_TURN_CCW,
+  ES_TURN_CW,
+  ES_FORWARD,
+  ES_REVERSE,
+  ES_BEGIN_ALIGN,
+  ES_FOUND_BEACON_B,
+  ES_FOUND_BEACON_C,
+  /* Keep at the end of enum for knowing valid events in EventOverSPI. */
+  NUM_ES_EVENTS
 }ES_EventType_t;
 
 #endif
