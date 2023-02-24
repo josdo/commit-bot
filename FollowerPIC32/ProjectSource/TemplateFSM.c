@@ -9,7 +9,7 @@ static uint8_t MyPriority;
 bool InitTemplateFSM(uint8_t Priority)
 {
   MyPriority = Priority;
-  CurrentState = InitPState;
+  CurrentState = InitPState_TemplateFSM;
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -28,7 +28,7 @@ ES_Event_t RunTemplateFSM(ES_Event_t ThisEvent)
 
   switch (CurrentState)
   {
-    case InitPState:
+    case InitPState_TemplateFSM:
     {
       if (ThisEvent.EventType = ES_INIT)
       {

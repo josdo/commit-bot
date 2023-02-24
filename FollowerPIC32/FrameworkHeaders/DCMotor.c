@@ -5,12 +5,24 @@
 #include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
+<<<<<<< HEAD
 #define R2 LATBbits.LATB4                               // right direction pin
 #define L2 LATAbits.LATA4                               // left direction pin
+=======
+#define EN12 LATBbits.LATB11                            // Enable pin 1,2
+#define EN34 LATBbits.LATB12                            // Enable pin 3,4
+
+#define A2 LATBbits.LATB4                               // non PWM control pin
+#define A4 LATAbits.LATA4                               // non PWM control pin
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 10000                                  // in Hz
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
 #define PBCLK_RATE 20000000L
 
 const uint16_t PWM_PERIOD = 2000-1;
@@ -44,6 +56,11 @@ static volatile uint32_t Lspeed = 0;                // left wheel speed
 static volatile uint32_t Rspeed = 0;                // right wheel speed
 
 static volatile float velError;                  // velocity error
+<<<<<<< HEAD
+=======
+
+static int32_t velocity;
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
 // ----------------------------------------------------------------------------
 
 
@@ -57,6 +74,7 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
 void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
 
+<<<<<<< HEAD
 void InitDCMotor()
 {
   // ----------------------- Set up DC Motor pins ----------------------- 
@@ -65,31 +83,66 @@ void InitDCMotor()
   
   R2 = 0;                                       // right direction
   L2 = 0;                                       // left direction
+=======
+
+
+void InitDCMotor()
+{
+  
+  // ----------------------- Set up DC Motor pins ----------------------- 
+  TRISBCLR = _TRISB_TRISB11_MASK;               // set RB11 as output (EN12)
+  
+  ANSELBCLR = _ANSELB_ANSB12_MASK;              // set rb12 as digital (EN 34)
+  TRISBCLR = _TRISB_TRISB12_MASK;               // set rb12 as output (EN 34)
+  
+  TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (A4)
+  TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (B4)
+  
+  EN12 = 1;                                     // enable the first motor
+  EN34 = 1;                                     // enable the second motor
+  A2 = 0;
+  A4 = 0;
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
   // --------------------------------------------------------------------
 
   
   // ------------------------------- PWM ----------------------------------
   setPWM();                                     // turn on PWM
   OC3RS = (uint16_t)(0);                        // initial speed is 0
+<<<<<<< HEAD
   OC2RS = (uint16_t)(0);                        // initial speed is 0
+=======
+  OC4RS = (uint16_t)(0);                        // initial speed is 0
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
   // ----------------------------------------------------------------------
   
   
   // ---------------------------- Init IC for encoders ---------------------
+<<<<<<< HEAD
 //  initRightEncoderISR();         // IC1 on RA2
 //  initLeftEncoderISR();          // IC3 on RB5
   // ----------------------------------------------------------------------
   DB_printf("\rES_INIT received in DC Motor  %d\r\n");
+=======
+  initRightEncoderISR();         // IC1 on RA2
+  initLeftEncoderISR();          // IC3 on RB5
+  // ----------------------------------------------------------------------
+  DB_printf("\rES_INIT received in DC Motor  %d\r\n");
+
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
 }
 
 // ---------------------------- Private Functions -----------------------------
 void setPWM(void){
+<<<<<<< HEAD
     // -------------------- Set PWM pins as digital output ----------------
     TRISBbits.TRISB10 = 0;                  // RB10 is output R
     TRISBbits.TRISB11 = 0;                  // RB11 is output L
     // --------------------------------------------------------------------
     
     
+=======
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
   // --------------------- Timer 3 --------------------- 
   //switching the timer 3 off
   T3CONbits.ON = 0;
@@ -117,6 +170,7 @@ void setPWM(void){
   OC3RS = 0;
   // -------------------------------------------------------
   
+<<<<<<< HEAD
   // --------------------- Channel 2 --------------------- 
   // switching off the output compare module
   OC2CONbits.ON = 0;
@@ -135,11 +189,32 @@ void setPWM(void){
   // mapping output compare channel to pins
   RPB10R = 0b0101;                          // RB10 (pin 21) to OC3 RIGHT
   RPB11R = 0b0101;                          // RB11 (pin 22) to OC2 LEFT
+=======
+  // --------------------- Channel 4 --------------------- 
+  // switching off the output compare module
+  OC4CONbits.ON = 0;
+  // selecting timer for the output compare mode
+  OC4CONbits.OCTSEL = 1;
+  // set PWM mode with no fault
+  OC4CONbits.OCM = 0b110;
+  // set the timer to 16 bits
+  OC4CONbits.OC32 = 0;
+  // set the initial cycle 
+  OC4R = 0;
+  // set the repeating cycle
+  OC4RS = 0;
+  // -------------------------------------------------------
+  
+  // mapping output compare channel to pins
+  RPB10R = 0b0101;                          // pin 21
+  RPB13R = 0b0101;                          // pin 24
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
   
   // switch on the output compare module
   OC3CONbits.ON = 1;
   
   // switch on the output compare module
+<<<<<<< HEAD
   OC2CONbits.ON = 1;
   
   // setting period on the timer
@@ -168,11 +243,52 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
         
         else {
             OC2RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
+=======
+  OC4CONbits.ON = 1;
+  
+  // turn on the timer 3
+  T3CONbits.ON = 1;
+  
+  // setting period on the timer
+  PR3 = PWM_PERIOD;
+}
+
+void setVelocity(){
+    
+}
+
+
+void setMotorDutyCycle(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
+    if (0 == dutyCycle){
+       EN12 = 0;
+       EN34 = 0;
+       A2 = 0;
+       A4 = 0;
+       OC3RS = 0;
+       OC4RS = 0;
+    }
+    
+    else if (LEFT_MOTOR == whichMotor){
+        EN34 = 1;
+        A4 = whichDirection;
+        
+        if (FORWARD == whichDirection){
+            OC4RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
+        }
+        
+        else {
+            OC4RS = (uint16_t)(PWM_PERIOD * (1 - (dutyCycle/100.0)));
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
         }
     }
     
     else if (RIGHT_MOTOR == whichMotor){
+<<<<<<< HEAD
         R2 = whichDirection;
+=======
+        EN12 = 1;
+        A2 = whichDirection;
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b
         
         if (FORWARD == whichDirection){
             OC3RS = (uint16_t)(PWM_PERIOD * (dutyCycle/100.0));
@@ -279,4 +395,7 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
     
     __builtin_enable_interrupts();          // enable global interrupts
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a560503b3303425c0a6850c0aaf8bc26b9a3a85b

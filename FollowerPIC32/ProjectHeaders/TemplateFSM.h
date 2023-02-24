@@ -53,7 +53,7 @@ Return:
 Description:
   Returns the current state of the Template state machine
 */
-TemplateState_t QueryTemplateFSM(void);
+TemplateFSMState_t QueryTemplateFSM(void);
 
 #endif /* TemplateFSM_H */
 
