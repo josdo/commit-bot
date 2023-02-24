@@ -22,5 +22,7 @@
 // prototypes for event checkers
 
 bool Check4Keystroke(void);
+bool Check4CornerBeacons(void);
+bool Check4InitialDistance(void);
 
 #endif /* EventCheckers_H */

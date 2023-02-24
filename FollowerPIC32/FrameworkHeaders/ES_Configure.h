@@ -24,6 +24,8 @@
 #ifndef ES_CONFIGURE_H
 #define ES_CONFIGURE_H
 
+#include "../../Shared/ES_Shared_Configure.h"
+
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of
 // services that the framework will handle. Reasonable values are 8 and 16
@@ -33,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 1
+#define NUM_SERVICES 2
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -41,6 +43,7 @@
 // services are added in numeric sequence (1,2,3,...) with increasing
 // priorities
 // the header file with the public function prototypes
+
 #define SERV_0_HEADER "TestHarnessService0.h"
 // the name of the Init function
 #define SERV_0_INIT InitTestHarnessService0
@@ -57,37 +60,37 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_3_HEADER "TestHarnessService1.h"
+#define SERV_1_HEADER "TopHSM.h"
 // the name of the Init function
-#define SERV_3_INIT InitTestHarnessService1
+#define SERV_1_INIT InitTopHSM
 // the name of the run function
-#define SERV_3_RUN RunTestHarnessService1
+#define SERV_1_RUN RunTopHSM
 // How big should this services Queue be?
-#define SERV_3_QUEUE_SIZE 3
+#define SERV_1_QUEUE_SIZE 4
 #endif
 
 /****************************************************************************/
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_3_HEADER "TestHarnessService2.h"
+#define SERV_2_HEADER "OptoSensorService.h"
 // the name of the Init function
-#define SERV_3_INIT InitTestHarnessService2
+#define SERV_2_INIT InitOptoSensorService
 // the name of the run function
-#define SERV_3_RUN RunTestHarnessService2
+#define SERV_2_RUN RunOptoSensorService
 // How big should this services Queue be?
-#define SERV_3_QUEUE_SIZE 3
+#define SERV_2_QUEUE_SIZE 3
 #endif
 
 /****************************************************************************/
 // These are the definitions for Service 3
 #if NUM_SERVICES > 3
 // the header file with the public function prototypes
-#define SERV_3_HEADER "TestHarnessService3.h"
+#define SERV_3_HEADER "DisplayEncoderService.h"
 // the name of the Init function
-#define SERV_3_INIT InitTestHarnessService3
+#define SERV_3_INIT InitDisplayEncoderService
 // the name of the run function
-#define SERV_3_RUN RunTestHarnessService3
+#define SERV_3_RUN RunDisplayEncoderService
 // How big should this services Queue be?
 #define SERV_3_QUEUE_SIZE 3
 #endif
@@ -249,22 +252,6 @@
 #endif
 
 /****************************************************************************/
-// Name/define the events of interest
-// Universal events occupy the lowest entries, followed by user-defined events
-typedef enum
-{
-  ES_NO_EVENT = 0,
-  ES_ERROR,                 /* used to indicate an error from the service */
-  ES_INIT,                  /* used to transition from initial pseudo-state */
-  ES_TIMEOUT,               /* signals that the timer has expired */
-  ES_SHORT_TIMEOUT,         /* signals that a short timer has expired */
-  /* User-defined events start here */
-  ES_NEW_KEY,               /* signals a new key received from terminal */
-  ES_LOCK,
-  ES_UNLOCK
-}ES_EventType_t;
-
-/****************************************************************************/
 // These are the definitions for the Distribution lists. Each definition
 // should be a comma separated list of post functions to indicate which
 // services are on that distribution list.
@@ -297,6 +284,7 @@ typedef enum
 /****************************************************************************/
 // This is the list of event checking functions
 #define EVENT_CHECK_LIST Check4Keystroke
+//Check4CornerBeacons, Check4InitialDistance
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -305,7 +293,7 @@ typedef enum
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC TIMER_UNUSED
+#define TIMER0_RESP_FUNC PostTestHarnessService0
 #define TIMER1_RESP_FUNC TIMER_UNUSED
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
@@ -318,7 +306,7 @@ typedef enum
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
-#define TIMER13_RESP_FUNC TIMER_UNUSED
+#define TIMER13_RESP_FUNC PostTopHSM
 #define TIMER14_RESP_FUNC TIMER_UNUSED
 #define TIMER15_RESP_FUNC PostTestHarnessService0
 
@@ -329,8 +317,17 @@ typedef enum
 // the timer number matches where the timer event will be routed
 // These symbolic names should be changed to be relevant to your application
 
+#define FREQ_TIMER 0
 #define SERVICE0_TIMER 15
-#define ANALOG_READ_TIMER 14
-//#define DISTANCE_READ_TIMER 13
+//#define BACKUP_TIMER 14
+#define FAST_RATE_TIMER 13
+//#define TURN_TIMER 0
+//#define PERIOD_TIMER 1
+//#define COMMAND_TIMER 14
+//#define OPTO_READ_TIMER 15
+//#define NEXT_STEP_TIMER 0
+//#define DIAL_READ_TIMER 1
+//#define NEXT_DISPLAY_TIMER 2
+
 
 #endif /* ES_CONFIGURE_H */

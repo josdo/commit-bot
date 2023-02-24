@@ -74,7 +74,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 //            DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
-            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
+//            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
             ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
         }
     }

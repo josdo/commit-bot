@@ -10,6 +10,15 @@ typedef enum {
     LongRangeBeaconSensor
 }BeaconSensor_t;
 
+typedef enum {
+    NoBeacon = 0,
+    BeaconA,
+    BeaconB,
+    BeaconC,
+    BeaconD
+}WhichBeacon_t;
+
+WhichBeacon_t getBeaconName(BeaconSensor_t);
 uint32_t getBeconSensorFreq(BeaconSensor_t);
 
 #endif

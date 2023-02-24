@@ -17,8 +17,8 @@ void InitIC4(void);
 
 volatile static uint32_t short_range_period;
 volatile static uint32_t long_range_period;
-static uint32_t short_range_freq;
-static uint32_t long_range_freq;
+volatile static uint32_t short_range_freq;
+volatile static uint32_t long_range_freq;
 
 extern volatile global_time gl;
 
@@ -34,8 +34,29 @@ void InitBeaconSensor(){
     InitTimer2();
     InitIC5();
     InitIC4();
-    
+    DB_printf("\rES_INIT received in Beacon Sensor Service %d\r\n");
 }
+
+//void InitShortBeaconTimeout(void){
+//    // -------------------------- Timer 1 -------------------------------
+//    T1CONbits.ON = 0;                   // turn off timer 1
+//    T1CONbits.TCS = 0;                  // PBCLK source
+//    T1CONbits.SIDL = 0;                 // active in idle mode
+//    T1CONbits.TGATE = 0;                // turn off gated mode
+//    T1CONbits.TSYNC = 0;                // turn of sync mode
+//    T1CONbits.TCKPS = 0b010;            // pre-scale of 4
+//    TMR1 = 0;                           // clear the timer
+//    PR1 = 5000;                         // 1 ms timeout
+//    // --------------------------------------------------------------------
+//    
+//    
+//    // ----------------------- Set Up Interrupt ------------------------------
+//    __builtin_disable_interrupts();      // disable global interrupts
+//    IPC1bits.T1IP = 4;                  // timer 1 priority is 4
+//    IFS0CLR = _IFS0_T1IF_MASK;          // clear pending flag
+//    // -----------------------------------------------------------------------
+//    
+//}
 
 // IC for Short Range IR connected to B2
 void InitIC5(){
@@ -121,12 +142,40 @@ uint32_t getBeconSensorFreq(BeaconSensor_t whichSensor){
     }
 }
 
+
+
+WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
+{
+    uint32_t freq = getBeconSensorFreq(whichSensor);
+    if (3000 < freq && freq < 3666)
+    {
+        return BeaconA;
+    }
+    else if (1800 < freq && freq < 2200)
+    {
+        return BeaconB;
+    }
+    else if (1285 < freq && freq < 1569)
+    {
+        return BeaconC;
+    }
+    else if (820 < freq && freq < 999)
+    {
+        return BeaconD;
+    }
+    else
+    {
+        return NoBeacon;
+    }
+}
+
+
 void Period2Freq(BeaconSensor_t whichSensor){
     if (whichSensor == ShortRangeBeaconSensor){
-        short_range_freq = (uint32_t)(0.2 * short_range_period);
+        short_range_freq = (uint32_t)(0.4 * short_range_period);
     }
     else if(whichSensor == LongRangeBeaconSensor){
-        long_range_freq = (uint32_t)(0.2 * long_range_period);
+        long_range_freq = (uint32_t)(0.4 * long_range_period);
     }
 } 
 
