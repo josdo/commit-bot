@@ -7,6 +7,8 @@
 // ------------------------------- Module Defines ---------------------------
 #define R2 LATBbits.LATB4                               // right direction pin
 #define L2 LATAbits.LATA4                               // left direction pin
+#define REncoder PORTBbits.RA2                          // right encoder pin
+#define LEncoder PORTBbits.RB5                          // left encoder pin
 
 #define TIMER_DIV 4                                     // pre scalar on timer
 #define PWM_FREQ 10000                                  // in Hz
@@ -151,6 +153,7 @@ void setPWM(void){
 
 
 
+/* R2/L2 is the direction pin, low if forward, high if backward. */
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
     if (0 == dutyCycle){
        R2 = 0;
@@ -188,7 +191,7 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 void initRightEncoderISR(void){
     // -------------------------- IC 1 -----------------------------------
     __builtin_disable_interrupts();         // disable global interrupts
-    IC1CONbits.ON = 0;                      // turn of IC3
+    IC1CONbits.ON = 0;                      // turn of IC1
     INTCONbits.MVEC = 1;                    // enable multivector mode
     IC1R = 0b0000;                          // map IC1 to RA2
     TRISAbits.TRISA4 = 1;                   // set RA2 as input
@@ -276,6 +279,8 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
         T3RO++;                             // increment rollover
         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
     }
+    IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
+    IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
     
     __builtin_enable_interrupts();          // enable global interrupts
 }
