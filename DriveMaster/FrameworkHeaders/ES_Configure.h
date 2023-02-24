@@ -60,11 +60,11 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "LeaderFSM.h"
+#define SERV_1_HEADER "TopHSM.h"
 // the name of the Init function
-#define SERV_1_INIT InitLeaderFSM
+#define SERV_1_INIT InitTopHSM
 // the name of the run function
-#define SERV_1_RUN RunLeaderFSM
+#define SERV_1_RUN RunTopHSM
 // How big should this services Queue be?
 #define SERV_1_QUEUE_SIZE 4
 #endif
@@ -305,7 +305,7 @@
 #define TIMER10_RESP_FUNC TIMER_UNUSED
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
-#define TIMER13_RESP_FUNC TIMER_UNUSED
+#define TIMER13_RESP_FUNC PostTopHSM
 #define TIMER14_RESP_FUNC TIMER_UNUSED
 #define TIMER15_RESP_FUNC PostTestHarnessService0
 
@@ -326,5 +326,6 @@
 //#define DIAL_READ_TIMER 1
 //#define NEXT_DISPLAY_TIMER 2
 
+#define FAST_RATE_TIMER 13
 
 #endif /* ES_CONFIGURE_H */

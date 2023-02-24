@@ -56,6 +56,9 @@
       <itemPath>ProjectHeaders/LeaderFSM.h</itemPath>
       <itemPath>ProjectHeaders/OptoSensorService.h</itemPath>
       <itemPath>ProjectHeaders/ButtonService.h</itemPath>
+      <itemPath>../Shared/TopHSM.h</itemPath>
+      <itemPath>../Shared/CalibrationSM.h</itemPath>
+      <itemPath>../Shared/DistanceSensor.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -82,6 +85,9 @@
       <itemPath>ProjectSource/LeaderFSM.c</itemPath>
       <itemPath>ProjectSource/OptoSensorService.c</itemPath>
       <itemPath>ProjectSource/ButtonService.c</itemPath>
+      <itemPath>../Shared/TopHSM.c</itemPath>
+      <itemPath>../Shared/CalibrationSM.c</itemPath>
+      <itemPath>../Shared/DistanceSensor.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -167,26 +173,6 @@
       <C32-AR>
         <property key="additional-options-chop-files" value="false"/>
       </C32-AR>
-      <C32-AS>
-        <property key="assembler-symbols" value=""/>
-        <property key="enable-symbols" value="true"/>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="expand-macros" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=""/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
-        <property key="false-conditionals" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="generate-micro-compressed-code" value="false"/>
-        <property key="keep-locals" value="false"/>
-        <property key="list-assembly" value="false"/>
-        <property key="list-source" value="false"/>
-        <property key="list-symbols" value="false"/>
-        <property key="oXC32asm-list-to-file" value="false"/>
-        <property key="omit-debug-dirs" value="false"/>
-        <property key="omit-forms" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warning-level" value=""/>
-      </C32-AS>
       <C32-CO>
         <property key="coverage-enable" value=""/>
         <property key="stack-guidance" value="false"/>
@@ -279,8 +265,6 @@
         </C32>
         <C32-AR>
         </C32-AR>
-        <C32-AS>
-        </C32-AS>
         <C32-CO>
         </C32-CO>
         <C32-LD>
@@ -290,13 +274,11 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="ProjectHeaders/TestHarnessService0.h" ex="true" overriding="false">
+      <item path="ProjectHeaders/TestHarnessService0.h" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>
         </C32-AR>
-        <C32-AS>
-        </C32-AS>
         <C32-CO>
         </C32-CO>
         <C32-LD>
@@ -311,8 +293,6 @@
         </C32>
         <C32-AR>
         </C32-AR>
-        <C32-AS>
-        </C32-AS>
         <C32-CO>
         </C32-CO>
         <C32-LD>
@@ -327,8 +307,6 @@
         </C32>
         <C32-AR>
         </C32-AR>
-        <C32-AS>
-        </C32-AS>
         <C32-CO>
         </C32-CO>
         <C32-LD>
@@ -343,8 +321,6 @@
         </C32>
         <C32-AR>
         </C32-AR>
-        <C32-AS>
-        </C32-AS>
         <C32-CO>
         </C32-CO>
         <C32-LD>
