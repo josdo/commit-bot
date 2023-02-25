@@ -36,7 +36,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
         case ROTATE_TO_ALIGN:
         {
             CurrentEvent = DuringRotateToAlign(CurrentEvent);
-            ES_Timer_InitTimer(FAST_RATE_TIMER,10);
+            ES_Timer_InitTimer(FAST_RATE_TIMER,1);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch (CurrentEvent.EventType)
@@ -77,13 +77,13 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
         
         case BACK_UP:
         {   CurrentEvent = DuringBackUp(CurrentEvent);
-            ES_Timer_InitTimer(FAST_RATE_TIMER,1000);
+            ES_Timer_InitTimer(FAST_RATE_TIMER,1);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch (CurrentEvent.EventType)
                 {
                   
-                    case ES_TIMEOUT:
+                    case                                                                                                                                                                                                                      :
                     {
                         if(CurrentEvent.EventParam == FAST_RATE_TIMER)
                         {
@@ -149,8 +149,8 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         // repeat the StartxxxSM() functions for concurrent state machines
         // on the lower level
         // turn CW until local beacon is found
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 15);
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 15);
         puts("Started Rotating\r\n");
     }
     else if (Event.EventType == ES_EXIT)
@@ -182,8 +182,8 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+        setMotorSpeed(LEFT_MOTOR, BACKWARD, 15);
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 15);
         puts("Moving Back\r\n");
     }
     else if (Event.EventType == ES_EXIT)

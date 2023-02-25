@@ -3,6 +3,7 @@
 #include "TopHSM.h"
 #include "CalibrationSM.h"
 #include "dbprintf.h"
+#include "DCMotor.h"
 
 
 static ES_Event_t DuringCalibration( ES_Event_t Event);
@@ -14,6 +15,8 @@ static uint8_t MyPriority;
 bool InitTopHSM ( uint8_t Priority )
 {
   ES_Event_t ThisEvent;
+  
+  InitDCMotor();
 
   MyPriority = Priority;  // save our priority
 
