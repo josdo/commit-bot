@@ -12,6 +12,7 @@
 #include <sys/attribs.h>
 #include "TestHarnessService0.h"
 #include "BeaconSensor.h"
+#include "DCMotor.h"
 
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
@@ -35,6 +36,9 @@ bool InitTestHarnessService0(uint8_t Priority)
   InitDistanceSensor();
   InitTapeSensor();
   InitBeaconSensor();
+  InitDCMotor();
+
+  DB_printf("Initialized TestHarnessService0\r\n");
   
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
@@ -56,6 +60,8 @@ bool PostTestHarnessService0(ES_Event_t ThisEvent)
 
 ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 {
+  static uint32_t dc = 0;
+
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
 
@@ -77,8 +83,34 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 //            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
             ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
         }
+        else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
+        {
+          DB_printf("TODO Print motor timer\r\n");
+          ES_Timer_InitTimer(PRINT_MOTOR_TIMER, 100);
+        }
     }
     break;
+
+    case ES_NEW_KEY:
+    {
+      DB_printf("Key -> %c <- pressed\r\n", ThisEvent.EventParam);
+      if ('k' == ThisEvent.EventParam)
+      {
+        dc = dc == 100 ? 100 : dc + 10;
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
+        DB_printf("Increase PWM to %u\r\n", dc);
+      }
+      else if ('j' == ThisEvent.EventParam)
+      {
+        dc = dc == 0 ? 0 : dc - 10;
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
+        DB_printf("Decrease PWM to %u\r\n", dc);
+      }
+      else if ('m' == ThisEvent.EventParam)
+      {
+        ES_Timer_InitTimer(PRINT_MOTOR_TIMER, 100);
+      }
+    }
   }
 
   return ReturnEvent;

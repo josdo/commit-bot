@@ -79,7 +79,7 @@ void InitDCMotor()
 //  initRightEncoderISR();         // IC1 on RA2
 //  initLeftEncoderISR();          // IC3 on RB5
   // ----------------------------------------------------------------------
-  DB_printf("\rES_INIT received in DC Motor  %d\r\n");
+  DB_printf("\rInitializing DC Motor\r\n");
 }
 
 // ---------------------------- Private Functions -----------------------------
@@ -102,7 +102,7 @@ void setPWM(void){
   // -------------------------------------------------------
   
   
-  // --------------------- Channel 3 --------------------- 
+  // --------------------- Channel 3, Right --------------------- 
   // switching off the output compare module
   OC3CONbits.ON = 0;
   // selecting timer for the output compare mode
@@ -117,7 +117,7 @@ void setPWM(void){
   OC3RS = 0;
   // -------------------------------------------------------
   
-  // --------------------- Channel 2 --------------------- 
+  // --------------------- Channel 2, Left --------------------- 
   // switching off the output compare module
   OC2CONbits.ON = 0;
   // selecting timer for the output compare mode
@@ -276,6 +276,8 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
         T3RO++;                             // increment rollover
         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
     }
+    IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
+    IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
     
     __builtin_enable_interrupts();          // enable global interrupts
 }
