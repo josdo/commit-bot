@@ -294,7 +294,7 @@
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
 #define TIMER0_RESP_FUNC PostTestHarnessService0
-#define TIMER1_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC PostTopHSM
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -318,6 +318,7 @@
 // These symbolic names should be changed to be relevant to your application
 
 #define FREQ_TIMER 0
+#define QUERY_TIMER 1
 #define SERVICE0_TIMER 15
 //#define BACKUP_TIMER 14
 #define FAST_RATE_TIMER 13

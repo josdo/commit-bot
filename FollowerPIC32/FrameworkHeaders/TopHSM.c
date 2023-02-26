@@ -4,10 +4,11 @@
 #include "CalibrationSM.h"
 #include "dbprintf.h"
 #include "DCMotor.h"
+#include "GoToBranchOriginSM.h"
 
 
 static ES_Event_t DuringCalibration( ES_Event_t Event);
-
+static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
 static MasterState_t CurrentState;
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
@@ -74,8 +75,9 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
            {
                switch(CurrentEvent.EventType)
                {
-                   case ES_FINISH_CALIBRATION:
-                   {
+                   case ES_FINISH:
+                   {    
+                        EntryEventKind.EventType = ES_ENTRY_HISTORY;
                         MakeTransition = true;
                         NextState = GO_TO_BRANCH_ORIGIN;
                    }
@@ -84,22 +86,93 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
            
        }
        break;
-       
+
        case GO_TO_BRANCH_ORIGIN:
        {
+           CurrentEvent = DuringGo2BranchOrigin(CurrentEvent);
            puts("GO_TO_BRANCH_ORIGIN\r\n");
+           if (CurrentEvent.EventType != ES_NO_EVENT)
+           {
+               switch(CurrentEvent.EventType)
+               {
+//                   case ES_NEW_KEY:
+//                   {
+//                       // GO to branch 1
+//                       if (CurrentEvent.EventParam == '1')
+//                       {
+//                           DuringGo2BranchOrigin(CurrentEvent);
+//                       }
+//                       // GO to branch 2
+//                       else if (CurrentEvent.EventParam == '2')
+//                       {
+//                           DuringGo2BranchOrigin(CurrentEvent);
+//                       }
+//                       else if (CurrentEvent.EventParam == '3')
+//                       {
+//                           DuringGo2BranchOrigin(CurrentEvent);
+//                       }
+//                   }
+//                   break;
+                   case ES_FINISH:
+                   {
+                       puts("also here\r\n");
+                       MakeTransition = true;
+                       NextState = FOLLOW_TAPE;
+                   }
+                   break;
+                   
+               }
+           }
+           
        }
        break;
        
        case FOLLOW_TAPE:
        {
+           if (CurrentEvent.EventType != ES_NO_EVENT)
+           {
+               switch(CurrentEvent.EventType)
+               {
+                   // change this to start btn click event
+                   case ES_NEW_KEY:
+                   {
+                       if (CurrentEvent.EventParam == 'z')
+                       {
+                            puts("FOLLOW_TAPE\r\n");
+            
+                            MakeTransition = true;
+                            NextState = COME_BACK;
+                       }
+                   }
+                   break;
+                        
+                }
+           }
+           
            
        }
        break;
        
        case COME_BACK:
        {
-           
+           if (CurrentEvent.EventType != ES_NO_EVENT)
+           {
+               switch(CurrentEvent.EventType)
+               {
+                   // change this to start btn click event
+                   case ES_NEW_KEY:
+                   {
+                       if (CurrentEvent.EventParam == 'x')
+                       {
+                            EntryEventKind.EventType = ES_ENTRY_HISTORY;
+                            puts("COME_BACK\r\n");
+                            MakeTransition = true;
+                            NextState = GO_TO_BRANCH_ORIGIN;
+                       }
+                   }
+                   break;
+               }
+           }
        }
        break;  
    }
@@ -171,5 +244,27 @@ static ES_Event_t DuringCalibration( ES_Event_t Event)
     }
     // return either Event, if you don't want to allow the lower level machine
     // to remap the current event, or ReturnEvent if you do want to allow it.
+    return(ReturnEvent);
+}
+
+
+static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event; // assme no re-mapping or comsumption
+
+    // process ES_ENTRY, ES_ENTRY_HISTORY & ES_EXIT events
+    if ( (Event.EventType == ES_ENTRY) ||
+         (Event.EventType == ES_ENTRY_HISTORY) )
+    { 
+        StartGoToBranchOriginSM(Event);
+    }
+    else if ( Event.EventType == ES_EXIT )
+    {
+        RunGoToBranchOriginSM(Event);
+    }
+    else
+    {
+        RunGoToBranchOriginSM(Event);
+    }
     return(ReturnEvent);
 }

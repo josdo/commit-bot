@@ -40,7 +40,7 @@ typedef enum
     ES_ENTRY_HISTORY,
           ES_FOUND_BEACON,
           ES_DONE_BACK_UP,
-          ES_FINISH_CALIBRATION
+          ES_FINISH
 }ES_EventType_t;
 
 #endif

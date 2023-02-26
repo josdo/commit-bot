@@ -36,6 +36,19 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
             {
                 switch (CurrentEvent.EventType)
                 {
+                    case ES_NEW_KEY:
+                    {
+                        if(CurrentEvent.EventParam == 'f')
+                        {
+                            ES_Event_t NewEvent;
+                            NewEvent.EventType = ES_FOUND_BEACON;
+                            NewEvent.EventParam = BeaconB;
+                            PostTopHSM(NewEvent);
+                        }
+                        
+                    }
+                    break;
+                    
                     case ES_FOUND_BEACON:
                     {
                         WhichBeacon_t BeaconName = CurrentEvent.EventParam;
@@ -80,7 +93,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         NextState = FINISH_CALIBRATION;
                         MakeTransition = true;
                         ES_Event_t NewEvent;
-                        NewEvent.EventType = ES_FINISH_CALIBRATION;
+                        NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
                         
                     }

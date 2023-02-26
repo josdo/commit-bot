@@ -2,7 +2,12 @@
 #define TopHSM_H
 
 // State definitions for use with the query function
-typedef enum { IDLE, CALIBRATION, GO_TO_BRANCH_ORIGIN, FOLLOW_TAPE, COME_BACK } MasterState_t ;
+typedef enum { IDLE, 
+        CALIBRATION, 
+        QUERY_THE_USER,
+        GO_TO_BRANCH_ORIGIN, 
+        FOLLOW_TAPE, 
+        COME_BACK } MasterState_t ;
 
 // Public Function Prototypes
 
