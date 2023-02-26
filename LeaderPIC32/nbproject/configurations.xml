@@ -52,6 +52,7 @@
       <itemPath>ProjectHeaders/TestHarnessService0.h</itemPath>
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
       <itemPath>../Shared/ES_Shared_Configure.h</itemPath>
+      <itemPath>ProjectHeaders/BranchSwitch.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -64,6 +65,7 @@
       <itemPath>ProjectSource/TestHarnessService0.c</itemPath>
       <itemPath>ProjectSource/main.c</itemPath>
       <itemPath>ProjectSource/TemplateService.c</itemPath>
+      <itemPath>ProjectSource/BranchSwitch.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -45,7 +45,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
    {
        case IDLE:
        {
-           
            DB_printf("IDLE STATE\r\n");
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
@@ -58,7 +57,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                        {
                            MakeTransition = true;
                            NextState = CALIBRATION;
-                           
                        }
                        
                    }
