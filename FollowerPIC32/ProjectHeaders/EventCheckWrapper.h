@@ -19,6 +19,7 @@
 #include "EventCheckers.h"
 #include "OptoSensorService.h"
 #include "ButtonService.h"
+#include "CalibrationSM.h"
 
 //#include "MotorStepService.h"
 

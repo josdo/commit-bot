@@ -15,6 +15,9 @@ static ES_Event_t DuringRotateToAlign (ES_Event_t Event);
 static ES_Event_t DuringBackUp(ES_Event_t Event);
 static uint8_t MyPriority;
 
+static const uint8_t NUM_PULSE = 3;
+static uint8_t countB = 0;
+static uint8_t countC = 0;
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
 {
@@ -22,50 +25,38 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
     CalibrationSMState_t NextState = CurrentState;
     ES_Event_t EntryEventKind = { ES_ENTRY, 0 };// default to normal entry to new state
     ES_Event_t ReturnEvent = CurrentEvent; // assume we are not consuming event
-    uint32_t Freq;
+    
     switch(CurrentState)
     {
-        case INIT_CALIBRATION:
-        {
-            DB_printf("INIT received in Calibration SM\r\n"); 
-            NextState = ROTATE_TO_ALIGN;
-            MakeTransition = true;
-        }
-        break;
         
         case ROTATE_TO_ALIGN:
         {
             CurrentEvent = DuringRotateToAlign(CurrentEvent);
-            ES_Timer_InitTimer(FAST_RATE_TIMER,1);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch (CurrentEvent.EventType)
                 {
-                    case ES_TIMEOUT:
+                    case ES_FOUND_BEACON:
                     {
-                        if (CurrentEvent.EventParam == FAST_RATE_TIMER)
+                        WhichBeacon_t BeaconName = CurrentEvent.EventParam;
+                        if (CurrentEvent.EventParam == BeaconB || CurrentEvent.EventParam == BeaconC) 
                         {
-                            ES_Event_t ThisEvent;
-                            WhichBeacon_t BeaconName = getBeaconName(ShortRangeBeaconSensor);
-                            if (BeaconName == BeaconB || BeaconName == BeaconC) 
+                            setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+                            setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                            NextState = BACK_UP;
+                            MakeTransition = true;
+
+                            ///////////////////////////
+                            switch(BeaconName)
                             {
-                                setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                                setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                                NextState = BACK_UP;
-                                MakeTransition = true;
-                                
-                                ///////////////////////////
-                                switch(BeaconName)
-                                {
-                                    case BeaconB:
-                                        puts("Beacon B Detected\r\n");
-                                    break;
-                                    case BeaconC:
-                                        puts("Beacon C Detected\r\n");
-                                    break;
-                                }
-                                ///////////////////////////
+                                case BeaconB:
+                                    puts("Beacon B Detected\r\n");
+                                break;
+                                case BeaconC:
+                                    puts("Beacon C Detected\r\n");
+                                break;
                             }
+                            ///////////////////////////
                         }
                     }
                     break;
@@ -77,26 +68,21 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
         
         case BACK_UP:
         {   CurrentEvent = DuringBackUp(CurrentEvent);
-            ES_Timer_InitTimer(FAST_RATE_TIMER,1);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch (CurrentEvent.EventType)
                 {
-                  
-                    case                                                                                                                                                                                                                      :
+                    case ES_DONE_BACK_UP:
                     {
-                        if(CurrentEvent.EventParam == FAST_RATE_TIMER)
-                        {
-                            if (getDistance() < 100)
-                            {
-                                setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                                setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                                puts("Done Backing up\r\n");
-                                ES_Event_t NewEvent;
-                                NewEvent.EventType = ES_FINISH_CALIBRATION;
-                                PostTopHSM(NewEvent);
-                            }
-                        }
+                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                        puts("Done Backing up\r\n");
+                        NextState = FINISH_CALIBRATION;
+                        MakeTransition = true;
+                        ES_Event_t NewEvent;
+                        NewEvent.EventType = ES_FINISH_CALIBRATION;
+                        PostTopHSM(NewEvent);
+                        
                     }
                     break;
                 }
@@ -206,4 +192,57 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
         // do any activity that is repeated as long as we are in this state
     }
     return ReturnEvent;
+}
+
+
+
+bool Check4CornerBeacons(void)
+{
+    if(CurrentState == ROTATE_TO_ALIGN )
+    {
+        ES_Event_t ThisEvent;
+        WhichBeacon_t BeaconName = getBeaconName(ShortRangeBeaconSensor);
+        
+        if (BeaconName == BeaconB){
+            countB++;
+            countC = 0;
+        }
+        
+        else if (BeaconName == BeaconC){
+            countB = 0;
+            countC++;
+        }
+        
+        else{
+            countB = 0;
+            countC = 0;
+        }
+        
+        if (countB >= NUM_PULSE || countC >= NUM_PULSE){
+            countB = 0;
+            countC = 0;
+            ThisEvent.EventType   = ES_FOUND_BEACON;
+            ThisEvent.EventParam  = BeaconName;
+            PostTopHSM(ThisEvent);
+            return true;
+        }
+        
+    }
+    return false;
+}
+
+
+bool Check4InitialDistance(void)
+{
+    if(CurrentState == BACK_UP)
+    {
+        ES_Event_t ThisEvent;
+        if (getDistance() < 100)
+        {
+            ThisEvent.EventType   = ES_DONE_BACK_UP;
+            PostTopHSM(ThisEvent);
+            return true;
+        }
+    }
+    return false;
 }
