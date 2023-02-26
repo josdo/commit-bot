@@ -43,6 +43,8 @@
 #include "terminal.h"
 #include "dbprintf.h"
 
+#include "BranchSwitch.h"
+
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
 #define ONE_SEC 1000
@@ -187,13 +189,24 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_INIT:
     {
       ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
+       ES_Timer_InitTimer(SWITCH_TIMER, ONE_SEC);
       puts("Service 00:");
       DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
+      
+      InitSwitches();
     }
     break;
     case ES_TIMEOUT:   // re-start timer & announce
     {
-      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
+        if (SWITCH_TIMER == ThisEvent.EventParam){
+            puts("\n");
+            BranchType_t B = GetBranch();
+            BranchDist_t D = GetDist();
+            DB_printf("Branch = %d\r\n", B);
+            DB_printf("Dist = %d\r\n", D);
+            ES_Timer_InitTimer(SWITCH_TIMER, ONE_SEC);
+        }
+//      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
       // DB_printf("ES_TIMEOUT received from Timer %d in Service %d\r\n",
       //     ThisEvent.EventParam, MyPriority);
     }

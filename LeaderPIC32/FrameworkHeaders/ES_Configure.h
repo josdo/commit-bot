@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 0
+#define NUM_SERVICES 1
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -292,7 +292,7 @@
 // Unlike services, any combination of timers may be used and there is no
 // priority in servicing them
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC TIMER_UNUSED
+#define TIMER0_RESP_FUNC PostTestHarnessService0
 #define TIMER1_RESP_FUNC TIMER_UNUSED
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
@@ -316,6 +316,7 @@
 // the timer number matches where the timer event will be routed
 // These symbolic names should be changed to be relevant to your application
 
+#define SWITCH_TIMER 0
 #define SERVICE0_TIMER 15
 
 #endif /* ES_CONFIGURE_H */

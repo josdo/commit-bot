@@ -2,4 +2,5 @@
   (lib (name "218")(type "Legacy")(uri "/Users/sleepearly/Classes/me218/Kicad_Lib/ME218_BaseLib.lib")(options "")(descr "")(disabled))
   (lib (name "218 spdl")(type "Legacy")(uri "${KIPRJMOD}/ME218_BaseLib.lib")(options "")(descr ""))
   (lib (name "Custom_Library")(type "KiCad")(uri "C:/Users/visha/Documents/Stanford/Winter_2023/ME_218B/Lab8/Custom_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "custom")(type "KiCad")(uri "${KIPRJMOD}/custom.kicad_sym")(options "")(descr ""))
 )

@@ -5,13 +5,15 @@
 
 
 typedef enum{
-    Branch1 = 0,
+    BranchErr = 0,
+    Branch1,
     Branch2,
-    Branch3
+    Branch3    
 } BranchType_t;
 
 typedef enum{
-    Dist50 = 0,
+    DistErr = 0,
+    Dist50,
     Dist66,
     Dist82,
     Dist100
