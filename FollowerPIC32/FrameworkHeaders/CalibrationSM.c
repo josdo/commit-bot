@@ -27,8 +27,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
     ES_Event_t ReturnEvent = CurrentEvent; // assume we are not consuming event
     
     switch(CurrentState)
-    {
-        
+    {       
         case ROTATE_TO_ALIGN:
         {
             CurrentEvent = DuringRotateToAlign(CurrentEvent);

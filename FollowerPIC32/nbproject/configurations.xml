@@ -67,6 +67,7 @@
       <itemPath>ProjectHeaders/HSMTemplate.h</itemPath>
       <itemPath>FrameworkHeaders/CalibrationSM.h</itemPath>
       <itemPath>ProjectHeaders/GoToBranchOriginSM.h</itemPath>
+      <itemPath>ProjectHeaders/ComeBackSM.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -97,6 +98,7 @@
       <itemPath>ProjectSource/HSMTemplateMain.c</itemPath>
       <itemPath>FrameworkHeaders/CalibrationSM.c</itemPath>
       <itemPath>ProjectHeaders/GoToBranchOriginSM.c</itemPath>
+      <itemPath>ProjectSource/ComeBackSM.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

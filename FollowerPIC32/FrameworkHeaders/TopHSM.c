@@ -1,10 +1,12 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "TopHSM.h"
-#include "CalibrationSM.h"
 #include "dbprintf.h"
+
 #include "DCMotor.h"
+
+#include "TopHSM.h"
 #include "GoToBranchOriginSM.h"
+#include "CalibrationSM.h"
 
 
 static ES_Event_t DuringCalibration( ES_Event_t Event);
@@ -43,7 +45,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
 
    switch(CurrentState)
    {
-       case IDLE:
+       case IDLE: // TODO: QUERY TO FOLLOWER TO SEE WHEN GAME STARTS
        {
            DB_printf("IDLE STATE\r\n");
            if (CurrentEvent.EventType != ES_NO_EVENT)
@@ -80,8 +82,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                         NextState = GO_TO_BRANCH_ORIGIN;
                    }
                }
-           }
-           
+           } 
        }
        break;
 
@@ -121,7 +122,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    
                }
            }
-           
        }
        break;
        
@@ -142,8 +142,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                             NextState = COME_BACK;
                        }
                    }
-                   break;
-                        
+                   break;        
                 }
            }
            
@@ -168,6 +167,15 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                             NextState = GO_TO_BRANCH_ORIGIN;
                        }
                    }
+                   break;
+                   
+                   case ES_FINISH: {
+                       puts("Done backing up from branch\r\n");
+                       puts("\t now 10cm from the wall\r\n");
+                       
+                       MakeTransition = true;
+                       NextState = ROTATE_IN;
+                   } 
                    break;
                }
            }
@@ -263,6 +271,28 @@ static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event)
     else
     {
         RunGoToBranchOriginSM(Event);
+    }
+    return(ReturnEvent);
+}
+
+static ES_Event_t DuringComeBack(ES_Event_t Event){
+    ES_Event_t ReturnEvent = Event;
+    
+    // process ES_ENTRY, ES_ENTRY_HISTORY & ES_EXIT events
+    if ( (Event.EventType == ES_ENTRY) ||
+         (Event.EventType == ES_ENTRY_HISTORY) )
+    { 
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);          //
+        setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
+    }
+    else if ( Event.EventType == ES_EXIT )
+    {
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);          //
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+    }
+    else
+    {
+        RunComeBackSM(Event);
     }
     return(ReturnEvent);
 }
