@@ -147,8 +147,8 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         // repeat the StartxxxSM() functions for concurrent state machines
         // on the lower level
         // turn CW until local beacon is found
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 15);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 15);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
         puts("Started Rotating\r\n");
     }
     else if (Event.EventType == ES_EXIT)
@@ -180,8 +180,8 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 15);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 15);
+        setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
+        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
         puts("Moving Back\r\n");
     }
     else if (Event.EventType == ES_EXIT)

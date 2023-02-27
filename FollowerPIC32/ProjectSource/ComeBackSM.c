@@ -4,7 +4,7 @@
 #include "ComeBackSM.h"
 #include "DCMotor.h"
 
-#define ENTRY_STATE REVERSING
+#define ENTRY_STATE REVERSE_TO_WALL
 #define TURN_90 1000
 
 static ES_Event_t DuringReverseToWall( ES_Event_t Event);
@@ -65,7 +65,7 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
        case ROTATE_IN_REPO: {
            CurrentEvent = DuringRotateInRepo(CurrentEvent);
            
-           if (CurrentEvent != ES_NO_EVENT){
+           if (CurrentEvent.EventType != ES_NO_EVENT){
                switch (CurrentEvent.EventType){
                    case ES_TIMEOUT: {
                        if (TURN_90_TIMER == CurrentEvent.EventParam){
@@ -86,13 +86,13 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
     {
        //   Execute exit function for current state
        CurrentEvent.EventType = ES_EXIT;
-       RunTemplateSM(CurrentEvent);
+       RunComeBackSM(CurrentEvent);
 
        CurrentState = NextState; //Modify state variable
 
        //   Execute entry function for new state
        // this defaults to ES_ENTRY
-       RunTemplateSM(EntryEventKind);
+       RunComeBackSM(EntryEventKind);
      }
      return(ReturnEvent);
 }

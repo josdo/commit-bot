@@ -7,6 +7,7 @@
 #include "TopHSM.h"
 #include "GoToBranchOriginSM.h"
 #include "CalibrationSM.h"
+#include "ComeBackSM.h"
 
 
 static ES_Event_t DuringCalibration( ES_Event_t Event);
@@ -174,7 +175,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                        puts("\t now 10cm from the wall\r\n");
                        
                        MakeTransition = true;
-                       NextState = ROTATE_IN;
+                       NextState = ROTATE_IN_REPO;
                    } 
                    break;
                }
