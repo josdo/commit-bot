@@ -2,6 +2,7 @@
 #include "ES_Framework.h"
 #include "DCMotor.h"
 #include "dbprintf.h"
+#include "xc.h"
 #include <sys/attribs.h>
 
 // ------------------------------- Module Defines ---------------------------
@@ -38,7 +39,10 @@ static volatile TimeTracker IC3CurrentTime;         // IC3 current time (left)
 static volatile TimeTracker IC3PrevTime;            // IC3 prev time (left)
 
 static volatile uint32_t Rperiod = 0;               // right wheel period  
+// static volatile uint32_t Rperiod = 100320;               // motor speed should read 59  
 static volatile uint32_t Lperiod = 0;               // left wheel period
+
+static const uint32_t ns_per_tick = 200;
 
 static volatile uint32_t Lspeed = 0;                // left wheel speed
 static volatile uint32_t Rspeed = 0;                // right wheel speed
@@ -49,9 +53,7 @@ static volatile float velError;                  // velocity error
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
-
-void initRightEncoderISR(void);         // IC1 on RA2
-void initLeftEncoderISR(void);          // IC3 on RB5
+void initEncoderISRs(void);                  // init encoder ISRs, IC1 on RA2, IC3 on RB5
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
@@ -76,8 +78,7 @@ void InitDCMotor()
   
   
   // ---------------------------- Init IC for encoders ---------------------
-//  initRightEncoderISR();         // IC1 on RA2
-//  initLeftEncoderISR();          // IC3 on RB5
+  initEncoderISRs();                            // init encoder ISRs
   // ----------------------------------------------------------------------
   DB_printf("\rInitializing DC Motor\r\n");
 }
@@ -149,7 +150,35 @@ void setPWM(void){
   T3CONbits.ON = 1; 
 }
 
+float periodToMotorSpeed(uint32_t period)
+{
+  // period = 0 means no ticks, so no speed 
+  if (period == 0)
+  {
+    return 0;
+  }
+  // ns per min = 60 * 1000 * 1000 * 1000
+  // ns per tick = 200
+  // gear = 50x slowdown
+  // period = ticks per revolution
+  // result = ns per min / (50 * period * ns per tick)
+  // result = k / period, where
+  // k = ns per min / (50 * ns per tick) = 60 * 1000 * 100
+  const uint32_t k = 6000000;
+  return 1.0 * k / period;
+}
 
+float getMotorSpeed(Motors_t whichMotor)
+{
+  uint32_t period = whichMotor == LEFT_MOTOR ? Lperiod : Rperiod;
+  return periodToMotorSpeed(period);
+}
+
+float getWheelSpeed(Motors_t whichMotor)
+{
+  // 3:1 gear ratio
+  return getMotorSpeed(whichMotor) * 3;
+}
 
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
     if (0 == dutyCycle){
@@ -185,44 +214,59 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 }
 
 
-void initRightEncoderISR(void){
-    // -------------------------- IC 1 -----------------------------------
-    __builtin_disable_interrupts();         // disable global interrupts
-    IC1CONbits.ON = 0;                      // turn of IC3
-    INTCONbits.MVEC = 1;                    // enable multivector mode
-    IC1R = 0b0000;                          // map IC1 to RA2
-    TRISAbits.TRISA4 = 1;                   // set RA2 as input
-    IPC1bits.IC1IP = 7;                     // priority 7
-    IC1CONbits.SIDL = 0;                    // active in idle mode
-    IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
-    IC1CONbits.ICTMR = 0;                   // timer 3 is time base
-    IC1CONbits.ICM = 0b011;                 // every rising edge
-    IC1CONbits.FEDGE = 1;                   // first edge is rising
-    IC1CONbits.C32 = 0;                     // 16 bit mode
-    IC1CONbits.ON = 1;                      // turn on IC1 interrupt
-    IEC0SET = _IEC0_IC1IE_MASK;             // enable IC1 interrupt
-    __builtin_enable_interrupts();          // enable global interrupts
-    // -------------------------------------------------------------------
-}
+void initEncoderISRs(void){
+  static const uint32_t maxPR3Value = 0xffff;
 
-void initLeftEncoderISR(void){
-    // -------------------------- IC 3 -----------------------------------
-    __builtin_disable_interrupts();         // disable global interrupts
-    IC3CONbits.ON = 0;                      // turn of IC3
-    INTCONbits.MVEC = 1;                    // enable multivector mode
-    IC3R = 0b0001;                          // map IC3 to RB5
-    TRISBbits.TRISB5 = 1;                   // set RA2 as input
-    IPC3bits.IC3IP = 7;                     // priority 7
-    IC3CONbits.SIDL = 0;                    // active in idle mode
-    IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
-    IC3CONbits.ICTMR = 0;                   // timer 3 is time base
-    IC3CONbits.ICM = 0b011;                 // every rising edge
-    IC3CONbits.FEDGE = 1;                   // first edge is rising
-    IC3CONbits.C32 = 0;                     // 16 bit mode
-    IC3CONbits.ON = 1;                      // turn on IC3 interrupt
-    IEC0SET = _IEC0_IC3IE_MASK;             // enable IC3 interrupt
-    __builtin_enable_interrupts();          // enable global interrupts
-    // -------------------------------------------------------------------
+  __builtin_disable_interrupts();         // disable global interrupts
+  // IC1
+  IC1R = 0; // Map pin A2 to IC 1
+
+  IC1CONbits.w = 0;       // Turn off and set to defaults
+  IC1CONbits.ICM = 0b011; // every rising edge
+  IC1CONbits.ICTMR = 0;   // Use Timer3
+  IC1CONbits.FEDGE = 1;   // Capture rising edge first
+
+  // // Enable global interrupts
+  // INTCONbits.w = 0;
+  INTCONbits.MVEC = 1; // use multi-vectored interrupts
+
+  // // Disable IC1 interrupts, enable Timer 3 interrupts, and reset interrupt flags
+  IFS0CLR = _IFS0_IC1IF_MASK;
+  IEC0SET = _IEC0_IC1IE_MASK;
+  IPC1bits.IC1IP = 7;         // interrupt priority
+
+  IC1CONbits.ON = 1;
+  __builtin_enable_interrupts(); // global enable
+
+    // __builtin_disable_interrupts();         // disable global interrupts
+    // IC1CONbits.ON = 0;                      // turn of IC3
+    // INTCONbits.MVEC = 1;                    // enable multivector mode
+    // IC1R = 0b0000;                          // map IC1 to RA2
+    // TRISAbits.TRISA4 = 1;                   // set RA2 as input
+    // IPC1bits.IC1IP = 7;                     // priority 7
+    // IC1CONbits.SIDL = 0;                    // active in idle mode
+    // IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
+    // IC1CONbits.ICTMR = 0;                   // timer 3 is time base
+    // IC1CONbits.ICM = 0b011;                 // every rising edge
+    // IC1CONbits.FEDGE = 1;                   // first edge is rising
+    // IC1CONbits.C32 = 0;                     // 16 bit mode
+    // IC1CONbits.ON = 1;                      // turn on IC1 interrupt
+    // IEC0SET = _IEC0_IC1IE_MASK;             // enable IC1 interrupt
+
+    // IC3CONbits.ON = 0;                      // turn of IC3
+    // INTCONbits.MVEC = 1;                    // enable multivector mode
+    // IC3R = 0b0001;                          // map IC3 to RB5
+    // TRISBbits.TRISB5 = 1;                   // set RA2 as input
+    // IPC3bits.IC3IP = 7;                     // priority 7
+    // IC3CONbits.SIDL = 0;                    // active in idle mode
+    // IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
+    // IC3CONbits.ICTMR = 0;                   // timer 3 is time base
+    // IC3CONbits.ICM = 0b011;                 // every rising edge
+    // IC3CONbits.FEDGE = 1;                   // first edge is rising
+    // IC3CONbits.C32 = 0;                     // 16 bit mode
+    // IC3CONbits.ON = 1;                      // turn on IC3 interrupt
+    // IEC0SET = _IEC0_IC3IE_MASK;             // enable IC3 interrupt
+    // __builtin_enable_interrupts();          // enable global interrupts
 }
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
@@ -231,11 +275,12 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
     do {
         thisTime = (uint16_t)IC1BUF;        // read the buffer
         
-        if ((1 == IFS0bits.T1IF) && (thisTime < 0x8000)){
+        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T1IF_MASK;      // clear rollover mask
         }
         IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
+        IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
         IC1CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
         
         // find period of right encoder pulse
@@ -245,6 +290,7 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
         IC1PrevTime.FullLength = IC1CurrentTime.FullLength;
         
     } while(IC1CONbits.ICBNE != 0);
+    IFS0CLR = _IFS0_IC1IF_MASK;
 }
 
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
@@ -257,16 +303,20 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
         }
+        IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
         IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
         IC3CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
         
         // find period of left encoder pulse
         Lperiod = IC3CurrentTime.FullLength - IC3PrevTime.FullLength;      
+
+        // TODO: rollover_count * PWM_PERIOD + captured_time
         
         // update prev time with current value
         IC3PrevTime.FullLength = IC3CurrentTime.FullLength;
         
     } while(IC3CONbits.ICBNE != 0);
+    IFS0CLR = _IFS0_IC3IF_MASK;
 }
 
 void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
@@ -274,7 +324,7 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
     
     if (1 == IFS0bits.T3IF){
         T3RO++;                             // increment rollover
-        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 2 interrupt flag
+        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
     }
     IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
     IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover

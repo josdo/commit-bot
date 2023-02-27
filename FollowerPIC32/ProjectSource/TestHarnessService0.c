@@ -36,7 +36,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   InitDistanceSensor();
   InitTapeSensor();
   InitBeaconSensor();
-  InitDCMotor();
+  // InitDCMotor();
 
   DB_printf("Initialized TestHarnessService0\r\n");
   
@@ -85,7 +85,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         }
         else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
         {
-          DB_printf("TODO Print motor timer\r\n");
+          float rspeed = getMotorSpeed(RIGHT_MOTOR);
+          // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
+          DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, 100);
         }
     }
