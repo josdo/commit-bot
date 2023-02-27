@@ -21,13 +21,19 @@ const uint16_t PWM_PERIOD = 2000-1;
 
 
 // ------------------------------- Module Variables ---------------------------
-typedef union{
-    struct{
-        uint16_t CapturedTime;
-        uint16_t RollOver;
-    } ByTime;
+// typedef union{
+//     struct{
+//         uint16_t CapturedTime;
+//         uint16_t RollOver;
+//     } ByTime;
     
-    uint32_t FullLength;
+//     uint32_t FullLength;
+// } TimeTracker;
+
+typedef struct
+{
+  uint32_t RolloverTime;
+  uint16_t CapturedTime;
 } TimeTracker;
 
 static volatile uint16_t T3RO = 0;                  // total rollover timer 3
@@ -171,6 +177,7 @@ float periodToMotorSpeed(uint32_t period)
 float getMotorSpeed(Motors_t whichMotor)
 {
   uint32_t period = whichMotor == LEFT_MOTOR ? Lperiod : Rperiod;
+  DB_printf("period = %u\r\n", period);
   return periodToMotorSpeed(period);
 }
 
@@ -215,28 +222,44 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 
 
 void initEncoderISRs(void){
-  static const uint32_t maxPR3Value = 0xffff;
-
-  __builtin_disable_interrupts();         // disable global interrupts
-  // IC1
-  IC1R = 0; // Map pin A2 to IC 1
-
+  __builtin_disable_interrupts();
+  // Map pin A2 to IC 1
+  IC1R = 0;
+  // Setup IC 1 module
   IC1CONbits.w = 0;       // Turn off and set to defaults
   IC1CONbits.ICM = 0b011; // every rising edge
   IC1CONbits.ICTMR = 0;   // Use Timer3
   IC1CONbits.FEDGE = 1;   // Capture rising edge first
-
-  // // Enable global interrupts
-  // INTCONbits.w = 0;
-  INTCONbits.MVEC = 1; // use multi-vectored interrupts
-
-  // // Disable IC1 interrupts, enable Timer 3 interrupts, and reset interrupt flags
+  // Enable interrupts
   IFS0CLR = _IFS0_IC1IF_MASK;
+  // Reset interrupt flag
   IEC0SET = _IEC0_IC1IE_MASK;
-  IPC1bits.IC1IP = 7;         // interrupt priority
+  // Set interrupt priority
+  IPC1bits.IC1IP = 7;
 
+  // Map pin B5 to IC 3
+  IC3R = 0b0001;
+  // Setup IC 3 module
+  IC3CONbits.w = 0;       // Turn off and set to defaults
+  IC3CONbits.ICM = 0b011; // every rising edge
+  IC3CONbits.ICTMR = 0;   // Use Timer3
+  IC3CONbits.FEDGE = 1;   // Capture rising edge first
+  // Enable interrupts
+  IFS0CLR = _IFS0_IC3IF_MASK;
+  // Reset interrupt flag
+  IEC0SET = _IEC0_IC3IE_MASK;
+  // Set interrupt priority
+  IPC3bits.IC3IP = 7;
+
+  // Use multi-vectored interrupts
+  INTCONbits.w = 0;
+  INTCONbits.MVEC = 1;
+
+  // Turn on
   IC1CONbits.ON = 1;
-  __builtin_enable_interrupts(); // global enable
+  IC3CONbits.ON = 1;
+
+  __builtin_enable_interrupts();
 
     // __builtin_disable_interrupts();         // disable global interrupts
     // IC1CONbits.ON = 0;                      // turn of IC3
@@ -269,6 +292,12 @@ void initEncoderISRs(void){
     // __builtin_enable_interrupts();          // enable global interrupts
 }
 
+// Rolled over time at this point in time.
+uint32_t getRolloverTime(void)
+{
+  return T3RO * (PWM_PERIOD+1);
+}
+
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
     static uint16_t thisTime = 0;           // current timer value
     
@@ -279,15 +308,15 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T1IF_MASK;      // clear rollover mask
         }
-        IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
-        IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
-        IC1CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
+        IC1CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+        IC1CurrentTime.CapturedTime = thisTime;  // store captured time
         
         // find period of right encoder pulse
-        Rperiod = IC1CurrentTime.FullLength - IC1PrevTime.FullLength;      
+        Rperiod = IC1CurrentTime.RolloverTime + IC1CurrentTime.CapturedTime 
+                  - IC1PrevTime.RolloverTime - IC1PrevTime.CapturedTime;
         
         // update prev time with current value
-        IC1PrevTime.FullLength = IC1CurrentTime.FullLength;
+        IC1PrevTime = IC1CurrentTime;
         
     } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC1IF_MASK;
@@ -303,18 +332,16 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
         }
-        IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
-        IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
-        IC3CurrentTime.ByTime.CapturedTime = thisTime;  // store captured time
+        IC3CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+        IC3CurrentTime.CapturedTime = thisTime;  // store captured time
         
-        // find period of left encoder pulse
-        Lperiod = IC3CurrentTime.FullLength - IC3PrevTime.FullLength;      
-
-        // TODO: rollover_count * PWM_PERIOD + captured_time
+        // find period of right encoder pulse
+        Lperiod = IC3CurrentTime.RolloverTime + IC3CurrentTime.CapturedTime 
+                  - IC3PrevTime.RolloverTime - IC3PrevTime.CapturedTime;
         
         // update prev time with current value
-        IC3PrevTime.FullLength = IC3CurrentTime.FullLength;
-        
+        IC3PrevTime = IC3CurrentTime;
+
     } while(IC3CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
 }
@@ -326,8 +353,8 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
         T3RO++;                             // increment rollover
         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
     }
-    IC1CurrentTime.ByTime.RollOver = T3RO;          // update rollover
-    IC3CurrentTime.ByTime.RollOver = T3RO;          // update rollover
+    // IC1CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+    // IC3CurrentTime.RolloverTime = getRolloverTime();          // update rollover
     
     __builtin_enable_interrupts();          // enable global interrupts
 }
