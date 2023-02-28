@@ -2,7 +2,7 @@
 #define CalibrationSM_H
 
 typedef enum {FINISH_CALIBRATION, 
-        ROTATE_TO_ALIGN, 
+        ROTATE_TO_ALIGN, STOP,
         BACK_UP} CalibrationSMState_t;
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent);

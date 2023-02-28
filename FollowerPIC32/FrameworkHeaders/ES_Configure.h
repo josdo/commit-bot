@@ -307,7 +307,7 @@
 #define TIMER11_RESP_FUNC TIMER_UNUSED
 #define TIMER12_RESP_FUNC TIMER_UNUSED
 #define TIMER13_RESP_FUNC PostTopHSM
-#define TIMER14_RESP_FUNC TIMER_UNUSED
+#define TIMER14_RESP_FUNC PostTopHSM
 #define TIMER15_RESP_FUNC PostTestHarnessService0
 
 /****************************************************************************/
@@ -321,6 +321,7 @@
 #define QUERY_TIMER 1
 #define TURN_90_TIMER 2
 #define SERVICE0_TIMER 15
+#define STOP_TIMER 14
 //#define BACKUP_TIMER 14
 #define FAST_RATE_TIMER 13
 //#define TURN_TIMER 0

@@ -53,11 +53,10 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         WhichBeacon_t BeaconName = CurrentEvent.EventParam;
                         if (CurrentEvent.EventParam == BeaconB || CurrentEvent.EventParam == BeaconC) 
                         {
-                            setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                            setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                            NextState = BACK_UP;
+                            
+                            NextState = STOP;
                             MakeTransition = true;
-
+                            
                             ///////////////////////////
                             switch(BeaconName)
                             {
@@ -72,6 +71,24 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         }
                     }
                     break;
+                    
+                }
+            
+            }
+        }
+        break;
+        
+        case STOP:
+        {
+            ES_Timer_InitTimer(STOP_TIMER,2000);
+            switch(CurrentEvent.EventType)
+            {
+                case ES_TIMEOUT:
+                {
+                    setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+                    setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                    NextState = BACK_UP;
+                    MakeTransition = true;
                 }
             
             }
@@ -157,6 +174,7 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         //RunLowerLevelSM(Event);
         // repeat for any concurrently running state machines
         // now do any local exit functionality
+        ES_Timer_InitTimer(STOP_TIMER, 2000);
         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
         setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Rotating\r\n");

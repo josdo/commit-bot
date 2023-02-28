@@ -91,7 +91,6 @@
       <itemPath>FrameworkHeaders/InitTimer2.c</itemPath>
       <itemPath>FrameworkHeaders/DCMotor.c</itemPath>
       <itemPath>FrameworkHeaders/LeaderFSM.c</itemPath>
-      <itemPath>FrameworkHeaders/GoToBranchXFSM.c</itemPath>
       <itemPath>ProjectSource/TopHSMTemplate.c</itemPath>
       <itemPath>FrameworkHeaders/TopHSM.c</itemPath>
       <itemPath>ProjectSource/HSMTemplate.c</itemPath>
@@ -99,6 +98,7 @@
       <itemPath>FrameworkHeaders/CalibrationSM.c</itemPath>
       <itemPath>ProjectHeaders/GoToBranchOriginSM.c</itemPath>
       <itemPath>ProjectSource/ComeBackSM.c</itemPath>
+      <itemPath>ProjectSource/FollowTapeSM.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
