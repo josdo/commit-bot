@@ -66,8 +66,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static bool print_motor_metrics = false;
   static bool pi_control_on = false;
   static bool t_key_go_forward = true;
-  static const uint16_t t_key_time = 5000;
-  static const uint32_t t_key_dc = 50;
+  static const uint16_t t_key_forward_time = 5000;
+  static const uint16_t t_key_backward_time = 2000;
+  static const uint32_t t_key_dc = 100;
   static uint16_t motor_timer_period = 500;
   static uint32_t last_rollover_time = 0;
   static uint16_t encoder_timer_period = 2;
@@ -114,9 +115,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           // If finished going forward for T_KEY_TIMER, then go backwards for T_KEY_TIMER
           if (!t_key_go_forward)
           {
-            DB_printf("Going backward for %u ms\r\n", t_key_time);
+            DB_printf("Going backward for %u ms\r\n", t_key_backward_time);
             t_key_go_forward = true;
-            ES_Timer_InitTimer(T_KEY_TIMER, t_key_time);
+            ES_Timer_InitTimer(T_KEY_TIMER, t_key_backward_time);
             setMotorSpeed(RIGHT_MOTOR, BACKWARD, t_key_dc);
             setMotorSpeed(LEFT_MOTOR, BACKWARD, t_key_dc);
           }
@@ -208,9 +209,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         // Go forward at 50 duty cycle for 5 seconds.
         if (t_key_go_forward == true)
         {
-          DB_printf("Going forward for %u ms\r\n", t_key_time);
+          DB_printf("Going forward for %u ms\r\n", t_key_forward_time);
           t_key_go_forward = false;
-          ES_Timer_InitTimer(T_KEY_TIMER, t_key_time);
+          ES_Timer_InitTimer(T_KEY_TIMER, t_key_forward_time);
           setMotorSpeed(RIGHT_MOTOR, FORWARD, t_key_dc);
           setMotorSpeed(LEFT_MOTOR, FORWARD, t_key_dc);
         }
