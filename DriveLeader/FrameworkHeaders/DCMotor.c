@@ -15,7 +15,7 @@
 
 #define PBCLK_RATE 20000000L
 
-const uint16_t PWM_PERIOD = 2000-1;
+static const uint16_t PWM_PERIOD = 10000-1;
 
 // TIMERx divisor for PWM, standard value is 8, to give maximum resolution
 // ----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ typedef struct
   uint16_t CapturedTime;
 } TimeTracker;
 
-static volatile uint16_t T3RO = 0;                  // total rollover timer 3
+static uint32_t T3RO = 0;                  // total rollover timer 3
 
 static volatile TimeTracker IC1CurrentTime;         // IC1 current time (right)
 static volatile TimeTracker IC1PrevTime;            // IC1 prev time (right)
@@ -45,9 +45,8 @@ static volatile TimeTracker IC1PrevTime;            // IC1 prev time (right)
 static volatile TimeTracker IC3CurrentTime;         // IC3 current time (left)
 static volatile TimeTracker IC3PrevTime;            // IC3 prev time (left)
 
-static volatile uint32_t Rperiod = 0;               // right wheel period  
-// static volatile uint32_t Rperiod = 100320;               // motor speed should read 59  
-static volatile uint32_t Lperiod = 0;               // left wheel period
+static uint32_t Rperiod = 0;               // right wheel period  
+static uint32_t Lperiod = 0;               // left wheel period
 
 static const uint32_t ns_per_tick = 200;
 
@@ -55,12 +54,6 @@ static uint32_t Ldirection_desired = 0;
 static uint32_t Rdirection_desired = 0;
 static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
-
-// static volatile uint32_t Lspeed = 0;                // left wheel speed
-// static volatile uint32_t Rspeed = 0;                // right wheel speed
-
-// static volatile float velError;                  // velocity error
-// ----------------------------------------------------------------------------
 
 
 // ---------------------------- Private Functions ----------------------------
@@ -79,19 +72,15 @@ void InitDCMotor()
   
   R2 = 0;                                       // right direction
   L2 = 0;                                       // left direction
-  // --------------------------------------------------------------------
 
   
   // ------------------------------- PWM ----------------------------------
   setPWM();                                     // turn on PWM
   OC3RS = (uint16_t)(0);                        // initial speed is 0
   OC2RS = (uint16_t)(0);                        // initial speed is 0
-  // ----------------------------------------------------------------------
   
   
-  // ---------------------------- Init IC for encoders ---------------------
   initEncoderISRs();                            // init encoder ISRs
-  // ----------------------------------------------------------------------
 
   DB_printf("\rInitialized DC Motor, compiled at %s on %s\r\n", __TIME__, __DATE__);
 }
@@ -219,6 +208,11 @@ void setPWM(void){
   T3CONbits.TCKPS = 0b010;
   // clear the timer register
   TMR3 = 0;
+
+  // Enable rollover counter ISR interrupts
+  IEC0SET = _IEC0_T3IE_MASK;
+  IPC3bits.T3IP = 6;
+  IFS0CLR = _IFS0_T3IF_MASK;
   // -------------------------------------------------------
   
   
@@ -405,10 +399,12 @@ void initEncoderISRs(void){
     // __builtin_enable_interrupts();          // enable global interrupts
 }
 
-// Rolled over time at this point in time.
+// Rolled over time at this point in time in us.
 uint32_t getRolloverTime(void)
 {
-  return T3RO * (PWM_PERIOD+1);
+  // 200ns per tick
+  static const uint32_t k = (PWM_PERIOD+1) * 200 / 1000;
+  return T3RO * k;
 }
 
 

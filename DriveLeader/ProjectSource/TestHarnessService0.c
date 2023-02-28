@@ -70,8 +70,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static const uint16_t t_key_backward_time = 2000;
   static const uint32_t t_key_dc = 100;
   static uint16_t motor_timer_period = 500;
-  static uint32_t last_rollover_time = 0;
-  static uint16_t encoder_timer_period = 2;
+  static uint32_t last_rt = 0;
+  static uint16_t encoder_timer_period = 100;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -103,11 +103,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
         {
-          uint32_t curr_rollover_time = getRolloverTime();
-          // in us
-          uint32_t delta = (last_rollover_time - curr_rollover_time) / 1000;
-          DB_printf("Rollover time (us): %d\r\n", delta);
-          last_rollover_time = curr_rollover_time;
+          uint32_t rt = getRolloverTime();
+          DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) / 1000);
+          last_rt = rt;
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
         else if (ThisEvent.EventParam == T_KEY_TIMER)
