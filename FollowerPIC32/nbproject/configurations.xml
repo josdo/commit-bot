@@ -420,6 +420,8 @@
         <C32Global>
         </C32Global>
       </item>
+      <item path="ProjectSource/FollowTapeSM.c" ex="true" overriding="false">
+      </item>
       <item path="ProjectSource/HSMTemplate.c" ex="true" overriding="false">
         <C32>
         </C32>
