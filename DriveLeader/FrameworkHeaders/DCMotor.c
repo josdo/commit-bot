@@ -367,44 +367,15 @@ void initEncoderISRs(void){
   IC3CONbits.ON = 1;
 
   __builtin_enable_interrupts();
-
-    // __builtin_disable_interrupts();         // disable global interrupts
-    // IC1CONbits.ON = 0;                      // turn of IC3
-    // INTCONbits.MVEC = 1;                    // enable multivector mode
-    // IC1R = 0b0000;                          // map IC1 to RA2
-    // TRISAbits.TRISA4 = 1;                   // set RA2 as input
-    // IPC1bits.IC1IP = 7;                     // priority 7
-    // IC1CONbits.SIDL = 0;                    // active in idle mode
-    // IFS0CLR = _IFS0_IC1IF_MASK;             // clear pending interrupts
-    // IC1CONbits.ICTMR = 0;                   // timer 3 is time base
-    // IC1CONbits.ICM = 0b011;                 // every rising edge
-    // IC1CONbits.FEDGE = 1;                   // first edge is rising
-    // IC1CONbits.C32 = 0;                     // 16 bit mode
-    // IC1CONbits.ON = 1;                      // turn on IC1 interrupt
-    // IEC0SET = _IEC0_IC1IE_MASK;             // enable IC1 interrupt
-
-    // IC3CONbits.ON = 0;                      // turn of IC3
-    // INTCONbits.MVEC = 1;                    // enable multivector mode
-    // IC3R = 0b0001;                          // map IC3 to RB5
-    // TRISBbits.TRISB5 = 1;                   // set RA2 as input
-    // IPC3bits.IC3IP = 7;                     // priority 7
-    // IC3CONbits.SIDL = 0;                    // active in idle mode
-    // IFS0CLR = _IFS0_IC3IF_MASK;             // clear pending interrupts
-    // IC3CONbits.ICTMR = 0;                   // timer 3 is time base
-    // IC3CONbits.ICM = 0b011;                 // every rising edge
-    // IC3CONbits.FEDGE = 1;                   // first edge is rising
-    // IC3CONbits.C32 = 0;                     // 16 bit mode
-    // IC3CONbits.ON = 1;                      // turn on IC3 interrupt
-    // IEC0SET = _IEC0_IC3IE_MASK;             // enable IC3 interrupt
-    // __builtin_enable_interrupts();          // enable global interrupts
 }
 
 // Rolled over time at this point in time in us.
-uint32_t getRolloverTime(void)
+uint32_t getRolloverTicks(void)
 {
   // 200ns per tick
-  static const uint32_t k = (PWM_PERIOD+1) * 200 / 1000;
-  return T3RO * k;
+  // static const uint32_t k = (PWM_PERIOD+1) * 200 / 1000;
+  // return T3RO * k;
+  return T3RO * (PWM_PERIOD+1);
 }
 
 
@@ -428,7 +399,7 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T1IF_MASK;      // clear rollover mask
         }
-        IC1CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+        IC1CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
         IC1CurrentTime.CapturedTime = thisTime;  // store captured time
         
         // find period of right encoder pulse
@@ -452,7 +423,7 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
             T3RO++;                         // increment rollover counter
             IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
         }
-        IC3CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+        IC3CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
         IC3CurrentTime.CapturedTime = thisTime;  // store captured time
         
         // find period of right encoder pulse
@@ -473,8 +444,8 @@ void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
         T3RO++;                             // increment rollover
         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
     }
-    // IC1CurrentTime.RolloverTime = getRolloverTime();          // update rollover
-    // IC3CurrentTime.RolloverTime = getRolloverTime();          // update rollover
+    // IC1CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
+    // IC3CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
     
     __builtin_enable_interrupts();          // enable global interrupts
 }

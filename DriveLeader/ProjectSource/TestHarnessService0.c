@@ -103,8 +103,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
         {
-          uint32_t rt = getRolloverTime();
-          DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) / 1000);
+          uint32_t rt = getRolloverTicks();
+          DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) * 200 / 1000);
           last_rt = rt;
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
@@ -196,8 +196,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else
         {
           print_motor_metrics = true;
-          // ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
-          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
+          ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
+          // ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
           DB_printf("Start printing motor metrics\r\n");
         }
       }

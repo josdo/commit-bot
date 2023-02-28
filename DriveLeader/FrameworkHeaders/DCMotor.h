@@ -29,7 +29,7 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 // Sets desired speed
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed);
 
-uint32_t getRolloverTime(void);
+uint32_t getRolloverTicks(void);
 
 void rotate90CW(void);
 void rotate90CCW(void);
