@@ -57,7 +57,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     {
       puts("Service 00:");
       DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
-       ES_Timer_InitTimer(SWITCH_TIMER, ONE_SEC);
+       ES_Timer_InitTimer(SWITCH_TIMER, 1000);
       
       InitSwitches();
     }
@@ -78,7 +78,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
             BranchDist_t D = GetDist();
             DB_printf("Branch = %d\r\n", B);
             DB_printf("Dist = %d\r\n", D);
-            ES_Timer_InitTimer(SWITCH_TIMER, ONE_SEC);
+            ES_Timer_InitTimer(SWITCH_TIMER, 1000);
         }
 //      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
       // DB_printf("ES_TIMEOUT received from Timer %d in Service %d\r\n",
