@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=FollowerPIC32
+PROJECTNAME=DriveLeader
 
 # Active Configuration
 DEFAULTCONF=default
