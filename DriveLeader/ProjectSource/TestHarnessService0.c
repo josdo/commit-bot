@@ -65,6 +65,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static uint32_t desired_speed = 0;
   static bool print_motor_metrics = false;
   static bool pi_control_on = false;
+  static bool t_key_go_forward = true;
+  static const uint16_t t_key_time = 5000;
+  static const uint32_t t_key_dc = 50;
   static uint16_t motor_timer_period = 500;
   static uint32_t last_rollover_time = 0;
   static uint16_t encoder_timer_period = 2;
@@ -106,6 +109,25 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           last_rollover_time = curr_rollover_time;
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
+        else if (ThisEvent.EventParam == T_KEY_TIMER)
+        {
+          // If finished going forward for T_KEY_TIMER, then go backwards for T_KEY_TIMER
+          if (!t_key_go_forward)
+          {
+            DB_printf("Going backward for %u ms\r\n", t_key_time);
+            t_key_go_forward = true;
+            ES_Timer_InitTimer(T_KEY_TIMER, t_key_time);
+            setMotorSpeed(RIGHT_MOTOR, BACKWARD, t_key_dc);
+            setMotorSpeed(LEFT_MOTOR, BACKWARD, t_key_dc);
+          }
+          // If finished going backwards, stop.
+          else
+          {
+            DB_printf("Finished t_key test sequence\r\n");
+            setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+            setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+          }
+        }
     }
     break;
 
@@ -118,12 +140,14 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       {
         dc = dc == 100 ? 100 : dc + 10;
         setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
         DB_printf("Increase PWM to %u\r\n", dc);
       }
       else if ('j' == ThisEvent.EventParam)
       {
         dc = dc == 0 ? 0 : dc - 10;
         setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
         DB_printf("Decrease PWM to %u\r\n", dc);
       }
 
@@ -176,6 +200,19 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           // ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
           DB_printf("Start printing motor metrics\r\n");
+        }
+      }
+
+      else if ('t' == ThisEvent.EventParam)
+      {
+        // Go forward at 50 duty cycle for 5 seconds.
+        if (t_key_go_forward == true)
+        {
+          DB_printf("Going forward for %u ms\r\n", t_key_time);
+          t_key_go_forward = false;
+          ES_Timer_InitTimer(T_KEY_TIMER, t_key_time);
+          setMotorSpeed(RIGHT_MOTOR, FORWARD, t_key_dc);
+          setMotorSpeed(LEFT_MOTOR, FORWARD, t_key_dc);
         }
       }
     }
