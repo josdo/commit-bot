@@ -31,7 +31,9 @@
 /*---------------------------- Module Functions ---------------------------*/
 static void selectModuleRegisters(SPI_Module_t WhichModule);
 static bool isSPI_ModuleLegal( SPI_Module_t WhichModule);
-static bool isSS_OutputPinLegal(SPI_Module_t WhichModule, 
+static bool isSS_PinLegal(SPI_Module_t WhichModule, 
+                                SPI_PinMap_t WhichPin);
+static bool isSS_InputPinLegal(SPI_Module_t WhichModule, 
                                 SPI_PinMap_t WhichPin);
 static bool isSDOPinLegal( SPI_PinMap_t WhichPin);
 
@@ -91,7 +93,7 @@ static uint32_t const mapPinMap2INTConst[] = { 0b0000/*RA0*/, 0b0000/*RA1*/,
          0/*RB12*/, 0b0011/*RB13*/, 0b0001/*RB14*/, 0b0011/*RB15*/
 };
 
-static SPI_PinMap_t const LegalSSOutPins[][5] = {{ SPI_RPA0, SPI_RPB3, SPI_RPB4, 
+static SPI_PinMap_t const LegalSSPins[][5] = {{ SPI_RPA0, SPI_RPB3, SPI_RPB4, 
                                              SPI_RPB7,SPI_RPB15 },
                                              { SPI_RPA3, SPI_RPB0, SPI_RPB9, 
                                              SPI_RPB10,SPI_RPB14 }
@@ -267,7 +269,55 @@ bool SPISetup_SetBitTime(SPI_Module_t WhichModule, uint32_t SPI_ClkPeriodIn_ns) 
 ****************************************************************************/
 bool SPISetup_MapSSInput(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
 {
-  // not needed for ME218a Labs
+  bool ReturnVal = true;
+  
+  // Make sure that we have a legal module specified & legal pin
+  if ( (false == isSPI_ModuleLegal(WhichModule)) || 
+       (false == isSS_PinLegal(WhichModule, WhichPin)) )
+  {
+    ReturnVal = false;
+  }else 
+  { // Legal module  & pin so set try setting it up
+    selectModuleRegisters(WhichModule);
+    if (0 == pSPICON->MSTEN)  // configured in follower mode?
+    {
+      if (SPI_NO_PIN == WhichPin)
+      {
+        pSPICON->SSEN = 0; // disable SS
+      }else //there is an SS pin so map it
+      {
+        pSPICON->SSEN = 1; // enable SS
+        // set the TRIS bit to make it an input
+        *setTRISRegisters[WhichPin] = mapPinMap2BitPosn[WhichPin];
+        // clear the ANSEL bit to disable analog on the pin
+        *clrANSELRegisters[WhichPin] = mapPinMap2BitPosn[WhichPin];
+            
+        if (SPI_SPI1 == WhichModule)
+        {
+          SS1R = mapPinMap2INTConst[WhichPin]; // map SS1 to chosen pin
+
+          // TODO: does the following work for SS input??
+          // set up to use INT4 to capture the rising edge of SS
+          INTCONbits.INT4EP = 1;            // set for rising edge sensitivity
+          IFS0CLR = _IFS0_INT4IF_MASK;      // clear any pending flag
+          INT4R = mapPinMap2INTConst[WhichPin];  // map INT4 to SS as well
+        }else  
+        {   // must be SPI2 so set up INT1
+          SS2R = mapPinMap2INTConst[WhichPin]; // map SS2 to chosen pin
+
+          // TODO: does the following work for SS input??
+          // set up to use INT1 to capture the rising edge of SS
+          INTCONbits.INT1EP = 1;            // set for rising edge sensitivity
+          IFS0CLR = _IFS0_INT1IF_MASK;      // clear any pending flag
+          INT1R = mapPinMap2INTConst[WhichPin];  // map INT1 to SS as well
+        }
+      }
+    }else // not in follower mode
+    {
+      ReturnVal = false; // then we can't config an SS output
+    }
+  }
+  return ReturnVal;
 }
 
 /****************************************************************************
@@ -289,7 +339,7 @@ bool SPISetup_MapSSOutput(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
   
   // Make sure that we have a legal module specified & legal pin
   if ( (false == isSPI_ModuleLegal(WhichModule)) || 
-       (false == isSS_OutputPinLegal(WhichModule, WhichPin)) )
+       (false == isSS_PinLegal(WhichModule, WhichPin)) )
   {
     ReturnVal = false;
   }else 
@@ -807,23 +857,23 @@ static bool isSPI_ModuleLegal( SPI_Module_t WhichModule) // my code
 
 /****************************************************************************
  Function
-    isSS_OutputPinLegal
+    isSS_PinLegal
 
  Description
-   Loops through the LegalSSOutPins array comparing the requested pin to each
+   Loops through the LegalSSPins array comparing the requested pin to each
    of the entries in the array. If a match is found, sets RetrnVal to true and 
    breaks out of the loop.
 ****************************************************************************/
-static bool isSS_OutputPinLegal(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
+static bool isSS_PinLegal(SPI_Module_t WhichModule, SPI_PinMap_t WhichPin)
 {
   bool ReturnVal = false;
   uint8_t index;
   
   for( index = 0; 
-       index <= ((sizeof(LegalSSOutPins[0])/sizeof(LegalSSOutPins[0][0]))-1);
+       index <= ((sizeof(LegalSSPins[0])/sizeof(LegalSSPins[0][0]))-1);
        index++)
   {
-    if (LegalSSOutPins[WhichModule][index] == WhichPin)
+    if (LegalSSPins[WhichModule][index] == WhichPin)
     {
       ReturnVal = true;
       break;

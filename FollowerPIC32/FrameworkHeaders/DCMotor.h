@@ -14,38 +14,27 @@ typedef enum{
     BACKWARD
 } Directions_t;
 
-/*
-Params: 
-     uint8_t : the priorty of this service
-Return:
-     bool, false if error in initialization, true otherwise
-Description:
-     Saves away the priority, sets up the initial transition and does any
-     other required initialization for this state machine
-*/
 void InitDCMotor(void);
 
-/*
-Params: 
-  ES_Event_t, the event to post to the queue
-Return:
-  boolean False if the Enqueue operation failed, True otherwise
-Description:
-  Posts an event to this state machine's queue
-*/
+float periodToMotorSpeed(uint32_t period);
+float getMotorSpeed(Motors_t whichMotor);
+float getWheelSpeed(Motors_t whichMotor);
+uint32_t getRolloverTime(void);
 
-/*
-Params: 
-  ES_Event_t, the event to process
-Return:
-  ES_Event_t, ES_NO_EVENT if no error ES_ERROR otherwise
-Description:
-  returns the current state of the Template state machine
-*/
+void enablePIControl(void);
+void disablePIControl(void);
 
+// Sets duty cycle -- overridden when PI motor control updates are on.
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle);
+// Sets desired speed
+void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed);
 
-void setVelocity(int32_t);
-float getVelError(void);
+uint32_t getRolloverTime(void);
+
+void rotate90CW(void);
+void rotate90CCW(void);
+
+// void setVelocity(int32_t);
+// float getVelError(void);
 #endif /* TemplateService_H */
 

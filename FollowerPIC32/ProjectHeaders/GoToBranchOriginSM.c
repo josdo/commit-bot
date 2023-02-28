@@ -67,7 +67,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-                        else if(CurrentEvent.EventParam == 'j')
+                        else if(CurrentEvent.EventParam == 'd')
                         {
                             ES_Event_t NewEvent;
                             NewEvent.EventType = ES_FINISH;

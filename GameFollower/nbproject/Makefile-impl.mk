@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=LeaderPIC32
+PROJECTNAME=GameFollower
 
 # Active Configuration
 DEFAULTCONF=default

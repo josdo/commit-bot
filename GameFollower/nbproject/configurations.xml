@@ -24,7 +24,6 @@
       <itemPath>FrameworkHeaders/dbprintf.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32PortHAL.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32_AD_Lib.h</itemPath>
-      <itemPath>FrameworkHeaders/PIC32_SPI_HAL.h</itemPath>
     </logicalFolder>
     <logicalFolder name="FrameworkSource"
                    displayName="FrameworkSource"
@@ -42,7 +41,6 @@
       <itemPath>FrameworkSource/dbprintf.c</itemPath>
       <itemPath>FrameworkSource/PIC32PortHAL.c</itemPath>
       <itemPath>FrameworkSource/PIC32_AD_Lib.c</itemPath>
-      <itemPath>FrameworkSource/PIC32_SPI_HAL.c</itemPath>
     </logicalFolder>
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -51,12 +49,18 @@
       <itemPath>ProjectHeaders/EventCheckers.h</itemPath>
       <itemPath>ProjectHeaders/TestHarnessService0.h</itemPath>
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
-      <itemPath>../Shared/ES_Shared_Configure.h</itemPath>
       <itemPath>ProjectHeaders/BranchSwitch.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="f1" displayName="Shared" projectFiles="true">
+      <itemPath>../Shared/ES_Shared_Configure.h</itemPath>
+      <itemPath>../Shared/EventOverSPI.c</itemPath>
+      <itemPath>../Shared/EventOverSPI.h</itemPath>
+      <itemPath>../Shared/PIC32_SPI_HAL.c</itemPath>
+      <itemPath>../Shared/PIC32_SPI_HAL.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -78,6 +82,8 @@
     <Elem>FrameworkSource</Elem>
     <Elem>ProjectSource</Elem>
     <Elem>ProjectHeaders</Elem>
+    <Elem>../Shared</Elem>
+    <Elem>//testarossa/Users$/kindled/final_218b/Shared</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -152,26 +158,6 @@
       <C32-AR>
         <property key="additional-options-chop-files" value="false"/>
       </C32-AR>
-      <C32-AS>
-        <property key="assembler-symbols" value=""/>
-        <property key="enable-symbols" value="true"/>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="expand-macros" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=""/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
-        <property key="false-conditionals" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="generate-micro-compressed-code" value="false"/>
-        <property key="keep-locals" value="false"/>
-        <property key="list-assembly" value="false"/>
-        <property key="list-source" value="false"/>
-        <property key="list-symbols" value="false"/>
-        <property key="oXC32asm-list-to-file" value="false"/>
-        <property key="omit-debug-dirs" value="false"/>
-        <property key="omit-forms" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warning-level" value=""/>
-      </C32-AS>
       <C32-CO>
         <property key="coverage-enable" value=""/>
         <property key="stack-guidance" value="false"/>
@@ -259,7 +245,7 @@
         <property key="stack-smashing" value=""/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
-      <item path="ProjectHeaders/TestHarnessService0.h" ex="true" overriding="false">
+      <item path="ProjectHeaders/TestHarnessService0.h" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>

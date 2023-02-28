@@ -47,7 +47,7 @@ void InitIC2(){
     // 16 bit capture
     IC2CONbits.C32 = 0;
     // First edge captured in rising
-    IC1CONbits.FEDGE = 1;
+    IC2CONbits.FEDGE = 1;
     // Select timer 2
     IC2CONbits.ICTMR = 1;
     // interrupt on every capture
