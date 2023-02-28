@@ -1,3 +1,4 @@
+#include <math.h>
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "DCMotor.h"
@@ -50,10 +51,15 @@ static volatile uint32_t Lperiod = 0;               // left wheel period
 
 static const uint32_t ns_per_tick = 200;
 
-static volatile uint32_t Lspeed = 0;                // left wheel speed
-static volatile uint32_t Rspeed = 0;                // right wheel speed
+static uint32_t Ldirection_desired = 0;
+static uint32_t Rdirection_desired = 0;
+static uint32_t Lspeed_desired = 0;
+static uint32_t Rspeed_desired = 0;
 
-static volatile float velError;                  // velocity error
+// static volatile uint32_t Lspeed = 0;                // left wheel speed
+// static volatile uint32_t Rspeed = 0;                // right wheel speed
+
+// static volatile float velError;                  // velocity error
 // ----------------------------------------------------------------------------
 
 
@@ -86,7 +92,114 @@ void InitDCMotor()
   // ---------------------------- Init IC for encoders ---------------------
   initEncoderISRs();                            // init encoder ISRs
   // ----------------------------------------------------------------------
-  DB_printf("\rInitializing DC Motor\r\n");
+
+  DB_printf("\rInitialized DC Motor, compiled at %s on %s\r\n", __TIME__, __DATE__);
+}
+
+void initPIController(void)
+{
+  // How frequently the controller updates
+  static uint16_t ControllerUpdatePeriod = 40000;
+
+  // Initialize timer 4
+  // Turn off T4
+  T4CONbits.w = 0;
+  // Use PBCLK
+  T4CONbits.TCS = 0;
+  // Set prescale value to 1:1, which allows for 
+  // (2^16-1 ticks) * 50ns/tick * 10^6ms/ns = 3.27ms of time measurement
+  T4CONbits.TCKPS = 0;
+  // Set PR4 to 2ms, which is 40,000 ticks
+  PR4 = ControllerUpdatePeriod - 1;
+
+  // Initialize interrupt vector
+  __builtin_enable_interrupts(); // global enable
+  INTCONbits.w = 0;
+  INTCONbits.MVEC = 1; // use multi-vectored interrupts
+
+  enablePIControl();
+  IPC4bits.T4IP = 6; // Ensure lower priority than encoder interrupt's priority
+
+  // Turn on T4 module
+  T4CONbits.ON = 1;
+}
+
+void enablePIControl(void)
+{
+  IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
+  IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
+}
+
+void disablePIControl(void)
+{
+  IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
+}
+
+void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
+{
+  if (motor == LEFT_MOTOR)
+  {
+    Lspeed_desired = speed;
+    Ldirection_desired = direction;
+  }
+  else
+  {
+    Rspeed_desired = speed;
+    Rdirection_desired = direction;
+  }
+}
+
+// Updates velocity control, i.e. duty cycle applied
+void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
+{
+  static float kP = 1;
+  static float kI = 1;
+  static float Lcurr_sum_e = 0;
+  static float Llast_sum_e = 0;
+  static float Rcurr_sum_e = 0;
+  static float Rlast_sum_e = 0;
+
+  float Le = Lspeed_desired - getWheelSpeed(LEFT_MOTOR);
+  Llast_sum_e = Lcurr_sum_e;
+  Lcurr_sum_e += Le;
+
+  float Re = Rspeed_desired - getWheelSpeed(RIGHT_MOTOR);
+  Rlast_sum_e = Rcurr_sum_e;
+  Rcurr_sum_e += Re;
+
+  // Clamp cumulative error if it drives the commanded duty cycle out of valid range
+  if (IFS0bits.T4IF)
+  {
+    // Left motor
+    float Lcandidate_dc = kP * Le + kI * Lcurr_sum_e;
+    uint32_t Lfinal_dc;
+    if (Lcandidate_dc > 100 || Lcandidate_dc < 0)
+    {
+      Lcurr_sum_e = Llast_sum_e;
+      Lfinal_dc = (Lcandidate_dc > 100) ? 100 : 0;
+    }
+    else
+    {
+      Lfinal_dc = round(Lcandidate_dc);
+    }
+    setMotorSpeed(LEFT_MOTOR, Ldirection_desired, Lfinal_dc);
+
+    // Right motor
+    float Rcandidate_dc = kP * Re + kI * Rcurr_sum_e;
+    uint32_t Rfinal_dc;
+    if (Rcandidate_dc > 100 || Rcandidate_dc < 0)
+    {
+      Rcurr_sum_e = Rlast_sum_e;
+      Rfinal_dc = (Rcandidate_dc > 100) ? 100 : 0;
+    }
+    else
+    {
+      Rfinal_dc = round(Rcandidate_dc);
+    }
+    setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, Rfinal_dc);
+
+    IFS0CLR = _IFS0_T4IF_MASK;
+  }
 }
 
 // ---------------------------- Private Functions -----------------------------
@@ -177,7 +290,7 @@ float periodToMotorSpeed(uint32_t period)
 float getMotorSpeed(Motors_t whichMotor)
 {
   uint32_t period = whichMotor == LEFT_MOTOR ? Lperiod : Rperiod;
-  DB_printf("period = %u\r\n", period);
+  DB_printf("period (us) = %u\r\n", period * 200 / 1000);
   return periodToMotorSpeed(period);
 }
 
@@ -296,6 +409,17 @@ void initEncoderISRs(void){
 uint32_t getRolloverTime(void)
 {
   return T3RO * (PWM_PERIOD+1);
+}
+
+
+void rotate90CW(void)
+{
+  return;
+}
+
+void rotate90CCW(void)
+{
+  return;
 }
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
