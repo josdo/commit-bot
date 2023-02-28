@@ -26,7 +26,7 @@ void InitDistanceSensor()
     // Initialize the timer 2
     InitTimer2();
     // Initialize the IC
-    InitIC2();
+//    InitIC2();
     
     DB_printf("\rES_INIT received in Distance Sensor Service %d\r\n");
 }

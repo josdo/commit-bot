@@ -15,9 +15,10 @@ typedef enum{
 } Directions_t;
 
 void InitDCMotor(void);
+void setEncoderRollovers(uint16_t RO);
 
 float periodToMotorSpeed(uint32_t period);
-float getMotorSpeed(Motors_t whichMotor);
+uint32_t getMotorSpeed(Motors_t whichMotor);
 float getWheelSpeed(Motors_t whichMotor);
 uint32_t getRolloverTime(void);
 

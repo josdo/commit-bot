@@ -5,6 +5,7 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 #include "InitTimer2.h"
+#include "DCMotor.h"
 
 volatile global_time gl;
 
@@ -36,11 +37,12 @@ void InitTimer2(){
 }
 
 
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
-    __builtin_disable_interrupts();
-    if(IFS0bits.T2IF == 1){
-        ++(gl.time_var.rollover);
-        IFS0CLR = _IFS0_T2IF_MASK;
-    }
-    __builtin_enable_interrupts();
-}
+//void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
+//    __builtin_disable_interrupts();
+//    if(IFS0bits.T2IF == 1){
+//        ++(gl.time_var.rollover);
+//        IFS0CLR = _IFS0_T2IF_MASK;
+//    }
+////    setEncoderRollovers(gl.time_var.rollover);
+//    __builtin_enable_interrupts();
+//}

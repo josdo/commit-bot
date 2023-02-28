@@ -96,19 +96,19 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         }
         else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
         {
-          float rspeed = getMotorSpeed(RIGHT_MOTOR);
+          uint32_t rspeed = getMotorSpeed(RIGHT_MOTOR);
           // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
-          // DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
+          DB_printf("Rspeed is %u\r\n", getMotorSpeed(RIGHT_MOTOR));
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
         {
-          uint32_t curr_rollover_time = getRolloverTime();
-          // in us
-          uint32_t delta = (last_rollover_time - curr_rollover_time) / 1000;
-          DB_printf("Rollover time (us): %d\r\n", delta);
-          last_rollover_time = curr_rollover_time;
-          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
+//          uint32_t curr_rollover_time = getRolloverTime();
+//          // in us
+//          uint32_t delta = (last_rollover_time - curr_rollover_time) / 1000;
+//          DB_printf("Rollover time (us): %d\r\n", delta);
+//          last_rollover_time = curr_rollover_time;
+//          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
         else if (ThisEvent.EventParam == T_KEY_TIMER)
         {
@@ -198,8 +198,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else
         {
           print_motor_metrics = true;
-          // ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
-          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
+           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
+//          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
           DB_printf("Start printing motor metrics\r\n");
         }
       }
