@@ -203,11 +203,12 @@ void __ISR(_INPUT_CAPTURE_4_VECTOR, IPL7SOFT) LongRangeIRSensor(void){
     do{
         thisTime = (uint16_t)IC4BUF;
         
-        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
-            ++(gl.time_var.rollover);
-            IFS0CLR = _IFS0_T2IF_MASK;
-        }
-        gl.time_var.local_time = thisTime;
+        // if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
+        //     ++(gl.time_var.rollover);
+        //     IFS0CLR = _IFS0_T2IF_MASK;
+        // }
+        // gl.time_var.local_time = thisTime;
+        updateGlobalTime(thisTime);
         long_range_period = (gl.actual_time - lastTimeLong);
         lastTimeLong = gl.actual_time;
     }while(IC4CONbits.ICBNE != 0);

@@ -36,7 +36,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   InitDistanceSensor();
   InitTapeSensor();
   InitBeaconSensor();
-  InitDCMotor();
+  // InitDCMotor();
   disablePIControl();
 
   DB_printf("Initialized TestHarnessService0, compiled at %s on %s\r\n", __TIME__, __DATE__);

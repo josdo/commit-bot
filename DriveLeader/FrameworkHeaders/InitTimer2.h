@@ -11,8 +11,7 @@ typedef union{
     }time_var;
 }global_time;
 
-
-
+void updateGlobalTime(uint16_t capturedTime);
 
 void InitTimer2(void);
 #endif 
