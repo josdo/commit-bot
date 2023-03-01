@@ -35,6 +35,15 @@ void InitTimer2(){
 
 }
 
+/* Updates if the interrupt flag is set. */
+void updateGlobalTime(uint16_t capturedTime){
+    if(IFS0bits.T2IF == 1 && capturedTime < 0x8000){
+        ++(gl.time_var.rollover);
+        IFS0CLR = _IFS0_T2IF_MASK;
+    }
+    gl.time_var.local_time = capturedTime;
+}
+
 
 void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
     __builtin_disable_interrupts();

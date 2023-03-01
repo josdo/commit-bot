@@ -5,6 +5,7 @@
 #include "dbprintf.h"
 #include "xc.h"
 #include <sys/attribs.h>
+#include "InitTimer2.h"
 
 // ------------------------------- Module Defines ---------------------------
 #define R2 LATBbits.LATB4                               // right direction pin
@@ -22,28 +23,12 @@ static const uint16_t PWM_PERIOD = 10000-1;
 
 
 // ------------------------------- Module Variables ---------------------------
-// typedef union{
-//     struct{
-//         uint16_t CapturedTime;
-//         uint16_t RollOver;
-//     } ByTime;
-    
-//     uint32_t FullLength;
-// } TimeTracker;
 
-typedef struct
-{
-  uint32_t RolloverTime;
-  uint16_t CapturedTime;
-} TimeTracker;
+static volatile global_time Rcurr_time;         // IC1 current time (right)
+static volatile global_time Rlast_time;            // IC1 prev time (right)
 
-static uint32_t T3RO = 0;                  // total rollover timer 3
-
-static volatile TimeTracker IC1CurrentTime;         // IC1 current time (right)
-static volatile TimeTracker IC1PrevTime;            // IC1 prev time (right)
-
-static volatile TimeTracker IC3CurrentTime;         // IC3 current time (left)
-static volatile TimeTracker IC3PrevTime;            // IC3 prev time (left)
+static volatile global_time Lcurr_time;         // IC3 current time (left)
+static volatile global_time Llast_time;            // IC3 prev time (left)
 
 static uint32_t Rperiod = 0;               // right wheel period  
 static uint32_t Lperiod = 0;               // left wheel period
@@ -55,6 +40,8 @@ static uint32_t Rdirection_desired = 0;
 static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
 
+extern volatile global_time gl;
+
 
 // ---------------------------- Private Functions ----------------------------
 void setPWM(void);                      // set up PWM on motor pins with 0 DC
@@ -62,7 +49,6 @@ void initEncoderISRs(void);                  // init encoder ISRs, IC1 on RA2, I
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
-void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void);
 
 void InitDCMotor()
 {
@@ -209,10 +195,10 @@ void setPWM(void){
   // clear the timer register
   TMR3 = 0;
 
-  // Enable rollover counter ISR interrupts
-  IEC0SET = _IEC0_T3IE_MASK;
-  IPC3bits.T3IP = 6;
-  IFS0CLR = _IFS0_T3IF_MASK;
+  // // Enable rollover counter ISR interrupts
+  // IEC0SET = _IEC0_T3IE_MASK;
+  // IPC3bits.T3IP = 6;
+  // IFS0CLR = _IFS0_T3IF_MASK;
   // -------------------------------------------------------
   
   
@@ -335,7 +321,7 @@ void initEncoderISRs(void){
   // Setup IC 1 module
   IC1CONbits.w = 0;       // Turn off and set to defaults
   IC1CONbits.ICM = 0b011; // every rising edge
-  IC1CONbits.ICTMR = 0;   // Use Timer3
+  IC1CONbits.ICTMR = 1;   // Use Timer2
   IC1CONbits.FEDGE = 1;   // Capture rising edge first
   // Enable interrupts
   IFS0CLR = _IFS0_IC1IF_MASK;
@@ -349,7 +335,7 @@ void initEncoderISRs(void){
   // Setup IC 3 module
   IC3CONbits.w = 0;       // Turn off and set to defaults
   IC3CONbits.ICM = 0b011; // every rising edge
-  IC3CONbits.ICTMR = 0;   // Use Timer3
+  IC3CONbits.ICTMR = 1;   // Use Timer2
   IC3CONbits.FEDGE = 1;   // Capture rising edge first
   // Enable interrupts
   IFS0CLR = _IFS0_IC3IF_MASK;
@@ -369,13 +355,11 @@ void initEncoderISRs(void){
   __builtin_enable_interrupts();
 }
 
-// Rolled over time at this point in time in us.
+// Rolled over time at this point.
 uint32_t getRolloverTicks(void)
 {
   // 200ns per tick
-  // static const uint32_t k = (PWM_PERIOD+1) * 200 / 1000;
-  // return T3RO * k;
-  return T3RO * (PWM_PERIOD+1);
+  return gl.time_var.rollover * (PWM_PERIOD+1);
 }
 
 
@@ -394,59 +378,51 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
     
     do {
         thisTime = (uint16_t)IC1BUF;        // read the buffer
-        
-        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
-            T3RO++;                         // increment rollover counter
-            IFS0CLR = _IFS0_T1IF_MASK;      // clear rollover mask
-        }
-        IC1CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
-        IC1CurrentTime.CapturedTime = thisTime;  // store captured time
-        
-        // find period of right encoder pulse
-        Rperiod = IC1CurrentTime.RolloverTime + IC1CurrentTime.CapturedTime 
-                  - IC1PrevTime.RolloverTime - IC1PrevTime.CapturedTime;
-        
-        // update prev time with current value
-        IC1PrevTime = IC1CurrentTime;
+
+        updateGlobalTime(thisTime);
+        Rcurr_time = gl;
+        Rperiod = Rcurr_time.actual_time - Rlast_time.actual_time; 
+        Rlast_time = Rcurr_time;
         
     } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC1IF_MASK;
 }
 
+/* TODO: outdated */
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
     static uint16_t thisTime = 0;           // current timer value
     
     do {
         thisTime = (uint16_t)IC3BUF;        // read the buffer
         
-        if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
-            T3RO++;                         // increment rollover counter
-            IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
-        }
-        IC3CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
-        IC3CurrentTime.CapturedTime = thisTime;  // store captured time
+        // if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
+        //     T3RO++;                         // increment rollover counter
+        //     IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
+        // }
+        // Lcurr_time.RolloverTime = getRolloverTicks();          // update rollover
+        // Lcurr_time.CapturedTime = thisTime;  // store captured time
         
-        // find period of right encoder pulse
-        Lperiod = IC3CurrentTime.RolloverTime + IC3CurrentTime.CapturedTime 
-                  - IC3PrevTime.RolloverTime - IC3PrevTime.CapturedTime;
+        // // find period of right encoder pulse
+        // Lperiod = Lcurr_time.RolloverTime + Lcurr_time.CapturedTime 
+        //           - Llast_time.RolloverTime - Llast_time.CapturedTime;
         
-        // update prev time with current value
-        IC3PrevTime = IC3CurrentTime;
+        // // update prev time with current value
+        // Llast_time = Lcurr_time;
 
     } while(IC3CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
 }
 
-void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
-    __builtin_disable_interrupts();         // disable global interrupts
+// void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
+//     __builtin_disable_interrupts();         // disable global interrupts
     
-    if (1 == IFS0bits.T3IF){
-        T3RO++;                             // increment rollover
-        IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
-    }
-    // IC1CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
-    // IC3CurrentTime.RolloverTime = getRolloverTicks();          // update rollover
+//     if (1 == IFS0bits.T3IF){
+//         T3RO++;                             // increment rollover
+//         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
+//     }
+//     // Rcurr_time.RolloverTime = getRolloverTicks();          // update rollover
+//     // Lcurr_time.RolloverTime = getRolloverTicks();          // update rollover
     
-    __builtin_enable_interrupts();          // enable global interrupts
-}
+//     __builtin_enable_interrupts();          // enable global interrupts
+// }
 
