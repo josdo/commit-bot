@@ -18,8 +18,8 @@ void InitTimer2(){
     T2CONbits.TCS = 0;
     // gated accumulation is off
     T2CONbits.TGATE = 0;
-    // selecting a prescaler 2 for the timer
-    T2CONbits.TCKPS = 0b001;
+    // selecting a prescaler 4 for the timer
+    T2CONbits.TCKPS = 0b010;
     // set the period on the timer    
     PR2 = 0xFFFF;
     // clear the timer flag
@@ -35,21 +35,30 @@ void InitTimer2(){
 
 }
 
+// Prescale of 4
+uint32_t T2_tick_to_ns(void)
+{
+  return 200;
+}
+
+uint32_t T2_actual_time(void)
+{
+  return gl.actual_time;
+}
+
 /* Updates if the interrupt flag is set. */
 void updateGlobalTime(uint16_t capturedTime){
-    if(IFS0bits.T2IF == 1 && capturedTime < 0x8000){
+    __builtin_disable_interrupts();
+    if(IFS0bits.T2IF == 1){ //  && capturedTime < 0x8000
         ++(gl.time_var.rollover);
         IFS0CLR = _IFS0_T2IF_MASK;
     }
+    __builtin_enable_interrupts();
     gl.time_var.local_time = capturedTime;
 }
 
 
 void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
-    __builtin_disable_interrupts();
-    if(IFS0bits.T2IF == 1){
-        ++(gl.time_var.rollover);
-        IFS0CLR = _IFS0_T2IF_MASK;
-    }
-    __builtin_enable_interrupts();
+  // TODO: Is setting to 0 correct? Should we be using TMR2?
+  updateGlobalTime(0);
 }

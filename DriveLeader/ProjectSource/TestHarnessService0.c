@@ -69,7 +69,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static const uint16_t t_key_forward_time = 5000;
   static const uint16_t t_key_backward_time = 2000;
   static const uint32_t t_key_dc = 100;
-  static uint16_t motor_timer_period = 500;
+  static uint16_t motor_timer_period = 100;
   static uint32_t last_rt = 0;
   static uint16_t encoder_timer_period = 100;
 
@@ -88,7 +88,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-//            DB_printf("Distance Period is: %d\r\n", getDistance());
+           DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
 //            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
@@ -97,6 +97,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
         {
           float rspeed = getMotorSpeed(RIGHT_MOTOR);
+          // DB_printf("Global time is %x\r\n", T2_actual_time());
           // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
           // DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);

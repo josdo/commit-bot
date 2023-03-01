@@ -172,10 +172,10 @@ WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
 
 void Period2Freq(BeaconSensor_t whichSensor){
     if (whichSensor == ShortRangeBeaconSensor){
-        short_range_freq = (uint32_t)(0.4 * short_range_period);
+        short_range_freq = (uint32_t)(0.8 * short_range_period);
     }
     else if(whichSensor == LongRangeBeaconSensor){
-        long_range_freq = (uint32_t)(0.4 * long_range_period);
+        long_range_freq = (uint32_t)(0.8 * long_range_period);
     }
 } 
 

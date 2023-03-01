@@ -12,6 +12,8 @@ typedef union{
 }global_time;
 
 void updateGlobalTime(uint16_t capturedTime);
+uint32_t T2_tick_to_ns(void);
+uint32_t T2_actual_time(void);
 
 void InitTimer2(void);
 #endif 

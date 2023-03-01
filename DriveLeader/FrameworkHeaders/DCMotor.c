@@ -269,8 +269,20 @@ float periodToMotorSpeed(uint32_t period)
 
 float getMotorSpeed(Motors_t whichMotor)
 {
-  uint32_t period = whichMotor == LEFT_MOTOR ? Lperiod : Rperiod;
-  DB_printf("period (us) = %u\r\n", period * 200 / 1000);
+  // TODO use 12
+  uint32_t periods_per_rev = 12;
+  uint32_t period;
+  if (whichMotor == LEFT_MOTOR)
+  {
+    // DB_printf("%x > %x\r\n", Llast_time.actual_time, Lcurr_time.actual_time);
+    period = Lperiod;
+  }
+  else
+  {
+    // DB_printf("%x > %x\r\n", Rlast_time.actual_time, Rcurr_time.actual_time);
+    period = Rperiod;
+  }
+  DB_printf("period (ms) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   return periodToMotorSpeed(period);
 }
 
@@ -381,8 +393,18 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
 
         updateGlobalTime(thisTime);
         Rcurr_time = gl;
-        Rperiod = Rcurr_time.actual_time - Rlast_time.actual_time; 
-        Rlast_time = Rcurr_time;
+        bool out_of_order = Rcurr_time.actual_time < Rlast_time.actual_time;
+        bool too_small = Rcurr_time.actual_time - Rlast_time.actual_time < 2000;
+        if (out_of_order || too_small)
+        {
+          Rlast_time = Rcurr_time;
+          continue;
+        }
+        else
+        {
+          Rperiod = Rcurr_time.actual_time - Rlast_time.actual_time; 
+          Rlast_time = Rcurr_time;
+        }
         
     } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC1IF_MASK;

@@ -69,7 +69,7 @@ void InitIC2(){
 
 
 void Period2Distance(){
-    distance = (uint32_t)(4 * ((0.1 * distance_period) - 1000));
+    distance = (uint32_t)(4 * ((0.2 * distance_period) - 1000));
 }
 
 
@@ -89,11 +89,7 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IPL7SOFT) DistanceSensor(void){
     do{
         thisTime = (uint16_t)IC2BUF;
         temp = lastTime;
-        if((IFS0bits.T2IF == 1) && (thisTime < 0x8000)){
-            ++(gl.time_var.rollover);
-            IFS0CLR = _IFS0_T2IF_MASK;
-        }
-        gl.time_var.local_time = thisTime;
+        updateGlobalTime(thisTime);
         if (isRising % 2){
             distance_period = (gl.actual_time - lastTime);
         }
