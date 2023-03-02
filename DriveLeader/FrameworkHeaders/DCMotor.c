@@ -96,7 +96,7 @@ void initPIController(void)
   IPC4bits.T4IP = 6; // Ensure lower priority than encoder interrupt's priority
 
   // Turn on T4 module
-  T4CONbits.ON = 1;
+//  T4CONbits.ON = 1;
 }
 
 void enablePIControl(void)

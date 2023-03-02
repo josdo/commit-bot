@@ -40,7 +40,9 @@ typedef enum
     ES_ENTRY_HISTORY,
           ES_FOUND_BEACON,
           ES_DONE_BACK_UP,
-          ES_FINISH
+          ES_FINISH,
+          ES_REACHED_MIDDLE,
+          ES_REACHED_THIRD
 }ES_EventType_t;
 
 #endif

@@ -95,29 +95,12 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
            {
                switch(CurrentEvent.EventType)
                {
-//                   case ES_NEW_KEY:
-//                   {
-//                       // GO to branch 1
-//                       if (CurrentEvent.EventParam == '1')
-//                       {
-//                           DuringGo2BranchOrigin(CurrentEvent);
-//                       }
-//                       // GO to branch 2
-//                       else if (CurrentEvent.EventParam == '2')
-//                       {
-//                           DuringGo2BranchOrigin(CurrentEvent);
-//                       }
-//                       else if (CurrentEvent.EventParam == '3')
-//                       {
-//                           DuringGo2BranchOrigin(CurrentEvent);
-//                       }
-//                   }
-//                   break;
                    case ES_FINISH:
                    {
-                       puts("also here\r\n");
-                       MakeTransition = true;
-                       NextState = FOLLOW_TAPE;
+                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                        MakeTransition = true;
+                        NextState = PUSH_COMMIT;
                    }
                    break;
                    
@@ -126,7 +109,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        }
        break;
        
-       case FOLLOW_TAPE:
+       case PUSH_COMMIT:
        {
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {

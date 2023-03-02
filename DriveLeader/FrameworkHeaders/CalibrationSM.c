@@ -183,7 +183,7 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         //RunLowerLevelSM(Event);
         // repeat for any concurrently running state machines
         // now do any local exit functionality
-        ES_Timer_InitTimer(STOP_TIMER, 2000);
+        ES_Timer_InitTimer(STOP_TIMER, 1200);
         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
         setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Rotating\r\n");
@@ -210,7 +210,7 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
         setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
         setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
         puts("Moving Back\r\n");
-        ES_Timer_InitTimer(STOP_TIMER, 2000);
+        ES_Timer_InitTimer(STOP_TIMER, 4000);
     }
     else if (Event.EventType == ES_EXIT)
     {

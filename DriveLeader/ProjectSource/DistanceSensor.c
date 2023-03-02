@@ -69,7 +69,7 @@ void InitIC2(){
 
 
 void Period2Distance(){
-    distance = (uint32_t)(4 * ((0.2 * distance_period) - 1000));
+    distance = (uint32_t)(4 * 0.039701 * ((0.2 * distance_period) - 1000));
 }
 
 
