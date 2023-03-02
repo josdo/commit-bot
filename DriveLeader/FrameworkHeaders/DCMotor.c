@@ -34,7 +34,7 @@ static void initEncoderISRs(void);
 static void setPWM(void);
 static void initPIController(void);
 
-void InitDCMotor()
+void InitDCMotor(bool enablePI)
 {
   // DC motor pins
   TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (L2)
@@ -51,7 +51,11 @@ void InitDCMotor()
   initEncoderISRs();                            // init encoder ISRs
 
   // PI control
-  // initPIController();
+  initPIController();
+  if (enablePI)
+    enablePIControl();
+  else
+    disablePIControl();
 
   DB_printf("\rInitialized DC Motor, compiled at %s on %s\r\n", __TIME__, __DATE__);
 }
@@ -235,7 +239,8 @@ float periodToMotorSpeed(uint32_t period)
   // = 10*1000*1000 / 200
   // = 50*1000
   // TODO: debug where the correction comes from
-  static const uint32_t correction = 60;
+  // static const uint32_t correction = 60;
+  static const uint32_t correction = 48;
   static const float k = 50*1000*correction;
 
   // period = 0 means no ticks, so no speed 

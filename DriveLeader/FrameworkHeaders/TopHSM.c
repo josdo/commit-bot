@@ -20,8 +20,6 @@ bool InitTopHSM ( uint8_t Priority )
 {
   ES_Event_t ThisEvent;
   
-  InitDCMotor();
-
   MyPriority = Priority;  // save our priority
 
   ThisEvent.EventType = ES_ENTRY;
