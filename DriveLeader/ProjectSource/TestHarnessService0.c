@@ -71,7 +71,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static const uint32_t t_key_dc = 100;
   static uint16_t motor_timer_period = 100;
   static uint32_t last_rt = 0;
-  static uint16_t encoder_timer_period = 100;
+  static uint16_t encoder_timer_period = 400;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -88,7 +88,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-           DB_printf("Distance Period is: %d\r\n", getDistance());
+          //  DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
 //            DB_printf("Short Range Freq: %d\r\n", getBeconSensorFreq(ShortRangeBeaconSensor));
@@ -96,7 +96,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         }
         else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
         {
-          float rspeed = getMotorSpeed(RIGHT_MOTOR);
+          // float rspeed = getMotorSpeed(RIGHT_MOTOR);
+          float lspeed = getMotorSpeed(LEFT_MOTOR);
           // DB_printf("Global time is %x\r\n", T2_actual_time());
           // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
           // DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
@@ -105,7 +106,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
         {
           uint32_t rt = getRolloverTicks();
-          DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) * 200 / 1000);
+
+          DB_printf("Rollover ms %u\r\n", rt * 200 / 1000 / 1000);
+          // DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) * 200 / 1000 / 1000);
           last_rt = rt;
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
@@ -197,8 +200,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else
         {
           print_motor_metrics = true;
-          ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
-          // ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
+          // ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
+          ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
           DB_printf("Start printing motor metrics\r\n");
         }
       }

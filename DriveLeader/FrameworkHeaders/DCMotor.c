@@ -371,7 +371,7 @@ void initEncoderISRs(void){
 uint32_t getRolloverTicks(void)
 {
   // 200ns per tick
-  return gl.time_var.rollover * (PWM_PERIOD+1);
+  return gl.time_var.rollover * 0xFFFF;
 }
 
 
@@ -387,64 +387,30 @@ void rotate90CCW(void)
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
     static uint16_t thisTime = 0;           // current timer value
-    
     do {
         thisTime = (uint16_t)IC1BUF;        // read the buffer
-
         updateGlobalTime(thisTime);
         Rcurr_time = gl;
         bool out_of_order = Rcurr_time.actual_time < Rlast_time.actual_time;
         bool too_small = Rcurr_time.actual_time - Rlast_time.actual_time < 2000;
-        if (out_of_order || too_small)
-        {
-          Rlast_time = Rcurr_time;
-          continue;
-        }
-        else
-        {
+        if (!out_of_order && !too_small)
           Rperiod = Rcurr_time.actual_time - Rlast_time.actual_time; 
-          Rlast_time = Rcurr_time;
-        }
-        
+        Rlast_time = Rcurr_time;
     } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC1IF_MASK;
 }
 
-/* TODO: outdated */
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
     static uint16_t thisTime = 0;           // current timer value
-    
     do {
         thisTime = (uint16_t)IC3BUF;        // read the buffer
-        
-        // if ((1 == IFS0bits.T3IF) && (thisTime < 0x8000)){
-        //     T3RO++;                         // increment rollover counter
-        //     IFS0CLR = _IFS0_T3IF_MASK;      // clear rollover mask
-        // }
-        // Lcurr_time.RolloverTime = getRolloverTicks();          // update rollover
-        // Lcurr_time.CapturedTime = thisTime;  // store captured time
-        
-        // // find period of right encoder pulse
-        // Lperiod = Lcurr_time.RolloverTime + Lcurr_time.CapturedTime 
-        //           - Llast_time.RolloverTime - Llast_time.CapturedTime;
-        
-        // // update prev time with current value
-        // Llast_time = Lcurr_time;
-
-    } while(IC3CONbits.ICBNE != 0);
+        updateGlobalTime(thisTime);
+        Lcurr_time = gl;
+        bool out_of_order = Lcurr_time.actual_time < Llast_time.actual_time;
+        bool too_small = Lcurr_time.actual_time - Llast_time.actual_time < 2000;
+        if (!out_of_order && !too_small)
+          Lperiod = Lcurr_time.actual_time - Llast_time.actual_time; 
+        Llast_time = Lcurr_time;
+    } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
 }
-
-// void __ISR(_TIMER_3_VECTOR, IPL6SOFT) ISR_Timer3RollOver(void){
-//     __builtin_disable_interrupts();         // disable global interrupts
-    
-//     if (1 == IFS0bits.T3IF){
-//         T3RO++;                             // increment rollover
-//         IFS0CLR = _IFS0_T3IF_MASK;          // clear timer 3 interrupt flag
-//     }
-//     // Rcurr_time.RolloverTime = getRolloverTicks();          // update rollover
-//     // Lcurr_time.RolloverTime = getRolloverTicks();          // update rollover
-    
-//     __builtin_enable_interrupts();          // enable global interrupts
-// }
-
