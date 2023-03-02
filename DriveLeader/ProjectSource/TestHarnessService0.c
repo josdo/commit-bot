@@ -71,7 +71,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static const uint16_t t_key_forward_time = 5000;
   static const uint16_t t_key_backward_time = 2000;
   static const uint32_t t_key_dc = 100;
-  static uint16_t motor_timer_period = 400;
+  static uint16_t motor_timer_period = 250;
   static uint32_t last_rt = 0;
   static uint16_t encoder_timer_period = 400;
 
@@ -100,9 +100,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         {
           float rspeed = getMotorSpeed(RIGHT_MOTOR);
           float lspeed = getMotorSpeed(LEFT_MOTOR);
-          // DB_printf("Global time is %x\r\n", T2_actual_time());
-          // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
-          // DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
+          DB_printf("Rspeed %d  Lspeed %d\r\n", (uint32_t)rspeed, (uint32_t)lspeed);
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)

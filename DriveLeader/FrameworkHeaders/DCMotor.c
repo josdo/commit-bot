@@ -7,22 +7,12 @@
 #include <sys/attribs.h>
 #include "InitTimer2.h"
 
-// ------------------------------- Module Defines ---------------------------
+extern volatile global_time gl;
+
 #define R2 LATBbits.LATB4                               // right direction pin
 #define L2 LATAbits.LATA4                               // left direction pin
 
-#define TIMER_DIV 4                                     // pre scalar on timer
-#define PWM_FREQ 10000                                  // in Hz
-
-#define PBCLK_RATE 20000000L
-
 static const uint16_t PWM_PERIOD = 10000-1;
-
-// TIMERx divisor for PWM, standard value is 8, to give maximum resolution
-// ----------------------------------------------------------------------------
-
-
-// ------------------------------- Module Variables ---------------------------
 
 static volatile global_time Rcurr_time;         // IC1 current time (right)
 static volatile global_time Rlast_time;            // IC1 prev time (right)
@@ -40,145 +30,74 @@ static uint32_t Rdirection_desired = 0;
 static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
 
-extern volatile global_time gl;
-
-
-// ---------------------------- Private Functions ----------------------------
-void setPWM(void);                      // set up PWM on motor pins with 0 DC
-void initEncoderISRs(void);                  // init encoder ISRs, IC1 on RA2, IC3 on RB5
-
-void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void);
-void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void);
+static void initEncoderISRs(void);
+static void setPWM(void);
+static void initPIController(void);
 
 void InitDCMotor()
 {
-  // ----------------------- Set up DC Motor pins ----------------------- 
+  // DC motor pins
   TRISACLR = _TRISA_TRISA4_MASK;                // set ra4 as output (L2)
   TRISBCLR = _TRISB_TRISB4_MASK;                // set rb4 as output (R2)
-  
   R2 = 0;                                       // right direction
   L2 = 0;                                       // left direction
 
-  
-  // ------------------------------- PWM ----------------------------------
+  // PWM
   setPWM();                                     // turn on PWM
   OC3RS = (uint16_t)(0);                        // initial speed is 0
   OC2RS = (uint16_t)(0);                        // initial speed is 0
   
-  
+  // Encoders
   initEncoderISRs();                            // init encoder ISRs
+
+  // PI control
+  // initPIController();
 
   DB_printf("\rInitialized DC Motor, compiled at %s on %s\r\n", __TIME__, __DATE__);
 }
 
-void initPIController(void)
-{
-  // How frequently the controller updates
-  static uint16_t ControllerUpdatePeriod = 40000;
+static void initEncoderISRs(void){
+  __builtin_disable_interrupts();
+  // Map pin A2 to IC 1, right
+  IC1R = 0;
+  // Setup IC 1 module
+  IC1CONbits.w = 0;       // Turn off and set to defaults
+  IC1CONbits.ICM = 0b011; // every rising edge
+  IC1CONbits.ICTMR = 1;   // Use Timer2
+  IC1CONbits.FEDGE = 1;   // Capture rising edge first
+  // Enable interrupts
+  IFS0CLR = _IFS0_IC1IF_MASK;
+  // Reset interrupt flag
+  IEC0SET = _IEC0_IC1IE_MASK;
+  // Set interrupt priority
+  IPC1bits.IC1IP = 7;
 
-  // Initialize timer 4
-  // Turn off T4
-  T4CONbits.w = 0;
-  // Use PBCLK
-  T4CONbits.TCS = 0;
-  // Set prescale value to 1:1, which allows for 
-  // (2^16-1 ticks) * 50ns/tick * 10^6ms/ns = 3.27ms of time measurement
-  T4CONbits.TCKPS = 0;
-  // Set PR4 to 2ms, which is 40,000 ticks
-  PR4 = ControllerUpdatePeriod - 1;
+  // Map pin B5 to IC 3
+  IC3R = 0b0001;
+  // Setup IC 3 module
+  IC3CONbits.w = 0;       // Turn off and set to defaults
+  IC3CONbits.ICM = 0b011; // every rising edge
+  IC3CONbits.ICTMR = 1;   // Use Timer2
+  IC3CONbits.FEDGE = 1;   // Capture rising edge first
+  // Enable interrupts
+  IFS0CLR = _IFS0_IC3IF_MASK;
+  // Reset interrupt flag
+  IEC0SET = _IEC0_IC3IE_MASK;
+  // Set interrupt priority
+  IPC3bits.IC3IP = 7;
 
-  // Initialize interrupt vector
-  __builtin_enable_interrupts(); // global enable
+  // Use multi-vectored interrupts
   INTCONbits.w = 0;
-  INTCONbits.MVEC = 1; // use multi-vectored interrupts
+  INTCONbits.MVEC = 1;
 
-  enablePIControl();
-  IPC4bits.T4IP = 6; // Ensure lower priority than encoder interrupt's priority
+  // Turn on
+  IC1CONbits.ON = 1;
+  IC3CONbits.ON = 1;
 
-  // Turn on T4 module
-  T4CONbits.ON = 1;
+  __builtin_enable_interrupts();
 }
 
-void enablePIControl(void)
-{
-  IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
-  IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
-}
-
-void disablePIControl(void)
-{
-  IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
-}
-
-void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
-{
-  if (motor == LEFT_MOTOR)
-  {
-    Lspeed_desired = speed;
-    Ldirection_desired = direction;
-  }
-  else
-  {
-    Rspeed_desired = speed;
-    Rdirection_desired = direction;
-  }
-}
-
-// Updates velocity control, i.e. duty cycle applied
-void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
-{
-  static float kP = 1;
-  static float kI = 1;
-  static float Lcurr_sum_e = 0;
-  static float Llast_sum_e = 0;
-  static float Rcurr_sum_e = 0;
-  static float Rlast_sum_e = 0;
-
-  float Le = Lspeed_desired - getWheelSpeed(LEFT_MOTOR);
-  Llast_sum_e = Lcurr_sum_e;
-  Lcurr_sum_e += Le;
-
-  float Re = Rspeed_desired - getWheelSpeed(RIGHT_MOTOR);
-  Rlast_sum_e = Rcurr_sum_e;
-  Rcurr_sum_e += Re;
-
-  // Clamp cumulative error if it drives the commanded duty cycle out of valid range
-  if (IFS0bits.T4IF)
-  {
-    // Left motor
-    float Lcandidate_dc = kP * Le + kI * Lcurr_sum_e;
-    uint32_t Lfinal_dc;
-    if (Lcandidate_dc > 100 || Lcandidate_dc < 0)
-    {
-      Lcurr_sum_e = Llast_sum_e;
-      Lfinal_dc = (Lcandidate_dc > 100) ? 100 : 0;
-    }
-    else
-    {
-      Lfinal_dc = round(Lcandidate_dc);
-    }
-    setMotorSpeed(LEFT_MOTOR, Ldirection_desired, Lfinal_dc);
-
-    // Right motor
-    float Rcandidate_dc = kP * Re + kI * Rcurr_sum_e;
-    uint32_t Rfinal_dc;
-    if (Rcandidate_dc > 100 || Rcandidate_dc < 0)
-    {
-      Rcurr_sum_e = Rlast_sum_e;
-      Rfinal_dc = (Rcandidate_dc > 100) ? 100 : 0;
-    }
-    else
-    {
-      Rfinal_dc = round(Rcandidate_dc);
-    }
-    setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, Rfinal_dc);
-
-    IFS0CLR = _IFS0_T4IF_MASK;
-  }
-}
-
-// ---------------------------- Private Functions -----------------------------
-void setPWM(void){
+static void setPWM(void){
     // -------------------- Set PWM pins as digital output ----------------
     TRISBbits.TRISB10 = 0;                  // RB10 is output R
     TRISBbits.TRISB11 = 0;                  // RB11 is output L
@@ -249,49 +168,97 @@ void setPWM(void){
   T3CONbits.ON = 1; 
 }
 
+static void initPIController(void)
+{
+  // How frequently the controller updates
+  static uint16_t ControllerUpdatePeriod = 40000;
+
+  // Initialize timer 4
+  // Turn off T4
+  T4CONbits.w = 0;
+  // Use PBCLK
+  T4CONbits.TCS = 0;
+  // Set prescale value to 1:1, which allows for 
+  // (2^16-1 ticks) * 50ns/tick * 10^6ms/ns = 3.27ms of time measurement
+  T4CONbits.TCKPS = 0;
+  // Set PR4 to 2ms, which is 40,000 ticks
+  PR4 = ControllerUpdatePeriod - 1;
+
+  // Initialize interrupt vector
+  __builtin_enable_interrupts(); // global enable
+  INTCONbits.w = 0;
+  INTCONbits.MVEC = 1; // use multi-vectored interrupts
+
+  enablePIControl();
+  IPC4bits.T4IP = 6; // Ensure lower priority than encoder interrupt's priority
+
+  // Turn on T4 module
+  T4CONbits.ON = 1;
+}
+
+void enablePIControl(void)
+{
+  IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
+  IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
+}
+
+void disablePIControl(void)
+{
+  IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
+}
+
+void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
+{
+  if (motor == LEFT_MOTOR)
+  {
+    Lspeed_desired = speed;
+    Ldirection_desired = direction;
+  }
+  else
+  {
+    Rspeed_desired = speed;
+    Rdirection_desired = direction;
+  }
+}
+
+/* Returns revs per minute, which is 
+    external revs per internal rev (1/50) * 
+    internal revs per period (1/12) * 
+    periods per tick (1 / period) * 
+    ticks per ns (1 / 200) * 
+    ns per min (60 * 1000 * 1000 * 1000)
+*/
 float periodToMotorSpeed(uint32_t period)
 {
+  // 60*1000*1000*1000 / (50*12*200)
+  // = 60*1000*1000*1000 / (6000*200)
+  // = 10*1000*1000 / 200
+  // = 50*1000
+  // TODO: debug where the correction comes from
+  static const uint32_t correction = 60;
+  static const float k = 50*1000*correction;
+
   // period = 0 means no ticks, so no speed 
   if (period == 0)
-  {
     return 0;
-  }
-  // ns per min = 60 * 1000 * 1000 * 1000
-  // ns per tick = 200
-  // gear = 50x slowdown
-  // period = ticks per revolution
-  // result = ns per min / (50 * period * ns per tick)
-  // result = k / period, where
-  // k = ns per min / (50 * ns per tick) = 60 * 1000 * 100
-  const uint32_t k = 6000000;
-  return 1.0 * k / period;
+
+  float rpm = k / period;
+  return rpm;
 }
 
 float getMotorSpeed(Motors_t whichMotor)
 {
-  // TODO use 12
-  uint32_t periods_per_rev = 12;
   uint32_t period;
   if (whichMotor == LEFT_MOTOR)
   {
-    // DB_printf("%x > %x\r\n", Llast_time.actual_time, Lcurr_time.actual_time);
     period = Lperiod;
-    DB_printf("Lperiod (ticks) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   }
   else
   {
-    // DB_printf("%x > %x\r\n", Rlast_time.actual_time, Rcurr_time.actual_time);
     period = Rperiod;
-    DB_printf("Rperiod (ticks) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   }
-  // DB_printf("period (ms) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
+  // DB_printf("period (us) = %u\r\n", period * T2_tick_to_ns() / 1000);
   return periodToMotorSpeed(period);
-}
-
-float getWheelSpeed(Motors_t whichMotor)
-{
-  // 3:1 gear ratio
-  return getMotorSpeed(whichMotor) * 3;
 }
 
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle){       
@@ -327,47 +294,6 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
     }
 }
 
-
-void initEncoderISRs(void){
-  __builtin_disable_interrupts();
-  // Map pin A2 to IC 1, right
-  IC1R = 0;
-  // Setup IC 1 module
-  IC1CONbits.w = 0;       // Turn off and set to defaults
-  IC1CONbits.ICM = 0b011; // every rising edge
-  IC1CONbits.ICTMR = 1;   // Use Timer2
-  IC1CONbits.FEDGE = 1;   // Capture rising edge first
-  // Enable interrupts
-  IFS0CLR = _IFS0_IC1IF_MASK;
-  // Reset interrupt flag
-  IEC0SET = _IEC0_IC1IE_MASK;
-  // Set interrupt priority
-  IPC1bits.IC1IP = 7;
-
-  // Map pin B5 to IC 3
-  IC3R = 0b0001;
-  // Setup IC 3 module
-  IC3CONbits.w = 0;       // Turn off and set to defaults
-  IC3CONbits.ICM = 0b011; // every rising edge
-  IC3CONbits.ICTMR = 1;   // Use Timer2
-  IC3CONbits.FEDGE = 1;   // Capture rising edge first
-  // Enable interrupts
-  IFS0CLR = _IFS0_IC3IF_MASK;
-  // Reset interrupt flag
-  IEC0SET = _IEC0_IC3IE_MASK;
-  // Set interrupt priority
-  IPC3bits.IC3IP = 7;
-
-  // Use multi-vectored interrupts
-  INTCONbits.w = 0;
-  INTCONbits.MVEC = 1;
-
-  // Turn on
-  IC1CONbits.ON = 1;
-  IC3CONbits.ON = 1;
-
-  __builtin_enable_interrupts();
-}
 
 // Rolled over time at this point.
 uint32_t getRolloverTicks(void)
@@ -415,4 +341,57 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
         Llast_time = Lcurr_time;
     } while(IC3CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
+}
+
+// Updates velocity control, i.e. duty cycle applied
+void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
+{
+  static float kP = 1;
+  static float kI = 1;
+  static float Lcurr_sum_e = 0;
+  static float Llast_sum_e = 0;
+  static float Rcurr_sum_e = 0;
+  static float Rlast_sum_e = 0;
+
+  float Le = Lspeed_desired - getMotorSpeed(LEFT_MOTOR);
+  Llast_sum_e = Lcurr_sum_e;
+  Lcurr_sum_e += Le;
+
+  float Re = Rspeed_desired - getMotorSpeed(RIGHT_MOTOR);
+  Rlast_sum_e = Rcurr_sum_e;
+  Rcurr_sum_e += Re;
+
+  // Clamp cumulative error if it drives the commanded duty cycle out of valid range
+  if (IFS0bits.T4IF)
+  {
+    // Left motor
+    float Lcandidate_dc = kP * Le + kI * Lcurr_sum_e;
+    uint32_t Lfinal_dc;
+    if (Lcandidate_dc > 100 || Lcandidate_dc < 0)
+    {
+      Lcurr_sum_e = Llast_sum_e;
+      Lfinal_dc = (Lcandidate_dc > 100) ? 100 : 0;
+    }
+    else
+    {
+      Lfinal_dc = round(Lcandidate_dc);
+    }
+    setMotorSpeed(LEFT_MOTOR, Ldirection_desired, Lfinal_dc);
+
+    // Right motor
+    float Rcandidate_dc = kP * Re + kI * Rcurr_sum_e;
+    uint32_t Rfinal_dc;
+    if (Rcandidate_dc > 100 || Rcandidate_dc < 0)
+    {
+      Rcurr_sum_e = Rlast_sum_e;
+      Rfinal_dc = (Rcandidate_dc > 100) ? 100 : 0;
+    }
+    else
+    {
+      Rfinal_dc = round(Rcandidate_dc);
+    }
+    setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, Rfinal_dc);
+
+    IFS0CLR = _IFS0_T4IF_MASK;
+  }
 }
