@@ -276,13 +276,15 @@ float getMotorSpeed(Motors_t whichMotor)
   {
     // DB_printf("%x > %x\r\n", Llast_time.actual_time, Lcurr_time.actual_time);
     period = Lperiod;
+    DB_printf("Lperiod (ticks) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   }
   else
   {
     // DB_printf("%x > %x\r\n", Rlast_time.actual_time, Rcurr_time.actual_time);
     period = Rperiod;
+    DB_printf("Rperiod (ticks) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   }
-  DB_printf("period (ms) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
+  // DB_printf("period (ms) = %u\r\n", period * T2_tick_to_ns() / 1000 / 1000);
   return periodToMotorSpeed(period);
 }
 
@@ -328,7 +330,7 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 
 void initEncoderISRs(void){
   __builtin_disable_interrupts();
-  // Map pin A2 to IC 1
+  // Map pin A2 to IC 1, right
   IC1R = 0;
   // Setup IC 1 module
   IC1CONbits.w = 0;       // Turn off and set to defaults

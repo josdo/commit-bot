@@ -23,8 +23,6 @@ void InitDistanceSensor()
 {  
     // B9 is the distance sensor
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_9);
-    // Initialize the timer 2
-    InitTimer2();
     // Initialize the IC
     InitIC2();
     

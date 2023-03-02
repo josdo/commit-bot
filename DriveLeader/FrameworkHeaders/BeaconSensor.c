@@ -30,8 +30,6 @@ void InitBeaconSensor(){
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_2);
     // Long Range
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_3);
-    // Initialize the timer 2
-    InitTimer2();
     InitIC5();
     InitIC4();
     DB_printf("\rES_INIT received in Beacon Sensor Service %d\r\n");

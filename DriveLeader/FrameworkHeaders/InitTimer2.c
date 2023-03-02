@@ -32,7 +32,6 @@ void InitTimer2(){
     TMR2 = 0;
     // turn on the timer 2
     T2CONbits.ON = 1;
-
 }
 
 // Prescale of 4
