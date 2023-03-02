@@ -15,6 +15,7 @@ static GoToBranchOriginState_t CurrentState;
 static ES_Event_t DuringBranchOne (ES_Event_t Event);
 static ES_Event_t DuringBranchTwo (ES_Event_t Event);
 static ES_Event_t DuringBranchThree (ES_Event_t Event);
+#define QueryTime 100
 
 ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 {
@@ -38,7 +39,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
                             puts("Query the follower\r\n");
-                            ES_Timer_InitTimer(QUERY_TIMER, 1000);
+                            ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
                     break;
@@ -93,7 +94,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
                             puts("Query the follower\r\n");
-                            ES_Timer_InitTimer(QUERY_TIMER, 1000);
+                            ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
                     break;
@@ -151,7 +152,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
                             puts("Query the follower\r\n");
-                            ES_Timer_InitTimer(QUERY_TIMER, 1000);
+                            ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
                     break;

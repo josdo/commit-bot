@@ -283,7 +283,8 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, Check4InitialDistance
+#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons
+//, Check4InitialDistance
 //Check4CornerBeacons, Check4InitialDistance
 
 /****************************************************************************/
