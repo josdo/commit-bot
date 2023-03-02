@@ -70,7 +70,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static const uint16_t t_key_forward_time = 5000;
   static const uint16_t t_key_backward_time = 2000;
   static const uint32_t t_key_dc = 100;
-  static uint16_t motor_timer_period = 250;
+  static uint16_t motor_timer_period = 100;
   static uint32_t last_rt = 0;
   static uint16_t encoder_timer_period = 400;
 
@@ -172,15 +172,16 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       }
       else if ('i' == ThisEvent.EventParam)
       {
-        // desired_speed = desired_speed == 100 ? 100 : desired_speed + 10;
-        desired_speed += 10;
+        // Increase
+        desired_speed += 20;
         setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
         DB_printf("Increase desired speed to %u\r\n", desired_speed);
       }
       else if ('u' == ThisEvent.EventParam)
       {
-        desired_speed = desired_speed == 0 ? 0 : desired_speed - 10;
+        // Decrease
+        desired_speed = desired_speed == 0 ? 0 : desired_speed - 20;
         setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
         DB_printf("Decrease desired speed to %u\r\n", desired_speed);

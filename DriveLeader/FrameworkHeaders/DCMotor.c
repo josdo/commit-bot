@@ -204,11 +204,17 @@ void enablePIControl(void)
 {
   IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
   IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
+  // TODO: stop motors or don't?
+  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
 }
 
 void disablePIControl(void)
 {
   IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
+  // TODO: stop motors or don't?
+  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
 }
 
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
@@ -263,6 +269,7 @@ float getMotorSpeed(Motors_t whichMotor)
     period = Rperiod;
   }
   // DB_printf("period (us) = %u\r\n", period * T2_tick_to_ns() / 1000);
+  // DB_printf("period (ticks) = %u\r\n", period);
   return periodToMotorSpeed(period);
 }
 
@@ -318,16 +325,34 @@ void rotate90CCW(void)
   return;
 }
 
+/* Return true if this classifies as a noisy interrupt. */
+static bool isNoise(uint32_t curr32, uint32_t last32)
+{
+  static const uint32_t minimum_valid_period = 2000;
+
+  bool out_of_order = curr32 < last32;
+  bool too_small = curr32 - last32 < minimum_valid_period;
+  return out_of_order || too_small;
+}
+
+/* Return true if this classifies as a stopped motor. */
+static bool isStopped(uint32_t lastEncoderTime32)
+{
+  static const uint32_t maximum_valid_period = 390000;
+
+  return gl.actual_time - lastEncoderTime32 >= maximum_valid_period;
+}
+
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
     static uint16_t thisTime = 0;           // current timer value
     do {
         thisTime = (uint16_t)IC1BUF;        // read the buffer
         updateGlobalTime(thisTime);
         Rcurr_time = gl;
-        bool out_of_order = Rcurr_time.actual_time < Rlast_time.actual_time;
-        bool too_small = Rcurr_time.actual_time - Rlast_time.actual_time < 2000;
-        if (!out_of_order && !too_small)
+
+        if (!isNoise(Rcurr_time.actual_time, Rlast_time.actual_time))
           Rperiod = Rcurr_time.actual_time - Rlast_time.actual_time; 
+
         Rlast_time = Rcurr_time;
     } while(IC1CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC1IF_MASK;
@@ -339,10 +364,10 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
         thisTime = (uint16_t)IC3BUF;        // read the buffer
         updateGlobalTime(thisTime);
         Lcurr_time = gl;
-        bool out_of_order = Lcurr_time.actual_time < Llast_time.actual_time;
-        bool too_small = Lcurr_time.actual_time - Llast_time.actual_time < 2000;
-        if (!out_of_order && !too_small)
+
+        if (!isNoise(Lcurr_time.actual_time, Llast_time.actual_time))
           Lperiod = Lcurr_time.actual_time - Llast_time.actual_time; 
+
         Llast_time = Lcurr_time;
     } while(IC3CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
@@ -351,12 +376,19 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
 // Updates velocity control, i.e. duty cycle applied
 void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
 {
-  static float kP = 1;
-  static float kI = 1;
+  static float kP = .4;
+  static float kI = 0;
   static float Lcurr_sum_e = 0;
   static float Llast_sum_e = 0;
   static float Rcurr_sum_e = 0;
   static float Rlast_sum_e = 0;
+
+  // Update the period to 0 if last and curren
+  if (isStopped(Rlast_time.actual_time))
+    Rperiod = 0;
+
+  if (isStopped(Llast_time.actual_time))
+    Lperiod = 0;
 
   float Le = Lspeed_desired - getMotorSpeed(LEFT_MOTOR);
   Llast_sum_e = Lcurr_sum_e;
