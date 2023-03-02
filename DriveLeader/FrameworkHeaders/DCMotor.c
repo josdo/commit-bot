@@ -376,8 +376,9 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
 // Updates velocity control, i.e. duty cycle applied
 void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
 {
-  static float kP = .4;
-  static float kI = 0;
+  static float kP = .1;
+  // static float kI = 0.005 // 100ms ramp to +20rpm, more variation
+  static float kI = 0.001; // 500ms ramp to +20rpm
   static float Lcurr_sum_e = 0;
   static float Llast_sum_e = 0;
   static float Rcurr_sum_e = 0;
