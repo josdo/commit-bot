@@ -241,13 +241,11 @@ void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
 float periodToMotorSpeed(uint32_t period)
 {
   // 60*1000*1000*1000 / (50*12*200)
-  // = 60*1000*1000*1000 / (6000*200)
-  // = 10*1000*1000 / 200
-  // = 50*1000
+  // = 500*1000
   // TODO: debug where the correction comes from
   // static const uint32_t correction = 60;
-  static const uint32_t correction = 48;
-  static const float k = 50*1000*correction;
+  static const uint32_t correction = 5;
+  static const float k = 500*1000*correction;
 
   // period = 0 means no ticks, so no speed 
   if (period == 0)
