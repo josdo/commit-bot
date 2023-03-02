@@ -413,6 +413,6 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
         if (!out_of_order && !too_small)
           Lperiod = Lcurr_time.actual_time - Llast_time.actual_time; 
         Llast_time = Lcurr_time;
-    } while(IC1CONbits.ICBNE != 0);
+    } while(IC3CONbits.ICBNE != 0);
     IFS0CLR = _IFS0_IC3IF_MASK;
 }
