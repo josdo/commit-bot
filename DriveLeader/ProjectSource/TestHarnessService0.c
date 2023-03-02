@@ -38,7 +38,7 @@ bool InitTestHarnessService0(uint8_t Priority)
   InitDistanceSensor();
   InitTapeSensor();
   InitBeaconSensor();
-  InitDCMotor(false);
+  InitDCMotor(true);
 
   DB_printf("Initialized TestHarnessService0, compiled at %s on %s\r\n", __TIME__, __DATE__);
   
@@ -64,8 +64,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 {
   static uint32_t dc = 0;
   static uint32_t desired_speed = 0;
+  static uint32_t desired_direction = FORWARD;
   static bool print_motor_metrics = false;
-  static bool pi_control_on = false;
+  static bool pi_control_on = true;
   static bool t_key_go_forward = true;
   static const uint16_t t_key_forward_time = 5000;
   static const uint16_t t_key_backward_time = 2000;
@@ -141,15 +142,15 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       if ('k' == ThisEvent.EventParam)
       {
         dc = dc == 100 ? 100 : dc + 10;
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
-        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
+        setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+        setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
         DB_printf("Increase PWM to %u\r\n", dc);
       }
       else if ('j' == ThisEvent.EventParam)
       {
         dc = dc == 0 ? 0 : dc - 10;
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
-        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
+        setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+        setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
         DB_printf("Decrease PWM to %u\r\n", dc);
       }
 
@@ -174,16 +175,16 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       {
         // Increase
         desired_speed += 20;
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
+        setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+        setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
         DB_printf("Increase desired speed to %u\r\n", desired_speed);
       }
       else if ('u' == ThisEvent.EventParam)
       {
         // Decrease
         desired_speed = desired_speed == 0 ? 0 : desired_speed - 20;
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
+        setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+        setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
         DB_printf("Decrease desired speed to %u\r\n", desired_speed);
       }
 
@@ -216,6 +217,28 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           ES_Timer_InitTimer(T_KEY_TIMER, t_key_forward_time);
           setMotorSpeed(RIGHT_MOTOR, FORWARD, t_key_dc);
           setMotorSpeed(LEFT_MOTOR, FORWARD, t_key_dc);
+        }
+      }
+
+      else if ('l' == ThisEvent.EventParam)
+      {
+        if (desired_direction == FORWARD)
+        {
+          desired_direction = BACKWARD;
+          setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Drive backwards\r\n");
+        }
+        else
+        {
+          desired_direction = FORWARD;
+          setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Drive forward\r\n");
         }
       }
     }
