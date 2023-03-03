@@ -24,7 +24,6 @@
       <itemPath>FrameworkHeaders/dbprintf.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32PortHAL.h</itemPath>
       <itemPath>FrameworkHeaders/PIC32_AD_Lib.h</itemPath>
-      <itemPath>FrameworkHeaders/PIC32_SPI_HAL.h</itemPath>
     </logicalFolder>
     <logicalFolder name="FrameworkSource"
                    displayName="FrameworkSource"
@@ -42,7 +41,6 @@
       <itemPath>FrameworkSource/dbprintf.c</itemPath>
       <itemPath>FrameworkSource/PIC32PortHAL.c</itemPath>
       <itemPath>FrameworkSource/PIC32_AD_Lib.c</itemPath>
-      <itemPath>FrameworkSource/PIC32_SPI_HAL.c</itemPath>
     </logicalFolder>
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -73,6 +71,13 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="f1" displayName="Shared" projectFiles="true">
+      <itemPath>../Shared/ES_Shared_Configure.h</itemPath>
+      <itemPath>../Shared/EventOverSPI.c</itemPath>
+      <itemPath>../Shared/EventOverSPI.h</itemPath>
+      <itemPath>../Shared/PIC32_SPI_HAL.c</itemPath>
+      <itemPath>../Shared/PIC32_SPI_HAL.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -113,6 +118,7 @@
     <Elem>FrameworkSource</Elem>
     <Elem>ProjectSource</Elem>
     <Elem>ProjectHeaders</Elem>
+    <Elem>../Shared</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

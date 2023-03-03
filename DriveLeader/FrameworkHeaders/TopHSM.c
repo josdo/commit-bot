@@ -1,7 +1,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "dbprintf.h"
-
+#include "../../Shared/EventOverSPI.h"
 #include "DCMotor.h"
 #include "PushCommitSM.h"
 #include "TopHSM.h"
@@ -9,27 +9,33 @@
 #include "CalibrationSM.h"
 #include "ComeBackSM.h"
 
-
+static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
 static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
 static ES_Event_t DuringPushCommit( ES_Event_t Event );
 static MasterState_t CurrentState;
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
+#define follower_query_timer 20
 
 bool InitTopHSM ( uint8_t Priority )
 {
   ES_Event_t ThisEvent;
   
   InitDCMotor();
-
+  InitEventOverSPI(true);
+//  InitDistanceSensor();
+//  InitTapeSensor();
+//  InitBeaconSensor();
+  // InitDCMotor();
+  disablePIControl();
   MyPriority = Priority;  // save our priority
 
   ThisEvent.EventType = ES_ENTRY;
   // Start the Master State machine
   DB_printf("ES_INIT received in Top HSM\r\n");
   StartTopHSM( ThisEvent );
-
+  
   return true;
 }
 
@@ -49,21 +55,33 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
    {
        case IDLE: // TODO: QUERY TO FOLLOWER TO SEE WHEN GAME STARTS
        {
-           DB_printf("IDLE STATE\r\n");
+//           DB_printf("IDLE STATE\r\n");
+           CurrentEvent = DuringIdle(CurrentEvent);
+           
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
                {
                    // change this to start btn click event
-                   case ES_NEW_KEY:
+                   case ES_TIMEOUT:
                    {
-                       if (CurrentEvent.EventParam == 's')
+                       if (CurrentEvent.EventParam == QUERY_FOLLOWER_TIMER)
                        {
-                           MakeTransition = true;
-                           NextState = CALIBRATION;
+                            ES_Event_t NewEvent;
+                            NewEvent.EventType = ES_NO_EVENT;
+                            PostEventOverSPI(NewEvent);
+//                            puts("Query the follower\r\n");
+                            ES_Timer_InitTimer(QUERY_FOLLOWER_TIMER, follower_query_timer);
                        }
-                       
                    }
+                   break;
+                   
+                   case ES_BUTTON_PRESS:
+                   {
+                        puts("Button is pressed\r\n");
+                        MakeTransition = true;
+                        NextState = CALIBRATION;
+                   }      
                    break;
                }
            }
@@ -77,6 +95,18 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
            {
                switch(CurrentEvent.EventType)
                {
+                   case ES_FOUND_BEACON_B:
+                   {
+                       PostEventOverSPI(CurrentEvent);
+                       
+                   }
+                   break;
+                   case ES_FOUND_BEACON_C:
+                   {
+                       DB_printf("Beacon c: %u\r\n", CurrentEvent);
+                       PostEventOverSPI(CurrentEvent);
+                   }
+                   break;
                    case ES_FINISH:
                    {    
                         EntryEventKind.EventType = ES_ENTRY_HISTORY;
@@ -197,6 +227,24 @@ void StartTopHSM (ES_Event_t CurrentEvent)
 MasterState_t  QueryTopHSM ( void )
 {
    return(CurrentState);
+}
+
+static ES_Event_t DuringIdle( ES_Event_t Event )
+{
+    ES_Event_t ReturnEvent = Event;
+    if ((Event.EventType == ES_ENTRY) || 
+        (Event.EventType == ES_ENTRY_HISTORY))
+    {
+        ES_Timer_InitTimer(QUERY_FOLLOWER_TIMER,follower_query_timer);
+    }
+    else if ( Event.EventType == ES_EXIT )
+    {
+        
+    }
+    else
+    {
+        
+    }
 }
 
 static ES_Event_t DuringCalibration( ES_Event_t Event)

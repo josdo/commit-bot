@@ -305,7 +305,7 @@
 #define TIMER9_RESP_FUNC PostTestHarnessService0
 #define TIMER10_RESP_FUNC PostTestHarnessService0
 #define TIMER11_RESP_FUNC PostTestHarnessService0
-#define TIMER12_RESP_FUNC TIMER_UNUSED
+#define TIMER12_RESP_FUNC PostTopHSM
 #define TIMER13_RESP_FUNC PostTopHSM
 #define TIMER14_RESP_FUNC PostTopHSM
 #define TIMER15_RESP_FUNC PostTestHarnessService0
@@ -325,7 +325,7 @@
 #define PRINT_ENCODER_TIMER 10
 #define PRINT_MOTOR_TIMER 11
 #define STOP_TIMER 14
-//#define BACKUP_TIMER 14
+#define QUERY_FOLLOWER_TIMER 12
 #define FAST_RATE_TIMER 13
 //#define TURN_TIMER 0
 //#define PERIOD_TIMER 1

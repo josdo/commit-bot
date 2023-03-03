@@ -7,6 +7,7 @@
 #include "BeaconSensor.h"
 #include "dbprintf.h"
 #include "TopHSM.h"
+//#include "../../Shared/EventOverSPI.h"
 
 
 static CalibrationSMState_t CurrentState;
@@ -48,6 +49,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                     
                     case ES_FOUND_BEACON:
                     {
+                        ES_Event_t BeaconEvent;
                         WhichBeacon_t BeaconName = CurrentEvent.EventParam;
                         if (CurrentEvent.EventParam == BeaconB || CurrentEvent.EventParam == BeaconC) 
                         {
@@ -60,9 +62,14 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                             {
                                 case BeaconB:
                                     puts("Beacon B Detected\r\n");
+                                    BeaconEvent.EventType = ES_FOUND_BEACON_B;
+                                    PostTopHSM(BeaconEvent);
+                                    
                                 break;
                                 case BeaconC:
                                     puts("Beacon C Detected\r\n");
+                                    BeaconEvent.EventType = ES_FOUND_BEACON_C;
+                                    PostTopHSM(BeaconEvent);
                                 break;
                             }
                             ///////////////////////////
