@@ -241,6 +241,12 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           DB_printf("Drive forward\r\n");
         }
       }
+
+      else if ('r' == ThisEvent.EventParam)
+      {
+        DB_printf("Rotate CW\r\n");
+        rotate90CW();
+      }
     }
   }
 

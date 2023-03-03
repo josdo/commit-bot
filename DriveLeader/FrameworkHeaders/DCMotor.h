@@ -29,7 +29,7 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed);
 
 void rotate90CW(void);
-void rotate90CCW(void);
+// void rotate90CCW(void);
 
 #endif /* TemplateService_H */
 

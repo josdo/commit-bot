@@ -6,14 +6,17 @@
 #include "xc.h"
 #include <sys/attribs.h>
 #include "InitTimer2.h"
+#include "PIC32PortHAL.h"
 
 extern volatile global_time gl;
 
 #define R2 LATBbits.LATB4                               // right direction pin
 #define L2 LATAbits.LATA4                               // left direction pin
 
+/* PWM */
 static const uint16_t PWM_PERIOD = 10000-1;
 
+/* Encoder */
 static volatile global_time Rcurr_time;         // IC1 current time (right)
 static volatile global_time Rlast_time;            // IC1 prev time (right)
 
@@ -25,10 +28,19 @@ static uint32_t Lperiod = 0;               // left wheel period
 
 static const uint32_t ns_per_tick = 200;
 
+/* PI control */
 static uint32_t Ldirection_desired = 0;
 static uint32_t Rdirection_desired = 0;
 static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
+
+/* Rotation and translation */
+static uint32_t Lpulses_desired = 0;
+static uint32_t Rpulses_desired = 0;
+static uint32_t Lpulses_curr = 0;
+static uint32_t Rpulses_curr = 0;
+static bool counting_Lpulses = false;
+static bool counting_Rpulses = false;
 
 static void initEncoderISRs(void);
 static void setPWM(void);
@@ -105,8 +117,14 @@ static void setPWM(void){
     // -------------------- Set PWM pins as digital output ----------------
     TRISBbits.TRISB10 = 0;                  // RB10 is output R
     TRISBbits.TRISB11 = 0;                  // RB11 is output L
-    // --------------------------------------------------------------------
     
+    // Pull down pins so they don't turn on the wheels 
+    bool status = true;
+    status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_10);
+    status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_11);
+    status &= PortSetup_ConfigurePullDowns(_Port_A, _Pin_4);
+    status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_4);
+    DB_printf("PortSetup_ConfigurePullDowns status: %d\r\n", status);
     
   // --------------------- Timer 3 --------------------- 
   //switching the timer 3 off
@@ -217,8 +235,23 @@ void disablePIControl(void)
   setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
 }
 
+/* Chooses the speed setpoint for the given motor. If speed == 0, stops
+   immediately by disabling PI control, which would gradually go to 0 rpm,
+   and directly setting the motor duty cycle to 0. */
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
 {
+  // To stop immediately, disable PI control.
+  if (speed == 0)
+  {
+    disablePIControl();
+    setMotorSpeed(motor, direction, 0);
+  }
+  // Otherwise, enable PI control so the desired speed can be reached.
+  else
+  {
+    enablePIControl();
+  }
+
   if (motor == LEFT_MOTOR)
   {
     Lspeed_desired = speed;
@@ -313,9 +346,23 @@ uint32_t getRolloverTicks(void)
 }
 
 
+/* Left forward, right backward. */
 void rotate90CW(void)
 {
-  return;
+  // static const uint32_t num_pulses = 12;
+  static const uint32_t num_pulses = 3*12;
+  static const uint32_t speed = 40;
+
+  __builtin_disable_interrupts();
+  Lpulses_desired = num_pulses;
+  Rpulses_desired = num_pulses;
+  Lpulses_curr = 0;
+  Rpulses_curr = 0;
+  counting_Lpulses = true;
+  counting_Rpulses = true;
+  setDesiredSpeed(LEFT_MOTOR, FORWARD, speed);
+  setDesiredSpeed(RIGHT_MOTOR, BACKWARD, speed);
+  __builtin_enable_interrupts();
 }
 
 void rotate90CCW(void)
@@ -353,6 +400,21 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void){
 
         Rlast_time = Rcurr_time;
     } while(IC1CONbits.ICBNE != 0);
+
+    /* Stop motor if traveled far enough. */
+    if (counting_Rpulses)
+    {
+      __builtin_disable_interrupts();
+      Rpulses_curr++;
+      if (Rpulses_curr >= Rpulses_desired)
+      {
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
+        DB_printf("Rpulses_curr = %u\r\n", Rpulses_curr);
+        counting_Rpulses = false;
+      }
+      __builtin_enable_interrupts();
+    }
+
     IFS0CLR = _IFS0_IC1IF_MASK;
 }
 
@@ -368,6 +430,21 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void){
 
         Llast_time = Lcurr_time;
     } while(IC3CONbits.ICBNE != 0);
+
+    /* Stop motor if traveled far enough. */
+    if (counting_Lpulses)
+    {
+      __builtin_disable_interrupts();
+      Lpulses_curr++;
+      if (Lpulses_curr >= Lpulses_desired)
+      {
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        DB_printf("Lpulses_curr = %u\r\n", Lpulses_curr);
+        counting_Lpulses = false;
+      }
+      __builtin_enable_interrupts();
+    }
+
     IFS0CLR = _IFS0_IC3IF_MASK;
 }
 
