@@ -2,6 +2,7 @@
 #define PushCommitSM_H
 
 typedef enum {
+    BACK_UP_A_BIT,
     ROTATE_TO_FACE_BRANCH,
             STOP_PUSH_COMMIT,
             MOVE_FORWARD
