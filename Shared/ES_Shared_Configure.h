@@ -47,4 +47,21 @@ typedef enum
   NUM_ES_EVENTS
 }ES_EventType_t;
 
+// for which branch to go to
+typedef enum{
+    BranchErr = 0,
+    Branch1,
+    Branch2,
+    Branch3    
+} BranchType_t;
+
+// for how far to drive within each branch
+typedef enum{
+    DistErr = 0,
+    Dist50,
+    Dist66,
+    Dist82,
+    Dist100
+}BranchDist_t;
+
 #endif
