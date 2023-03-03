@@ -81,6 +81,13 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         }
                     }
                     break;
+                    
+                    case ES_REACHED_ONE:
+                    {
+                        ES_Event_t NewEvent;
+                        NewEvent.EventType = ES_FINISH;
+                        PostTopHSM(NewEvent);
+                    }
                 }
             }
         }
@@ -340,6 +347,39 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
 }
 
 
+
+
+#define buttonState1 PORTBbits.RB15
+bool lastButtonState1 = 0;
+
+uint32_t prevTime1 = 0;
+
+bool Check4FirstBranch(void)
+{
+    bool ReturnVal = false;
+//    puts("a\r\n");
+    bool val = buttonState1;
+    uint32_t currTime = ES_Timer_GetTime();
+    if(CurrentState == BRANCH_ONE)
+    {
+        ES_Event_t ThisEvent;
+        if ((val != lastButtonState1) && (currTime - prevTime1 > 200)) {
+            if (val == 1) {
+                puts("Reached 1");
+                ThisEvent.EventType   = ES_REACHED_ONE;
+                PostTopHSM(ThisEvent);
+                ReturnVal = true;
+            }
+            lastButtonState1 = val;
+            prevTime1 = currTime;
+            
+      }
+      
+      
+    }
+    return ReturnVal;
+}
+
 bool check4MiddleBranch(void)
 {
     if(CurrentState == BRANCH_TWO)
@@ -357,29 +397,29 @@ bool check4MiddleBranch(void)
     return false;
 }
 
-#define buttonState PORTBbits.RB12
-bool lastButtonState = 0;
+#define buttonState3 PORTBbits.RB12
+bool lastButtonState3 = 0;
 
-uint32_t prevTime = 0;
+uint32_t prevTime3 = 0;
 
 bool Check4ThirdBranch(void)
 {
     bool ReturnVal = false;
 //    puts("a\r\n");
-    bool val = buttonState;
+    bool val = buttonState3;
     uint32_t currTime = ES_Timer_GetTime();
     if(CurrentState == BRANCH_THREE)
     {
         ES_Event_t ThisEvent;
-        if ((val != lastButtonState) && (currTime - prevTime > 200)) {
+        if ((val != lastButtonState3) && (currTime - prevTime3 > 200)) {
             if (val == 1) {
                 puts("Reached 3");
-            ThisEvent.EventType   = ES_REACHED_THIRD;
-            PostTopHSM(ThisEvent);
-            ReturnVal = true;
+                ThisEvent.EventType   = ES_REACHED_THIRD;
+                PostTopHSM(ThisEvent);
+                ReturnVal = true;
             }
-            lastButtonState = val;
-            prevTime = currTime;
+            lastButtonState3 = val;
+            prevTime3 = currTime;
             
       }
       

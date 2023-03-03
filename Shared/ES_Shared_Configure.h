@@ -42,7 +42,8 @@ typedef enum
           ES_DONE_BACK_UP,
           ES_FINISH,
           ES_REACHED_MIDDLE,
-          ES_REACHED_THIRD
+          ES_REACHED_THIRD,
+	ES_REACHED_ONE
 }ES_EventType_t;
 
 #endif

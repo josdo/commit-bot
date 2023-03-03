@@ -3,7 +3,7 @@
 #include "dbprintf.h"
 
 #include "DCMotor.h"
-
+#include "PushCommitSM.h"
 #include "TopHSM.h"
 #include "GoToBranchOriginSM.h"
 #include "CalibrationSM.h"
@@ -12,6 +12,7 @@
 
 static ES_Event_t DuringCalibration( ES_Event_t Event);
 static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
+static ES_Event_t DuringPushCommit( ES_Event_t Event );
 static MasterState_t CurrentState;
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
@@ -111,6 +112,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        
        case PUSH_COMMIT:
        {
+           CurrentEvent = DuringPushCommit(CurrentEvent);
+           
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
@@ -257,6 +260,27 @@ static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event)
         RunGoToBranchOriginSM(Event);
     }
     return(ReturnEvent);
+}
+
+static ES_Event_t DuringPushCommit(ES_Event_t Event){
+    ES_Event_t ReturnEvent = Event;
+    
+    if ( (Event.EventType == ES_ENTRY) ||
+         (Event.EventType == ES_ENTRY_HISTORY) )
+    {
+        StartPushCommitSM(Event);
+    }
+    else if (Event.EventType == ES_EXIT)
+    {
+        RunPushCommitSM(Event);
+    }
+    
+    else 
+    {
+        RunPushCommitSM(Event);
+    }
+    
+    return (ReturnEvent);
 }
 
 static ES_Event_t DuringComeBack(ES_Event_t Event){

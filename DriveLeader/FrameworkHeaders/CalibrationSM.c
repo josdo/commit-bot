@@ -1,6 +1,5 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "LeaderFSM.h"
 #include "DCMotor.h"
 #include "BeaconSensor.h"
 #include "DistanceSensor.h"
@@ -13,7 +12,6 @@
 static CalibrationSMState_t CurrentState;
 static ES_Event_t DuringRotateToAlign (ES_Event_t Event);
 static ES_Event_t DuringBackUp(ES_Event_t Event);
-static uint8_t MyPriority;
 
 static const uint8_t NUM_PULSE = 3;
 static uint8_t countB = 0;
@@ -101,15 +99,15 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
             {
                 switch (CurrentEvent.EventType)
                 {
-                    case ES_TIMEOUT:
-                    {
-                        if(CurrentEvent.EventParam == STOP_TIMER)
-                        {
-                            ES_Event_t ThisEvent;
-                            ThisEvent.EventType   = ES_DONE_BACK_UP;
-                            PostTopHSM(ThisEvent);
-                        }
-                    }
+//                    case ES_TIMEOUT:
+//                    {
+//                        if(CurrentEvent.EventParam == STOP_TIMER)
+//                        {
+//                            ES_Event_t ThisEvent;
+//                            ThisEvent.EventType   = ES_DONE_BACK_UP;
+//                            PostTopHSM(ThisEvent);
+//                        }
+//                    }
                     case ES_DONE_BACK_UP:
                     {
                         setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
@@ -210,7 +208,7 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
         setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
         setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
         puts("Moving Back\r\n");
-        ES_Timer_InitTimer(STOP_TIMER, 4000);
+//        ES_Timer_InitTimer(STOP_TIMER, 2000);
     }
     else if (Event.EventType == ES_EXIT)
     {
@@ -272,17 +270,17 @@ bool Check4CornerBeacons(void)
 }
 
 
-//bool Check4InitialDistance(void)
-//{
-//    if(CurrentState == BACK_UP)
-//    {
-//        ES_Event_t ThisEvent;
-//        if (getDistance() < 100)
-//        {
-//            ThisEvent.EventType   = ES_DONE_BACK_UP;
-//            PostTopHSM(ThisEvent);
-//            return true;
-//        }
-//    }
-//    return false;
-//}
+bool Check4InitialDistance(void)
+{
+    if(CurrentState == BACK_UP)
+    {
+        ES_Event_t ThisEvent;
+        if (getDistance() < 4)
+        {
+            ThisEvent.EventType   = ES_DONE_BACK_UP;
+            PostTopHSM(ThisEvent);
+            return true;
+        }
+    }
+    return false;
+}
