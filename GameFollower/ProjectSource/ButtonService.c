@@ -14,7 +14,9 @@ void InitButtonService(){
     puts("InitButtonStatus\r\n");
     TRISBbits.TRISB10 = 1;                  // RB10 input
     
-    CNPDBSET = _CNPDB_CNPDB10_MASK;
+    CNPDBSET = _CNPDB_CNPDB10_MASK;         // pull down resistor
+    InitEventOverSPI(false);                // configure follower mode
+    
     LastButtonState = PORTBbits.RB10; 
 }
 
@@ -34,7 +36,7 @@ bool CheckButtonEvents(){
         ReturnEvent.EventType = ES_BUTTON_PRESS;    // button press event
         puts("New button state\r\n");
         ES_PostAll(ReturnEvent);
-//        PostEventOverSPI(ReturnEvent);              // send event over SPI
+        PostEventOverSPI(ReturnEvent);              // send event over SPI
     }
     
     LastButtonState = CurrentButtonState;

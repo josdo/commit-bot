@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 2
+#define NUM_SERVICES 3
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -72,11 +72,11 @@
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "ButtonService.h"
+#define SERV_2_HEADER "ServoService.h"
 // the name of the Init function
-#define SERV_2_INIT InitButtonService
+#define SERV_2_INIT InitServoService
 // the name of the run function
-#define SERV_2_RUN RunButtonService
+#define SERV_2_RUN RunServoService
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif
@@ -85,11 +85,11 @@
 // These are the definitions for Service 3
 #if NUM_SERVICES > 3
 // the header file with the public function prototypes
-#define SERV_3_HEADER "DisplayEncoderService.h"
+#define SERV_3_HEADER "ServoService.h"
 // the name of the Init function
-#define SERV_3_INIT InitDisplayEncoderService
+#define SERV_3_INIT InitServoService
 // the name of the run function
-#define SERV_3_RUN RunDisplayEncoderService
+#define SERV_3_RUN RunServoService
 // How big should this services Queue be?
 #define SERV_3_QUEUE_SIZE 3
 #endif

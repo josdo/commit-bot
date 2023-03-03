@@ -105,8 +105,12 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
               ES_PostAll(testEvent);
           }
           
-          if ('f' == ThisEvent.EventParam){
+          else if ('f' == ThisEvent.EventParam){
               ES_Event_t testEvent = {ES_GAME_END, 0};
+              ES_PostAll(testEvent);
+          }
+          else if ('s' == ThisEvent.EventParam){
+              ES_Event_t testEvent = {ES_GAME_START, 0};
               ES_PostAll(testEvent);
           }
     }
