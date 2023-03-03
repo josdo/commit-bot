@@ -20,7 +20,6 @@ typedef enum{
 }BranchDist_t;
 
 
-
 // Initialize the branch choosing switch
 void InitSwitches(void);
 

@@ -3,32 +3,38 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "ES_DeferRecall.h"
-#include "LeaderService.h"
-#include "ButtonService.h"
 
-uint16_t LastButtonState;
+#include "../../Shared/EventOverSPI.h"
+#include "ButtonService.h"
+#include "BranchSwitch.h"
+
+static bool LastButtonState;
 
 void InitButtonService(){
     puts("InitButtonStatus\r\n");
-    TRISBbits.TRISB9 = 1;
-    LastButtonState = PORTBbits.RB9;    
+    TRISBbits.TRISB10 = 1;                  // RB10 input
+    
+    CNPDBSET = _CNPDB_CNPDB10_MASK;
+    LastButtonState = PORTBbits.RB10; 
 }
 
 bool CheckButtonEvents(){
-    bool returnVal = false;
-    uint16_t CurrentButtonState;
-    ES_Event_t ReturnEvent;
-    CurrentButtonState = PORTBbits.RB9;
-    if(CurrentButtonState!=LastButtonState){
+    bool returnVal = false;                  // default return false
+    bool CurrentButtonState;            // current button state
+//    BranchType_t whichBranch = GetBranch();
+//    BranchDist_t whichDist = GetDist();
+    
+    ES_Event_t ReturnEvent;             
+    
+    CurrentButtonState = PORTBbits.RB10;     // read button
+    
+    if( (CurrentButtonState!=LastButtonState) ){        // if new state
         returnVal = true;
-        if(CurrentButtonState == 0){
-            ReturnEvent.EventType = ES_ButtonDown;
-            PostLeaderService(ReturnEvent);
-        }
-        else{
-            ReturnEvent.EventType = ES_ButtonUp;
-            PostLeaderService(ReturnEvent);
-        }
+        
+        ReturnEvent.EventType = ES_BUTTON_PRESS;    // button press event
+        puts("New button state\r\n");
+        ES_PostAll(ReturnEvent);
+//        PostEventOverSPI(ReturnEvent);              // send event over SPI
     }
     
     LastButtonState = CurrentButtonState;
