@@ -2,6 +2,8 @@
 #include "ES_Framework.h"
 #include "ServoService.h"
 
+#include "ButtonService.h"
+
 #define PRESCALE 4              
 #define PBCLK 20000000
 
@@ -15,6 +17,7 @@ bool InitServoService(uint8_t Priority)
   MyPriority = Priority;
   
   InitServoPWM();
+  InitButtonService();
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};
@@ -41,7 +44,7 @@ ES_Event_t RunServoService(ES_Event_t ThisEvent)
       break;
       
       case ES_GAME_START: {
-          puts("Game start in servo");
+          puts("Game start in servo\r\n");
           OC1RS = PBCLK/PRESCALE*2/1000;
       }
       break;

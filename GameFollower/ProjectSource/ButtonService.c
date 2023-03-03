@@ -9,6 +9,7 @@
 #include "BranchSwitch.h"
 
 static bool LastButtonState;
+static bool isGameStarted = false;
 
 void InitButtonService(){
     puts("InitButtonStatus\r\n");
@@ -37,6 +38,12 @@ bool CheckButtonEvents(){
         puts("New button state\r\n");
         ES_PostAll(ReturnEvent);
         PostEventOverSPI(ReturnEvent);              // send event over SPI
+        
+        if (isGameStarted == false){
+            ES_Event_t GameEvent = {ES_GAME_START, 0};
+            ES_PostAll(GameEvent);
+            isGameStarted = true;
+        }
     }
     
     LastButtonState = CurrentButtonState;

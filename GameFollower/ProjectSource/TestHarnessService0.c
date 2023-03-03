@@ -32,7 +32,7 @@ bool InitTestHarnessService0(uint8_t Priority)
 
 //  InitEventOverSPI(false);
   
-  InitButtonService();
+//  InitButtonService();
 
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
