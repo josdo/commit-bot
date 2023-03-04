@@ -78,6 +78,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    
                    case ES_BUTTON_PRESS:
                    {
+                       DB_printf("Received Event: %d\r\n", CurrentEvent.EventType);
+                       DB_printf("Button press Event: %d\r\n", ES_BUTTON_PRESS);
                         puts("Button is pressed\r\n");
                         MakeTransition = true;
                         NextState = CALIBRATION;

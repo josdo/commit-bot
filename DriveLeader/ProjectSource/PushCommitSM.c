@@ -159,8 +159,8 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
     }
     
     else if (Event.EventType == ES_EXIT)
