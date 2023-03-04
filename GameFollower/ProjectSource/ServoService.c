@@ -16,8 +16,9 @@ bool InitServoService(uint8_t Priority)
     puts("Init Servo service\r\n");
   MyPriority = Priority;
   
-  InitServoPWM();
-  InitButtonService();
+  InitServoPWM();           // init servos
+  InitButtonService();      // init go button
+  InitSwitches();           // init branch switch
 
   // Post successful initialization
   ES_Event_t ThisEvent = {ES_INIT};

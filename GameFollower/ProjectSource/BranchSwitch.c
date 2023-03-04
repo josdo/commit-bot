@@ -44,7 +44,7 @@ void InitSwitches(void)
 BranchType_t GetBranch(void){
     ADC_MultiRead(SwitchReadings);                  // read the pins
     
-    printf("Branch analog reading = %d\r\n", SwitchReadings[1]);
+    printf("\tBranch analog reading = %d\r\n", SwitchReadings[1]);
     
     BranchType_t WhichBranch = BranchErr;
     
