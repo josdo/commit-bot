@@ -11,6 +11,9 @@
 #include "GoToBranchOriginSM.h"
 #include "TapeSensor.h"
 #include "PIC32PortHAL.h"
+#include "../../Shared/ES_Shared_Configure.h"
+#include "../../Shared/EventOverSPI.h"
+
 
 static GoToBranchOriginState_t CurrentState;
 static GoToBranchOriginState_t PrevState;
@@ -23,12 +26,17 @@ static ES_Event_t DuringBranchThree (ES_Event_t Event);
 uint32_t distance;
 
 
+
+
 ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 {
     bool MakeTransition = false;/* are we making a state transition? */
     CalibrationSMState_t NextState = CurrentState;
     ES_Event_t EntryEventKind = { ES_ENTRY, 0 };// default to normal entry to new state
     ES_Event_t ReturnEvent = CurrentEvent; 
+    ES_Event_t QueryEvent;
+    QueryEvent.EventType = ES_NO_EVENT;
+    
     DB_printf("Prev Branch: %d", PrevState+1);
     switch(CurrentState)
     {
@@ -44,41 +52,42 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     {
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
-                            puts("Query the follower\r\n");
+//                            puts("Query the follower\r\n");
+                            PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
                     break;
                     
-                    case ES_NEW_KEY:
+                    case ES_BUTTON_PRESS:
                     {    
-                        if (CurrentEvent.EventParam == '1')
+                        if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 1\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_ONE;
                         }
-                        else if(CurrentEvent.EventParam == '2')
+                        else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 2\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_TWO;
                         }
-                        else if(CurrentEvent.EventParam == '3')
+                        else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 3\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-                        else if(CurrentEvent.EventParam == 'd')
-                        {
-                            ES_Event_t NewEvent;
-                            NewEvent.EventType = ES_FINISH;
-                            PostTopHSM(NewEvent);
-                        }
+//                        else if(CurrentEvent.EventParam == 'd')
+//                        {
+//                            ES_Event_t NewEvent;
+//                            NewEvent.EventType = ES_FINISH;
+//                            PostTopHSM(NewEvent);
+//                        }
                     }
                     break;
                     
@@ -106,6 +115,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
                             puts("Query the follower\r\n");
+                            PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
@@ -114,33 +124,33 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     case ES_NEW_KEY:
                     {
                         
-                        if (CurrentEvent.EventParam == '1')
+                        if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 1\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_ONE;
                         }
-                        else if(CurrentEvent.EventParam == '2')
+                        else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 2\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_TWO;
                         }
-                        else if(CurrentEvent.EventParam == '3')
+                        else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 3\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-                        else if(CurrentEvent.EventParam == 'd')
-                        {
-                            ES_Event_t NewEvent;
-                            NewEvent.EventType = ES_FINISH;
-                            PostTopHSM(NewEvent);
-                        }
+//                        else if(CurrentEvent.EventParam == 'd')
+//                        {
+//                            ES_Event_t NewEvent;
+//                            NewEvent.EventType = ES_FINISH;
+//                            PostTopHSM(NewEvent);
+//                        }
                     }
                     break;
                     
@@ -169,6 +179,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
                             puts("Query the follower\r\n");
+                            PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
                     }
@@ -177,33 +188,33 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     case ES_NEW_KEY:
                     {
                         
-                        if (CurrentEvent.EventParam == '1')
+                        if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 1\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_ONE;
                         }
-                        else if(CurrentEvent.EventParam == '2')
+                        else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 2\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_TWO;
                         }
-                        else if(CurrentEvent.EventParam == '3')
+                        else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 3\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-                        else if(CurrentEvent.EventParam == 'd')
-                        {
-                            ES_Event_t NewEvent;
-                            NewEvent.EventType = ES_FINISH;
-                            PostTopHSM(NewEvent);
-                        }
+//                        else if(CurrentEvent.EventParam == 'd')
+//                        {
+//                            ES_Event_t NewEvent;
+//                            NewEvent.EventType = ES_FINISH;
+//                            PostTopHSM(NewEvent);
+//                        }
                     }
                     break;
                     

@@ -51,4 +51,11 @@ typedef enum
 
 }ES_EventType_t;
 
+typedef enum{
+    BranchErr = 0,
+    Branch1,
+    Branch2,
+    Branch3    
+} BranchType_t;
+
 #endif

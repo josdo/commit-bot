@@ -80,7 +80,7 @@ void InitIC5(){
     // interrupt on every capture
     IC5CONbits.ICI = 0b00;
     // set mode on input capture to every rising edge
-    IC5CONbits.ICM = 0b001;
+    IC5CONbits.ICM = 0b011;
     // set priority
     IPC5bits.IC5IP = 7;
     // multivector is enabled
@@ -116,7 +116,7 @@ void InitIC4(){
     // interrupt on every capture
     IC4CONbits.ICI = 0b00;
     // set mode on input capture to every rising edge
-    IC4CONbits.ICM = 0b001;
+    IC4CONbits.ICM = 0b011;
     // set priority
     IPC4bits.IC4IP = 7;
     // multivector is enabled
