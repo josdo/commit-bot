@@ -24,18 +24,22 @@ void InitButtonService(){
 bool CheckButtonEvents(){
     bool returnVal = false;                  // default return false
     bool CurrentButtonState;            // current button state
-//    BranchType_t whichBranch = GetBranch();
+    BranchType_t whichBranch = GetBranch();
 //    BranchDist_t whichDist = GetDist();
     
     ES_Event_t ReturnEvent;             
     
     CurrentButtonState = PORTBbits.RB10;     // read button
     
-    if( (CurrentButtonState!=LastButtonState) ){        // if new state
+    if( (CurrentButtonState!=LastButtonState)  ){        // if new state
         returnVal = true;
         
         ReturnEvent.EventType = ES_BUTTON_PRESS;    // button press event
-        puts("New button state\r\n");
+        ReturnEvent.EventParam = whichBranch;       // which branch to go to
+        
+        printf("ES_BUTTON_PRESS = %u\r\n", ES_BUTTON_PRESS);
+        printf("event param = %d\r\n", whichBranch);
+        
         ES_PostAll(ReturnEvent);
         PostEventOverSPI(ReturnEvent);              // send event over SPI
         
@@ -44,6 +48,8 @@ bool CheckButtonEvents(){
             ES_PostAll(GameEvent);
             isGameStarted = true;
         }
+        
+        
     }
     
     LastButtonState = CurrentButtonState;
