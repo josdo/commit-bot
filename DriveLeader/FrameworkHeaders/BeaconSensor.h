@@ -19,7 +19,7 @@ typedef enum {
 }WhichBeacon_t;
 
 WhichBeacon_t getBeaconName(BeaconSensor_t);
-uint32_t getBeconSensorFreq(BeaconSensor_t);
+uint32_t getBeconSensorPeriod(BeaconSensor_t);
 
 #endif
 

@@ -133,12 +133,12 @@ void InitIC4(){
 static uint32_t lastTimeShort;
 static uint32_t lastTimeLong;
 
-uint32_t getBeconSensorFreq(BeaconSensor_t whichSensor){
+uint32_t getBeconSensorPeriod(BeaconSensor_t whichSensor){
     if (whichSensor == ShortRangeBeaconSensor){
-        return short_range_freq;
+        return short_range_period  * 200 /1000;
     }
     else if (whichSensor == LongRangeBeaconSensor){
-        return long_range_freq;
+        return long_range_period  * 200 /1000;
     }
 }
 
@@ -146,20 +146,23 @@ uint32_t getBeconSensorFreq(BeaconSensor_t whichSensor){
 
 WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
 {
-    uint32_t freq = getBeconSensorFreq(whichSensor);
-    if (3000 < freq && freq < 3666)
+    
+    uint32_t Period = (whichSensor == ShortRangeBeaconSensor) ? short_range_period : long_range_period;
+    Period = Period * 200 / 1000;
+    
+    if (200 < Period && Period < 380)
     {
         return BeaconA;
     }
-    else if (1800 < freq && freq < 2200)
+    else if (430 < Period && Period < 570)
     {
         return BeaconB;
     }
-    else if (1285 < freq && freq < 1569)
+    else if (610 < Period && Period < 790)
     {
         return BeaconC;
     }
-    else if (820 < freq && freq < 999)
+    else if (900 < Period && Period < 1300)
     {
         return BeaconD;
     }
@@ -170,14 +173,15 @@ WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
 }
 
 
-void Period2Freq(BeaconSensor_t whichSensor){
-    if (whichSensor == ShortRangeBeaconSensor){
-        short_range_freq = (uint32_t)(0.8 * short_range_period);
-    }
-    else if(whichSensor == LongRangeBeaconSensor){
-        long_range_freq = (uint32_t)(0.8 * long_range_period);
-    }
-} 
+//void Period2Freq(BeaconSensor_t whichSensor){
+//    if (whichSensor == ShortRangeBeaconSensor){
+//        
+//        short_range_freq = (uint32_t)(short_range_period);
+//    }
+//    else if(whichSensor == LongRangeBeaconSensor){
+//        long_range_freq = (uint32_t)(1.6 * long_range_period);
+//    }
+//} 
 
 // ISR for short range sensor
 void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
@@ -193,7 +197,7 @@ void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
         short_range_period = (gl.actual_time - lastTimeShort);
         lastTimeShort = gl.actual_time;
     }while(IC5CONbits.ICBNE != 0);
-    Period2Freq(ShortRangeBeaconSensor);
+//    Period2Freq(ShortRangeBeaconSensor);
     IFS0CLR = _IFS0_IC5IF_MASK;
 }
 
@@ -212,6 +216,6 @@ void __ISR(_INPUT_CAPTURE_4_VECTOR, IPL7SOFT) LongRangeIRSensor(void){
         long_range_period = (gl.actual_time - lastTimeLong);
         lastTimeLong = gl.actual_time;
     }while(IC4CONbits.ICBNE != 0);
-    Period2Freq(LongRangeBeaconSensor);
+//    Period2Freq(LongRangeBeaconSensor);
     IFS0CLR = _IFS0_IC4IF_MASK;
 }
