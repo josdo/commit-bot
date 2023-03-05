@@ -10,8 +10,9 @@ typedef enum{
 } Motors_t;
 
 typedef enum{
+    // Must be first two for setMotorSpeed() to have right values
     FORWARD = 0,
-    BACKWARD,
+    BACKWARD = 1,
     CW,
     CCW
 } Directions_t;
