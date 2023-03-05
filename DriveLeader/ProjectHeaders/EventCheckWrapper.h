@@ -20,6 +20,7 @@
 #include "OptoSensorService.h"
 #include "ButtonService.h"
 #include "CalibrationSM.h"
+#include "DCMotor.h"
 
 //#include "MotorStepService.h"
 

@@ -52,13 +52,6 @@ void updateGlobalTime(uint16_t capturedTime){
         ++(gl.time_var.rollover);
         IFS0CLR = _IFS0_T2IF_MASK;
     }
-    /* TODO: maybe don't update the local time. */
     gl.time_var.local_time = capturedTime;
     __builtin_enable_interrupts();
-}
-
-
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
-  // TODO: Is setting to 0 correct? Should we be using TMR2?
-  updateGlobalTime(0);
 }

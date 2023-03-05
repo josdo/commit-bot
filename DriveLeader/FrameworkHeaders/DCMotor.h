@@ -11,7 +11,9 @@ typedef enum{
 
 typedef enum{
     FORWARD = 0,
-    BACKWARD
+    BACKWARD,
+    CW,
+    CCW
 } Directions_t;
 
 void InitDCMotor(bool enablePI);
@@ -28,8 +30,12 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 // Sets desired speed
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed);
 
-void rotate90CW(void);
-// void rotate90CCW(void);
+void rotate90(Directions_t direction);
+void drive(Directions_t direction, uint32_t dist_cm);
+
+
+bool reachedDesiredLPulses(void);
+bool reachedDesiredRPulses(void);
 
 #endif /* TemplateService_H */
 
