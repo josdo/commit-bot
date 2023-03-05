@@ -120,14 +120,6 @@ static void setPWM(void)
   TRISBbits.TRISB10 = 0; // RB10 is output R
   TRISBbits.TRISB11 = 0; // RB11 is output L
 
-  // Pull down pins so they don't turn on the wheels
-  bool status = true;
-  status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_10);
-  status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_11);
-  status &= PortSetup_ConfigurePullDowns(_Port_A, _Pin_4);
-  status &= PortSetup_ConfigurePullDowns(_Port_B, _Pin_4);
-  DB_printf("PortSetup_ConfigurePullDowns status: %d\r\n", status);
-
   // --------------------- Timer 3 ---------------------
   // switching the timer 3 off
   T3CONbits.ON = 0;
