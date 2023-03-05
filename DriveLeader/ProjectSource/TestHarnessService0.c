@@ -251,8 +251,14 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       else if ('n' == ThisEvent.EventParam)
       {
         uint32_t n_key_cm = 1;
-        DB_printf("Drive %u cm\r\n", n_key_cm);
-        drive(desired_direction, n_key_cm);
+        DB_printf("Drive %u cm forwards\r\n", n_key_cm);
+        drive(FORWARD, n_key_cm);
+      }
+      else if ('b' == ThisEvent.EventParam)
+      {
+        uint32_t n_key_cm = 1;
+        DB_printf("Drive %u cm backwards\r\n", n_key_cm);
+        drive(BACKWARD, n_key_cm);
       }
     }
   }
