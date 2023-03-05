@@ -397,7 +397,7 @@ bool check4MiddleBranch(void)
     {
         distance = getDistance();
         ES_Event_t ThisEvent;
-        if (distance > 48 && distance < 60 && isOnTape(MiddleTapeSensor))
+        if ((distance > 30 && distance < 50) && isOnTape(MiddleTapeSensor))
         {
             ThisEvent.EventType   = ES_REACHED_MIDDLE;
             PostTopHSM(ThisEvent);
