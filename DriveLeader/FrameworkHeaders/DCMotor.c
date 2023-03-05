@@ -216,16 +216,16 @@ void enablePIControl(void)
   IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
   IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
   // TODO: stop motors or don't?
-  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+  setMotorSpeed(LEFT_MOTOR, Ldirection_desired, 0);
+  setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
 }
 
 void disablePIControl(void)
 {
   IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
   // TODO: stop motors or don't?
-  setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-  setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+  setMotorSpeed(LEFT_MOTOR, Ldirection_desired, 0);
+  setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
 }
 
 /* Chooses the speed setpoint for the given motor. If speed == 0, stops
@@ -299,15 +299,7 @@ float getMotorSpeed(Motors_t whichMotor)
 
 void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t dutyCycle)
 {
-  if (0 == dutyCycle)
-  {
-    R2 = 0;
-    L2 = 0;
-    OC3RS = 0;
-    OC2RS = 0;
-  }
-
-  else if (LEFT_MOTOR == whichMotor)
+  if (LEFT_MOTOR == whichMotor)
   {
     L2 = whichDirection;
 
@@ -352,7 +344,7 @@ uint32_t getRolloverTicks(void)
 void drive(Directions_t direction, uint32_t dist_cm)
 {
   // TODO: tune pulses per cm
-  static const uint32_t pulses_per_cm = 10;
+  static const uint32_t pulses_per_cm = 6;
   static const uint32_t speed = 20;
 
   uint32_t num_pulses = pulses_per_cm * dist_cm;
@@ -438,7 +430,7 @@ bool reachedDesiredLPulses(void)
   bool hasReached = curr > desired;
   if (hasReached)
   {
-    setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+    setDesiredSpeed(LEFT_MOTOR, Ldirection_desired, 0);
     counting_Lpulses = false;
     DB_printf("Desired %u Lpulses, stopped at %u Lpulses\r\n", desired, curr);
 
@@ -463,7 +455,7 @@ bool reachedDesiredRPulses(void)
   bool hasReached = curr > desired;
   if (hasReached)
   {
-    setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
+    setDesiredSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
     counting_Rpulses = false;
     DB_printf("Desired %u Rpulses, stopped at %u Rpulses\r\n", desired, curr);
 
@@ -490,9 +482,12 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void)
     Rlast_time = Rcurr_time;
   } while (IC1CONbits.ICBNE != 0);
 
-  __builtin_disable_interrupts();
-  Rpulses_curr++;
-  __builtin_enable_interrupts();
+  if (counting_Rpulses)
+  {
+    __builtin_disable_interrupts();
+    Rpulses_curr++;
+    __builtin_enable_interrupts();
+  }
 
   IFS0CLR = _IFS0_IC1IF_MASK;
 }
@@ -512,9 +507,12 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void)
     Llast_time = Lcurr_time;
   } while (IC3CONbits.ICBNE != 0);
 
-  __builtin_disable_interrupts();
-  Lpulses_curr++;
-  __builtin_enable_interrupts();
+  if (counting_Lpulses)
+  {
+    __builtin_disable_interrupts();
+    Lpulses_curr++;
+    __builtin_enable_interrupts();
+  }
 
   IFS0CLR = _IFS0_IC3IF_MASK;
 }

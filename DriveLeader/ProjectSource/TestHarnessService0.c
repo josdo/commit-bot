@@ -74,6 +74,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
   static uint16_t motor_timer_period = 100;
   static uint32_t last_rt = 0;
   static uint16_t encoder_timer_period = 400;
+  static uint32_t n_key_cm = 5;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -225,8 +226,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         if (desired_direction == FORWARD)
         {
           desired_direction = BACKWARD;
-          setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
-          setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
           setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
           setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
           DB_printf("Drive backwards\r\n");
@@ -234,8 +235,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         else
         {
           desired_direction = FORWARD;
-          setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
-          setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
           setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
           setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
           DB_printf("Drive forward\r\n");
@@ -250,13 +251,11 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 
       else if ('n' == ThisEvent.EventParam)
       {
-        uint32_t n_key_cm = 1;
         DB_printf("Drive %u cm forwards\r\n", n_key_cm);
         drive(FORWARD, n_key_cm);
       }
       else if ('b' == ThisEvent.EventParam)
       {
-        uint32_t n_key_cm = 1;
         DB_printf("Drive %u cm backwards\r\n", n_key_cm);
         drive(BACKWARD, n_key_cm);
       }
