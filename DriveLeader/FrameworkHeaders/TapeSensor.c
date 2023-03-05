@@ -10,7 +10,7 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 
-#define THRESHOLD 200
+#define THRESHOLD 900
 uint32_t analog_signal[3];
 //static uint16_t LastAnalogValueLeft = 0;
 static uint16_t CurrentAnalogValueLeft = 0;
@@ -34,6 +34,32 @@ void InitTapeSensor()
     TRISBbits.TRISB15 = 1;
     
     ADC_ConfigAutoScan(BIT12HI | BIT11HI | BIT9HI, 3);
+}
+
+uint16_t getTapeValue(TapeSensor_t WhichTapeSensor)
+{
+    ADC_MultiRead(analog_signal);
+    CurrentAnalogValueLeft = analog_signal[2];
+    CurrentAnalogValueMiddle = analog_signal[1];
+    CurrentAnalogValueRight = analog_signal[0];
+    
+    switch (WhichTapeSensor) {
+        case LeftTapeSensor:
+        {
+            return CurrentAnalogValueLeft;
+       
+        }
+        break;
+        case MiddleTapeSensor:
+        {
+            return CurrentAnalogValueMiddle;
+        }
+        break;
+        case RightTapeSensor:
+        {
+            return CurrentAnalogValueRight;
+        }
+    }  
 }
 
 bool isOnTape(TapeSensor_t WhichTapeSensor){

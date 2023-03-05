@@ -11,6 +11,7 @@ typedef enum {
     LeftTapeSensor         //B12
 } TapeSensor_t;
 
+uint16_t getTapeValue(TapeSensor_t WhichTapeSensor);
 bool isOnTape(TapeSensor_t);
 
 #endif /* TemplateService_H */
