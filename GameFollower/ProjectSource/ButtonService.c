@@ -43,7 +43,6 @@ bool CheckButtonEvents(){
         ES_PostAll(ReturnEvent);
         
         PostEventOverSPI(ReturnEvent);              // send event over SPI
-        PostEventOverSPI(ReturnEvent);              // send event over SPI
         
         if (isGameStarted == false){
             ES_Event_t GameEvent = {ES_GAME_START, 0};
