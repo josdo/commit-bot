@@ -7,6 +7,7 @@
 #include "BeaconSensor.h"
 #include "dbprintf.h"
 #include "TopHSM.h"
+#include "TapeSensor.h"
 //#include "../../Shared/EventOverSPI.h"
 
 
@@ -285,7 +286,7 @@ static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event)
 
 bool Check4CornerBeacons(void)
 {
-    if(CurrentState == ROTATE_TO_ALIGN || CurrentState == FORWARD_UNTIL_BEACON)
+    if(CurrentState == ROTATE_TO_ALIGN)
     {
         ES_Event_t ThisEvent;
         WhichBeacon_t BeaconName = getBeaconName(ShortRangeBeaconSensor);
@@ -318,21 +319,21 @@ bool Check4CornerBeacons(void)
     return false;
 }
 
-
-//bool Check4InitialDistance(void)
-//{
-//    if(CurrentState == BACK_UP)
-//    {
-//        ES_Event_t ThisEvent;
-//        if (getDistance() < 10)
-//        {
-//            ThisEvent.EventType   = ES_DONE_BACK_UP;
-//            PostTopHSM(ThisEvent);
-//            return true;
-//        }
-//    }
-//    return false;
-//}
+bool check4Tape(void)
+{
+    if(CurrentState == FORWARD_UNTIL_BEACON)
+    {
+        ES_Event_t ThisEvent;
+        if (isOnTape(MiddleTapeSensor))
+        {
+            ThisEvent.EventType   = ES_FOUND_BEACON;
+            PostTopHSM(ThisEvent);
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 #define buttonBack PORTBbits.RB15
 bool lastBackButtonState = 0;
@@ -359,3 +360,4 @@ bool Check4InitialDistance(void)
     }
     return ReturnVal;
 }
+
