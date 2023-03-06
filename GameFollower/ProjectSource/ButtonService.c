@@ -41,6 +41,8 @@ bool CheckButtonEvents(){
         printf("\tevent param = %d\r\n", whichBranch);
         
         ES_PostAll(ReturnEvent);
+        
+        PostEventOverSPI(ReturnEvent);              // send event over SPI
         PostEventOverSPI(ReturnEvent);              // send event over SPI
         
         if (isGameStarted == false){

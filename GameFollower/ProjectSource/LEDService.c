@@ -39,8 +39,8 @@ ES_Event_t RunLEDService(ES_Event_t ThisEvent)
 
   // TODO write service code
   switch(ThisEvent.EventType){
-      case ES_FOUND_BEACON_B: {
-          puts("LED found beacon B\r\n");
+      case ES_FOUND_BEACON_C: {
+          puts("LED found beacon C\r\n");
 //          RED = 0;
 //          BLUE = 1;
           
@@ -49,8 +49,8 @@ ES_Event_t RunLEDService(ES_Event_t ThisEvent)
       }
       break;
       
-      case ES_FOUND_BEACON_C: {
-          puts("LED found beacon C\r\n");
+      case ES_FOUND_BEACON_B: {
+          puts("LED found beacon B\r\n");
 //          RED = 1;
 //          BLUE = 0;
           
