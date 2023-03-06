@@ -25,7 +25,7 @@ bool InitTopHSM ( uint8_t Priority )
 {
   ES_Event_t ThisEvent;
   
-  InitDCMotor();
+  InitDCMotor(true);
   InitEventOverSPI(true);
 //  InitDistanceSensor();
 //  InitTapeSensor();
@@ -85,6 +85,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    
                    case ES_BUTTON_PRESS:
                    {
+                       ES_Timer_StopTimer(QUERY_FOLLOWER_TIMER);
                        DB_printf("Received Event: %d\r\n", CurrentEvent.EventType);
                        DB_printf("Button press Event: %d\r\n", ES_BUTTON_PRESS);
                         puts("Button is pressed\r\n");
@@ -130,15 +131,14 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        case GO_TO_BRANCH_ORIGIN:
        {
            CurrentEvent = DuringGo2BranchOrigin(CurrentEvent);
-           puts("GO_TO_BRANCH_ORIGIN\r\n");
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
                {
                    case ES_FINISH:
                    {
-                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+                        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
                         MakeTransition = true;
                         NextState = PUSH_COMMIT;
                    }
@@ -248,7 +248,7 @@ static ES_Event_t DuringIdle( ES_Event_t Event )
     }
     else if ( Event.EventType == ES_EXIT )
     {
-        
+        ES_Timer_StopTimer(QUERY_FOLLOWER_TIMER);
     }
     else
     {

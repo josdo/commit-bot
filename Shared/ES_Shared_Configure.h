@@ -47,6 +47,8 @@ typedef enum
   ES_REACHED_MIDDLE,
   ES_REACHED_THIRD,
   ES_REACHED_ONE,
+  ES_ROTATED,
+  ES_FOUND_TAPE,
   NUM_ES_EVENTS,
 
 }ES_EventType_t;

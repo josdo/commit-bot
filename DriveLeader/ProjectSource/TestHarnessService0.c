@@ -13,6 +13,8 @@
 #include "TestHarnessService0.h"
 #include "BeaconSensor.h"
 #include "DCMotor.h"
+#include "InitTimer2.h"
+
 
 /*----------------------------- Module Defines ----------------------------*/
 // these times assume a 10.000mS/tick timing
@@ -33,12 +35,11 @@ bool InitTestHarnessService0(uint8_t Priority)
   MyPriority = Priority;
 
   // initialising everything
+  InitTimer2();
   InitDistanceSensor();
   InitTapeSensor();
   InitBeaconSensor();
-  // InitDCMotor();
-  disablePIControl();
-
+  InitDCMotor(true);
   DB_printf("Initialized TestHarnessService0, compiled at %s on %s\r\n", __TIME__, __DATE__);
   
   ThisEvent.EventType = ES_INIT;
@@ -63,15 +64,17 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
 {
   static uint32_t dc = 0;
   static uint32_t desired_speed = 0;
+  static uint32_t desired_direction = FORWARD;
   static bool print_motor_metrics = false;
-  static bool pi_control_on = false;
+  static bool pi_control_on = true;
   static bool t_key_go_forward = true;
   static const uint16_t t_key_forward_time = 5000;
   static const uint16_t t_key_backward_time = 2000;
   static const uint32_t t_key_dc = 100;
   static uint16_t motor_timer_period = 100;
   static uint32_t last_rt = 0;
-  static uint16_t encoder_timer_period = 100;
+  static uint16_t encoder_timer_period = 400;
+  static uint32_t n_key_cm = 5;
 
   ES_Event_t ReturnEvent;
   ReturnEvent.EventType = ES_NO_EVENT; // assume no errors
@@ -90,22 +93,23 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         if(ThisEvent.EventParam == SERVICE0_TIMER){
 //           DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
-//            DB_printf("Right Is it on tape: %d\r\n", isOnTape(RightTapeSensor));
+//            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
+//            DB_printf("Middle Is it on tape: %d\r\n", getTapeValue(MiddleTapeSensor));
 //            DB_printf("Short Range Period: %d\r\n", getBeconSensorPeriod(ShortRangeBeaconSensor));
             ES_Timer_InitTimer(SERVICE0_TIMER, HALF_SEC);
         }
         else if (ThisEvent.EventParam == PRINT_MOTOR_TIMER)
         {
           float rspeed = getMotorSpeed(RIGHT_MOTOR);
-          // DB_printf("Global time is %x\r\n", T2_actual_time());
-          // DB_printf("Rspeed is %u.%u\r\n", (uint32_t) rspeed, (rspeed - (uint32_t) rspeed)* 10000000000);
-          // DB_printf("Rspeed is %u\r\n", (uint32_t) rspeed);
+          float lspeed = getMotorSpeed(LEFT_MOTOR);
+          DB_printf("Rspeed %d  Lspeed %d\r\n", (uint32_t)rspeed, (uint32_t)lspeed);
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
         {
           uint32_t rt = getRolloverTicks();
-          DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) * 200 / 1000);
+          DB_printf("Rollover ms %u\r\n", rt * 200 / 1000 / 1000);
+          // DB_printf("Rollover delta ms %d\r\n", (rt - last_rt) * 200 / 1000 / 1000);
           last_rt = rt;
           ES_Timer_InitTimer(PRINT_ENCODER_TIMER, encoder_timer_period);
         }
@@ -139,15 +143,15 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       if ('k' == ThisEvent.EventParam)
       {
         dc = dc == 100 ? 100 : dc + 10;
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
-        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
+        setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+        setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
         DB_printf("Increase PWM to %u\r\n", dc);
       }
       else if ('j' == ThisEvent.EventParam)
       {
         dc = dc == 0 ? 0 : dc - 10;
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, dc);
-        setMotorSpeed(LEFT_MOTOR, FORWARD, dc);
+        setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+        setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
         DB_printf("Decrease PWM to %u\r\n", dc);
       }
 
@@ -171,17 +175,20 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       else if ('i' == ThisEvent.EventParam)
       {
         // desired_speed = desired_speed == 100 ? 100 : desired_speed + 10;
-        desired_speed += 10;
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
-        DB_printf("Increase desired speed to %u\r\n", desired_speed);
+          // Increase
+          desired_speed += 20;
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Increase desired speed to %u\r\n", desired_speed);
       }
       else if ('u' == ThisEvent.EventParam)
       {
-        desired_speed = desired_speed == 0 ? 0 : desired_speed - 10;
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, desired_speed);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, desired_speed);
-        DB_printf("Decrease desired speed to %u\r\n", desired_speed);
+          // Decrease
+
+          desired_speed = desired_speed == 0 ? 0 : desired_speed - 20;
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Decrease desired speed to %u\r\n", desired_speed);
       }
 
       /* Print motor metrics. */
@@ -190,8 +197,8 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         if (print_motor_metrics)
         {
           print_motor_metrics = false;
-          // ES_Timer_StopTimer(PRINT_MOTOR_TIMER);
-          ES_Timer_StopTimer(PRINT_ENCODER_TIMER);
+          ES_Timer_StopTimer(PRINT_MOTOR_TIMER);
+          // ES_Timer_StopTimer(PRINT_ENCODER_TIMER);
           DB_printf("Stopped printing motor metrics\r\n");
         }
         else
@@ -215,6 +222,45 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
           setMotorSpeed(LEFT_MOTOR, FORWARD, t_key_dc);
         }
       }
+      else if ('l' == ThisEvent.EventParam)
+      {
+        if (desired_direction == FORWARD)
+        {
+          desired_direction = BACKWARD;
+          // setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Drive backwards\r\n");
+        }
+        else
+        {
+          desired_direction = FORWARD;
+          // setMotorSpeed(RIGHT_MOTOR, desired_direction, dc);
+          // setMotorSpeed(LEFT_MOTOR, desired_direction, dc);
+          setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
+          setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
+          DB_printf("Drive forward\r\n");
+        }
+      }
+
+      else if ('r' == ThisEvent.EventParam)
+      {
+        DB_printf("Rotate CW\r\n");
+        rotate90(CW);
+      }
+
+      else if ('n' == ThisEvent.EventParam)
+      {
+        DB_printf("Drive %u cm forwards\r\n", n_key_cm);
+        drive(FORWARD, n_key_cm);
+      }
+      else if ('b' == ThisEvent.EventParam)
+      {
+        DB_printf("Drive %u cm backwards\r\n", n_key_cm);
+        drive(BACKWARD, n_key_cm);
+      }
+      
     }
   }
 

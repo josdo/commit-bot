@@ -283,7 +283,7 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, check4MiddleBranch, Check4ThirdBranch, Check4InitialDistance, check4Tape
+#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, check4MiddleBranch, Check4ThirdBranch, Check4InitialDistance,reachedDesiredLPulses, reachedDesiredRPulses
 //Check4CornerBeacons, Check4InitialDistance
 
 /****************************************************************************/

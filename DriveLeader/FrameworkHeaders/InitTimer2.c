@@ -22,17 +22,16 @@ void InitTimer2(){
     T2CONbits.TCKPS = 0b010;
     // set the period on the timer    
     PR2 = 0xFFFF;
-    // clear the timer flag
-    IFS0CLR = _IFS0_T2IF_MASK;
     // enable the timer interrupts
     IEC0SET = _IEC0_T2IE_MASK;
+    // clear the timer flag
+    IFS0CLR = _IFS0_T2IF_MASK;
     // setting timer priority
-    IPC2bits.INT2IP = 6;
+    IPC2bits.T2IP = 6;
     // starting from 0
     TMR2 = 0;
     // turn on the timer 2
     T2CONbits.ON = 1;
-
 }
 
 // Prescale of 4
@@ -49,16 +48,10 @@ uint32_t T2_actual_time(void)
 /* Updates if the interrupt flag is set. */
 void updateGlobalTime(uint16_t capturedTime){
     __builtin_disable_interrupts();
-    if(IFS0bits.T2IF == 1){ //  && capturedTime < 0x8000
+    if(IFS0bits.T2IF == 1 && capturedTime < 0x8000){
         ++(gl.time_var.rollover);
         IFS0CLR = _IFS0_T2IF_MASK;
     }
-    __builtin_enable_interrupts();
     gl.time_var.local_time = capturedTime;
-}
-
-
-void __ISR(_TIMER_2_VECTOR, IPL6SOFT) CountRollOver(void){
-  // TODO: Is setting to 0 correct? Should we be using TMR2?
-  updateGlobalTime(0);
+    __builtin_enable_interrupts();
 }

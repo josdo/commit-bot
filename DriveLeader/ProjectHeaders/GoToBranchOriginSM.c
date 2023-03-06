@@ -22,9 +22,8 @@ static ES_Event_t DuringBranchOne (ES_Event_t Event);
 static ES_Event_t DuringBranchTwo (ES_Event_t Event);
 static ES_Event_t DuringBranchThree (ES_Event_t Event);
 
-#define QueryTime 100
+#define QueryTime 1000
 uint32_t distance;
-
 
 
 
@@ -36,7 +35,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
     ES_Event_t ReturnEvent = CurrentEvent; 
     ES_Event_t QueryEvent;
     QueryEvent.EventType = ES_NO_EVENT;
-    
+    DB_printf("Curr Event: %d\r\n", CurrentEvent);
     DB_printf("Prev Branch: %d\r\n", PrevState+1);
     switch(CurrentState)
     {
@@ -212,12 +211,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                             NewEvent.EventType = ES_FINISH;
                             PostTopHSM(NewEvent);
                         }
-//                        else if(CurrentEvent.EventParam == 'd')
-//                        {
-//                            ES_Event_t NewEvent;
-//                            NewEvent.EventType = ES_FINISH;
-//                            PostTopHSM(NewEvent);
-//                        }
                     }
                     break;
                     
@@ -283,13 +276,13 @@ static ES_Event_t DuringBranchOne(ES_Event_t Event)
     {
         puts("Entering branch 1\r\n");
         if(CurrentState > PrevState){
-            setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
         }
         if(CurrentState < PrevState)
         {
-            setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
         }
     }
     else if (Event.EventType == ES_EXIT)
@@ -313,13 +306,13 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     {
         puts("Entering branch 2\r\n");
         if(CurrentState > PrevState){
-            setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
         }
         if(CurrentState < PrevState)
         {
-            setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
         }
     }
     else if (Event.EventType == ES_EXIT)
@@ -342,14 +335,15 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
          (Event.EventType == ES_ENTRY_HISTORY))
     {
         puts("Entering branch 3\r\n");
-        if(CurrentState > PrevState){
-            setMotorSpeed(LEFT_MOTOR, FORWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);
+        if(CurrentState > PrevState){\
+            puts("GM\r\n");
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
         }
         if(CurrentState < PrevState)
         {
-            setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
         }
     }
     else if (Event.EventType == ES_EXIT)
@@ -379,7 +373,7 @@ bool Check4FirstBranch(void)
 //    puts("a\r\n");
     bool val = buttonState1;
     uint32_t currTime = ES_Timer_GetTime();
-    if(CurrentState == BRANCH_ONE)
+    if(CurrentState == BRANCH_ONE && (PrevState == BRANCH_TWO || PrevState == BRANCH_THREE))
     {
         ES_Event_t ThisEvent;
         if ((val != lastButtonState1) && (currTime - prevTime1 > 200)) {

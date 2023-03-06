@@ -38,26 +38,7 @@ void InitBeaconSensor(void){
     DB_printf("\rES_INIT received in Beacon Sensor Service %d\r\n");
 }
 
-//void InitShortBeaconTimeout(void){
-//    // -------------------------- Timer 1 -------------------------------
-//    T1CONbits.ON = 0;                   // turn off timer 1
-//    T1CONbits.TCS = 0;                  // PBCLK source
-//    T1CONbits.SIDL = 0;                 // active in idle mode
-//    T1CONbits.TGATE = 0;                // turn off gated mode
-//    T1CONbits.TSYNC = 0;                // turn of sync mode
-//    T1CONbits.TCKPS = 0b010;            // pre-scale of 4
-//    TMR1 = 0;                           // clear the timer
-//    PR1 = 5000;                         // 1 ms timeout
-//    // --------------------------------------------------------------------
-//    
-//    
-//    // ----------------------- Set Up Interrupt ------------------------------
-//    __builtin_disable_interrupts();      // disable global interrupts
-//    IPC1bits.T1IP = 4;                  // timer 1 priority is 4
-//    IFS0CLR = _IFS0_T1IF_MASK;          // clear pending flag
-//    // -----------------------------------------------------------------------
-//    
-//}
+
 
 // IC for Short Range IR connected to B2
 void InitIC5(void){
@@ -183,28 +164,12 @@ WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
 }
 
 
-//void Period2Freq(BeaconSensor_t whichSensor){
-//    if (whichSensor == ShortRangeBeaconSensor){
-//        
-//        short_range_freq = (uint32_t)(short_range_period);
-//    }
-//    else if(whichSensor == LongRangeBeaconSensor){
-//        long_range_freq = (uint32_t)(1.6 * long_range_period);
-//    }
-//} 
 
-// ISR for short range sensor
 void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
     volatile static uint16_t thisTime;
     do{
         thisTime = (uint16_t)IC5BUF;
-        
-        if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
-            ++(gl.time_var.rollover);
-            IFS0CLR = _IFS0_T2IF_MASK;
-        }
-        
-        gl.time_var.local_time = thisTime;
+        updateGlobalTime(thisTime);
         
         short_range_period = (gl.actual_time - lastTimeShort);
         
@@ -219,12 +184,6 @@ void __ISR(_INPUT_CAPTURE_4_VECTOR, IPL7SOFT) LongRangeIRSensor(void){
     volatile static uint16_t thisTime;
     do{
         thisTime = (uint16_t)IC4BUF;
-        
-        // if(IFS0bits.T2IF == 1 && thisTime < 0x8000){
-        //     ++(gl.time_var.rollover);
-        //     IFS0CLR = _IFS0_T2IF_MASK;
-        // }
-        // gl.time_var.local_time = thisTime;
         updateGlobalTime(thisTime);
         long_range_period = (gl.actual_time - lastTimeLong);
         lastTimeLong = gl.actual_time;

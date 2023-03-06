@@ -10,7 +10,7 @@
 #include <xc.h>            
 #include <sys/attribs.h>
 
-#define THRESHOLD 900
+#define THRESHOLD 700
 uint32_t analog_signal[3];
 //static uint16_t LastAnalogValueLeft = 0;
 static uint16_t CurrentAnalogValueLeft = 0;

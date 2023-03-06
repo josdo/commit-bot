@@ -92,8 +92,8 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
             {
                 case ES_TIMEOUT:
                 {
-                    setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                    setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                    setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+                    setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
                     NextState = BACK_UP;
                     MakeTransition = true;
                 }
@@ -133,7 +133,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                 {
                     case ES_NEW_KEY:
                     {
-                        if(CurrentEvent.EventParam == 'f')
+                        if(CurrentEvent.EventParam == 'g')
                         {
                             ES_Event_t NewEvent;
                             NewEvent.EventType = ES_FOUND_BEACON;
@@ -143,12 +143,18 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         
                     }
                     break;
-                    case ES_FOUND_BEACON:
+                    case ES_TIMEOUT:
                     {
-                        puts("Saw beacon again!");
-                        ES_Event_t NewEvent;
-                        NewEvent.EventType = ES_FINISH;
-                        PostTopHSM(NewEvent);
+                        if (CurrentEvent.EventParam == STOP_TIMER)
+                        {
+                            setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+                            setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+                            puts("Saw tape again!");
+                            ES_Event_t NewEvent;
+                            NewEvent.EventType = ES_FINISH;
+                            PostTopHSM(NewEvent);
+                        }
+                        
                     }
                     break;
                 }
@@ -201,8 +207,10 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         // repeat the StartxxxSM() functions for concurrent state machines
         // on the lower level
         // turn CW until local beacon is found
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
+//        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
+//        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
         puts("Started Rotating\r\n");
     }
     else if (Event.EventType == ES_EXIT)
@@ -212,8 +220,8 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
         // repeat for any concurrently running state machines
         // now do any local exit functionality
         ES_Timer_InitTimer(STOP_TIMER, 1200);
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Rotating\r\n");
     }
     else
@@ -235,8 +243,10 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
+//        setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
+//        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, 30);
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
         puts("Moving Back\r\n");
 //        ES_Timer_InitTimer(STOP_TIMER, 2000);
     }
@@ -246,8 +256,8 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
         //RunLowerLevelSM(Event);
         // repeat for any concurrently running state machines
         // now do any local exit functionality
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Moving\r\n");
     }
     else
@@ -268,13 +278,14 @@ static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 25);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 30);
+        ES_Timer_InitTimer(STOP_TIMER, 1500);
     }
     else if (Event.EventType == ES_EXIT)
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
@@ -319,43 +330,45 @@ bool Check4CornerBeacons(void)
     return false;
 }
 
-bool check4Tape(void)
-{
-    if(CurrentState == FORWARD_UNTIL_BEACON)
-    {
-        ES_Event_t ThisEvent;
-        if (isOnTape(MiddleTapeSensor))
-        {
-            ThisEvent.EventType   = ES_FOUND_BEACON;
-            PostTopHSM(ThisEvent);
-            return true;
-        }
-    }
-    
-    return false;
-}
+//bool check4Tape(void)
+//{
+//    if(CurrentState == FORWARD_UNTIL_BEACON)
+//    {
+//        ES_Event_t ThisEvent;
+//        if (isOnTape(MiddleTapeSensor))
+//        {
+//            ThisEvent.EventType   = ES_FOUND_TAPE;
+//            PostTopHSM(ThisEvent);
+//            return true;
+//        }
+//    }
+//    
+//    return false;
+//}
 
 #define buttonBack PORTBbits.RB15
 bool lastBackButtonState = 0;
+uint32_t prevTime = 0;
 
 bool Check4InitialDistance(void)
 {
     bool ReturnVal = false;
     
     bool val = buttonBack;
-//    uint32_t currTime = ES_Timer_GetTime();
+    uint32_t currTime = ES_Timer_GetTime();
     
     if(CurrentState == BACK_UP)
     {
         ES_Event_t ThisEvent;
-        if ((val != lastBackButtonState)) {
-            puts("a\r\n");
+        if ((val != lastBackButtonState) && (currTime - prevTime > 200)) {
             if (val == 1) {
+                puts("---------------------\r\n");
                 ThisEvent.EventType   = ES_DONE_BACK_UP;
                 PostTopHSM(ThisEvent);
                 ReturnVal = true;
             }
             lastBackButtonState = val;    
+            prevTime = currTime;
       }
     }
     return ReturnVal;

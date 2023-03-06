@@ -21,6 +21,7 @@
 #include "ButtonService.h"
 #include "CalibrationSM.h"
 #include "GoToBranchOriginSM.h"
+#include "DCMotor.h"
 
 //#include "MotorStepService.h"
 

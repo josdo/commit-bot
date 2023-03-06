@@ -63,7 +63,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
             {
                 switch(CurrentEvent.EventType)
                 {
-                    case ES_TIMEOUT:
+                    case ES_ROTATED:
                     {
                         NextState = STOP_PUSH_COMMIT;
                         MakeTransition = true;
@@ -117,11 +117,12 @@ void StartPushCommitSM( ES_Event_t CurrentEvent )
         puts("here1");
         GoToBranchOriginState_t CurrentBranch = QueryGoToBranchOriginSM();
         GoToBranchOriginState_t PrevBrnach = QueryGoToBranchOriginPrevSM();
-        if (CurrentBranch == PrevBrnach)
-        {
-            CurrentState = ROTATE_TO_FACE_BRANCH;
-        }
-        else if(CurrentBranch == BRANCH_THREE)
+//        if (CurrentBranch == PrevBrnach)
+//        {
+//            puts("_-_-_-_-_\r\n");
+//            CurrentState = ROTATE_TO_FACE_BRANCH;
+//        }
+        if(CurrentBranch == BRANCH_THREE)
         {
             CurrentState = BACK_UP_A_BIT;
         }
@@ -149,15 +150,15 @@ static ES_Event_t DuringBackUpABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 30);
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 30);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, 30);
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
         ES_Timer_InitTimer(STOP_TIMER, 1200);
     }
     
     else if (Event.EventType == ES_EXIT)
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
@@ -172,16 +173,13 @@ static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 30);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 30);
-        ES_Timer_InitTimer(TURN_90_TIMER, 1300);
+        rotate90(CCW);
     }
     
     else if (Event.EventType == ES_EXIT)
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-        ES_Timer_InitTimer(STOP_TIMER, 1000);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
@@ -196,14 +194,14 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 30);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 30);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 30);
         ES_Timer_InitTimer(STOP_TIMER, 500);
     }
      else if (Event.EventType == ES_EXIT)
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
@@ -218,8 +216,8 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 100);
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 100);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, 100);
+        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 100);
     }
     
     else if (Event.EventType == ES_EXIT)
