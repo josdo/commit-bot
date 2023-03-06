@@ -42,6 +42,8 @@ static uint32_t Lpulses_curr = 0;
 static uint32_t Rpulses_curr = 0;
 static bool counting_Lpulses = false;
 static bool counting_Rpulses = false;
+static bool reached_Lpulses = false;
+static bool reached_Rpulses = false;
 
 static void initEncoderISRs(void);
 static void setPWM(void);
@@ -383,6 +385,8 @@ void drive(Directions_t direction, uint32_t dist_cm)
   }
   counting_Lpulses = true;
   counting_Rpulses = true;
+  reached_Lpulses = false;
+  reached_Rpulses = false;
 }
 
 /* Rotate 90 degrees. */
@@ -390,9 +394,6 @@ void rotate90(Directions_t direction)
 {
   // Assuming 76cm circumference, 90 degrees is 19cm.
   drive(direction, 19);
-  ES_Event_t ThisEvent;
-  ThisEvent.EventType = ES_ROTATED;
-  PostTopHSM(ThisEvent);
 }
 
 /* Return true if this classifies as a noisy interrupt. */
@@ -436,11 +437,14 @@ bool reachedDesiredLPulses(void)
   {
     setDesiredSpeed(LEFT_MOTOR, Ldirection_desired, 0);
     counting_Lpulses = false;
+    reached_Lpulses = true;
     DB_printf("Desired %u Lpulses, stopped at %u Lpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
     Lpulses_curr = 0;
     Lpulses_desired = 0;
+    __builtin_enable_interrupts();
+
   }
   return hasReached;
 }
@@ -461,6 +465,7 @@ bool reachedDesiredRPulses(void)
   {
     setDesiredSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
     counting_Rpulses = false;
+    reached_Rpulses = true;
     DB_printf("Desired %u Rpulses, stopped at %u Rpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
@@ -469,6 +474,19 @@ bool reachedDesiredRPulses(void)
     __builtin_enable_interrupts();
   }
   return hasReached;
+}
+
+bool reachedBothDesiredPulses(void)
+{
+  if (reached_Lpulses && reached_Rpulses)
+  {
+    reached_Lpulses = false;
+    reached_Rpulses = false;
+    ES_Event_t ThisEvent = {ES_ROTATED};
+    PostTopHSM(ThisEvent);
+    return true;
+  }
+  return false;
 }
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void)
