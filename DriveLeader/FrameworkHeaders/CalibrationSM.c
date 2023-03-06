@@ -337,13 +337,13 @@ bool Check4CornerBeacons(void)
 #define buttonBack PORTBbits.RB15
 bool lastBackButtonState = 0;
 
-
 bool Check4InitialDistance(void)
 {
     bool ReturnVal = false;
     
     bool val = buttonBack;
-    uint32_t currTime = ES_Timer_GetTime();
+//    uint32_t currTime = ES_Timer_GetTime();
+    
     if(CurrentState == BACK_UP)
     {
         ES_Event_t ThisEvent;
@@ -354,11 +354,8 @@ bool Check4InitialDistance(void)
                 PostTopHSM(ThisEvent);
                 ReturnVal = true;
             }
-            lastBackButtonState = val;
-            
+            lastBackButtonState = val;    
       }
-      
-      
     }
     return ReturnVal;
 }

@@ -438,11 +438,8 @@ bool Check4ThirdBranch(void)
                 ReturnVal = true;
             }
             lastButtonState3 = val;
-            prevTime3 = currTime;
-            
+            prevTime3 = currTime;           
       }
-      
-      
     }
     return ReturnVal;
 }

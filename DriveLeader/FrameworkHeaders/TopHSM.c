@@ -2,6 +2,7 @@
 #include "ES_Framework.h"
 #include "dbprintf.h"
 #include "../../Shared/EventOverSPI.h"
+
 #include "DCMotor.h"
 #include "PushCommitSM.h"
 #include "TopHSM.h"
@@ -30,8 +31,10 @@ bool InitTopHSM ( uint8_t Priority )
 //  InitTapeSensor();
 //  InitBeaconSensor();
   // InitDCMotor();
+  
   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_15);
   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_12);
+  
   disablePIControl();
   MyPriority = Priority;  // save our priority
 

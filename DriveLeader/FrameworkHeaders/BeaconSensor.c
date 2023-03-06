@@ -23,9 +23,10 @@ volatile static uint32_t long_range_freq;
 extern volatile global_time gl;
 
 void Period2Freq(BeaconSensor_t);
+void resetPeriod(void);
 
 
-void InitBeaconSensor(){
+void InitBeaconSensor(void){
     // Short range
     PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_2);
     // Long Range
@@ -59,7 +60,7 @@ void InitBeaconSensor(){
 //}
 
 // IC for Short Range IR connected to B2
-void InitIC5(){
+void InitIC5(void){
     // disable interrupts
     __builtin_disable_interrupts();         
     // switch off the input capture module
@@ -130,6 +131,10 @@ void InitIC4(){
     
 }
 
+void resetPeriod(void){
+    short_range_period = 0;
+}
+
 static uint32_t lastTimeShort;
 static uint32_t lastTimeLong;
 
@@ -152,22 +157,27 @@ WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
     
     if (200 < Period && Period < 380)
     {
+        short_range_period = 0;
         return BeaconA;
     }
     else if (430 < Period && Period < 570)
     {
+        short_range_period = 0;
         return BeaconB;
     }
     else if (610 < Period && Period < 790)
     {
+        short_range_period = 0;
         return BeaconC;
     }
     else if (900 < Period && Period < 1300)
     {
+        short_range_period = 0;
         return BeaconD;
     }
     else
     {
+        short_range_period = 0;
         return NoBeacon;
     }
 }
@@ -193,11 +203,14 @@ void __ISR(_INPUT_CAPTURE_5_VECTOR, IPL7SOFT) ShortRangeIRSensor(void){
             ++(gl.time_var.rollover);
             IFS0CLR = _IFS0_T2IF_MASK;
         }
+        
         gl.time_var.local_time = thisTime;
+        
         short_range_period = (gl.actual_time - lastTimeShort);
+        
         lastTimeShort = gl.actual_time;
     }while(IC5CONbits.ICBNE != 0);
-//    Period2Freq(ShortRangeBeaconSensor);
+    
     IFS0CLR = _IFS0_IC5IF_MASK;
 }
 
