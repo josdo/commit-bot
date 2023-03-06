@@ -1,9 +1,8 @@
 #ifndef CalibrationSM_H
 #define CalibrationSM_H
 
-typedef enum {FINISH_CALIBRATION, 
-        ROTATE_TO_ALIGN, STOP,
-        BACK_UP} CalibrationSMState_t;
+typedef enum {ROTATE_TO_ALIGN, STOP,
+        BACK_UP, FORWARD_UNTIL_BEACON} CalibrationSMState_t;
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent);
 void StartCalibrationSM( ES_Event_t CurrentEvent );

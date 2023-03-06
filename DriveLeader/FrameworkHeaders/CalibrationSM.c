@@ -13,6 +13,7 @@
 static CalibrationSMState_t CurrentState;
 static ES_Event_t DuringRotateToAlign (ES_Event_t Event);
 static ES_Event_t DuringBackUp(ES_Event_t Event);
+static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event);
 
 static const uint8_t NUM_PULSE = 3;
 static uint8_t countB = 0;
@@ -106,26 +107,47 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
             {
                 switch (CurrentEvent.EventType)
                 {
-//                    case ES_TIMEOUT:
-//                    {
-//                        if(CurrentEvent.EventParam == STOP_TIMER)
-//                        {
-//                            ES_Event_t ThisEvent;
-//                            ThisEvent.EventType   = ES_DONE_BACK_UP;
-//                            PostTopHSM(ThisEvent);
-//                        }
-//                    }
                     case ES_DONE_BACK_UP:
                     {
-                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+//                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+//                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
                         puts("Done Backing up\r\n");
-                        NextState = FINISH_CALIBRATION;
+                        NextState = FORWARD_UNTIL_BEACON;
                         MakeTransition = true;
+                        
+                        
+                    }
+                    break;
+                }
+            }
+        }
+        break;
+        
+        case FORWARD_UNTIL_BEACON:
+        {
+            CurrentEvent = DuringForwardUntilBeacon(CurrentEvent);
+            if(CurrentEvent.EventType != ES_NO_EVENT)
+            {
+                switch (CurrentEvent.EventType)
+                {
+                    case ES_NEW_KEY:
+                    {
+                        if(CurrentEvent.EventParam == 'f')
+                        {
+                            ES_Event_t NewEvent;
+                            NewEvent.EventType = ES_FOUND_BEACON;
+                            NewEvent.EventParam = BeaconB;
+                            PostTopHSM(NewEvent);
+                        }
+                        
+                    }
+                    break;
+                    case ES_FOUND_BEACON:
+                    {
+                        puts("Saw beacon again!");
                         ES_Event_t NewEvent;
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
-                        
                     }
                     break;
                 }
@@ -239,11 +261,31 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
     return ReturnEvent;
 }
 
+static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event;
+    if ( (Event.EventType == ES_ENTRY) || 
+         (Event.EventType == ES_ENTRY_HISTORY))
+    {
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 25);
+    }
+    else if (Event.EventType == ES_EXIT)
+    {
+        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
+    }
+    else
+    {
+        
+    }
+    return ReturnEvent;
+}
 
 
 bool Check4CornerBeacons(void)
 {
-    if(CurrentState == ROTATE_TO_ALIGN )
+    if(CurrentState == ROTATE_TO_ALIGN || CurrentState == FORWARD_UNTIL_BEACON)
     {
         ES_Event_t ThisEvent;
         WhichBeacon_t BeaconName = getBeaconName(ShortRangeBeaconSensor);
@@ -277,17 +319,46 @@ bool Check4CornerBeacons(void)
 }
 
 
+//bool Check4InitialDistance(void)
+//{
+//    if(CurrentState == BACK_UP)
+//    {
+//        ES_Event_t ThisEvent;
+//        if (getDistance() < 10)
+//        {
+//            ThisEvent.EventType   = ES_DONE_BACK_UP;
+//            PostTopHSM(ThisEvent);
+//            return true;
+//        }
+//    }
+//    return false;
+//}
+
+#define buttonBack PORTBbits.RB15
+bool lastBackButtonState = 0;
+
+
 bool Check4InitialDistance(void)
 {
+    bool ReturnVal = false;
+    
+    bool val = buttonBack;
+    uint32_t currTime = ES_Timer_GetTime();
     if(CurrentState == BACK_UP)
     {
         ES_Event_t ThisEvent;
-        if (getDistance() < 4)
-        {
-            ThisEvent.EventType   = ES_DONE_BACK_UP;
-            PostTopHSM(ThisEvent);
-            return true;
-        }
+        if ((val != lastBackButtonState)) {
+            puts("a\r\n");
+            if (val == 1) {
+                ThisEvent.EventType   = ES_DONE_BACK_UP;
+                PostTopHSM(ThisEvent);
+                ReturnVal = true;
+            }
+            lastBackButtonState = val;
+            
+      }
+      
+      
     }
-    return false;
+    return ReturnVal;
 }

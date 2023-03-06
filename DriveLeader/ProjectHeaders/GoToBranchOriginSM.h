@@ -8,6 +8,7 @@ typedef enum {  BRANCH_ONE,
 ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent);
 void StartGoToBranchOriginSM( ES_Event_t CurrentEvent );
 GoToBranchOriginState_t QueryGoToBranchOriginSM ( void );
+GoToBranchOriginState_t QueryGoToBranchOriginPrevSM (void);
 
 bool check4MiddleBranch(void);
 bool Check4ThirdBranch(void);

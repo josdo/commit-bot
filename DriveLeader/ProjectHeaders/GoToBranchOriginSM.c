@@ -37,7 +37,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
     ES_Event_t QueryEvent;
     QueryEvent.EventType = ES_NO_EVENT;
     
-    DB_printf("Prev Branch: %d", PrevState+1);
+    DB_printf("Prev Branch: %d\r\n", PrevState+1);
     switch(CurrentState)
     {
         case  BRANCH_ONE:
@@ -46,6 +46,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 //            puts("In Branch 1\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
+                ES_Event_t NewEvent;
                 switch (CurrentEvent.EventType)
                 {
                     case ES_TIMEOUT:
@@ -65,8 +66,8 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 1\r\n");
-                            MakeTransition = true;
-                            NextState = BRANCH_ONE;
+                            NewEvent.EventType = ES_FINISH;
+                            PostTopHSM(NewEvent);
                         }
                         else if(CurrentEvent.EventParam == Branch2)
                         {
@@ -93,7 +94,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     
                     case ES_REACHED_ONE:
                     {
-                        ES_Event_t NewEvent;
+                        
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
                     }
@@ -108,6 +109,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 //            puts("In branch 2\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
+                ES_Event_t NewEvent;
                 switch (CurrentEvent.EventType)
                 {
                     case ES_TIMEOUT:
@@ -121,7 +123,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     }
                     break;
                     
-                    case ES_NEW_KEY:
+                    case ES_BUTTON_PRESS:
                     {
                         
                         if (CurrentEvent.EventParam == Branch1)
@@ -135,8 +137,8 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 2\r\n");
-                            MakeTransition = true;
-                            NextState = BRANCH_TWO;
+                            NewEvent.EventType = ES_FINISH;
+                            PostTopHSM(NewEvent);
                         }
                         else if(CurrentEvent.EventParam == Branch3)
                         {
@@ -156,7 +158,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     
                     case ES_REACHED_MIDDLE:
                     {
-                        ES_Event_t NewEvent;
+                        
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
                     }
@@ -172,6 +174,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 //            puts("In branch 3\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
+                ES_Event_t NewEvent;
                 switch (CurrentEvent.EventType)
                 {
                     case ES_TIMEOUT:
@@ -185,7 +188,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     }
                     break;
                     
-                    case ES_NEW_KEY:
+                    case ES_BUTTON_PRESS:
                     {
                         
                         if (CurrentEvent.EventParam == Branch1)
@@ -206,8 +209,8 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
                             puts("\tGo to branch 3\r\n");
-                            MakeTransition = true;
-                            NextState = BRANCH_THREE;
+                            NewEvent.EventType = ES_FINISH;
+                            PostTopHSM(NewEvent);
                         }
 //                        else if(CurrentEvent.EventParam == 'd')
 //                        {
@@ -220,7 +223,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     
                     case ES_REACHED_THIRD:
                     {
-                        ES_Event_t NewEvent;
+                        
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
                     }
@@ -256,7 +259,7 @@ void StartGoToBranchOriginSM( ES_Event_t CurrentEvent )
                 CurrentState+1);
     
     // Front limit switch R12
-    PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_12);
+    
     
     ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
     RunGoToBranchOriginSM(CurrentEvent);
@@ -265,6 +268,11 @@ void StartGoToBranchOriginSM( ES_Event_t CurrentEvent )
 GoToBranchOriginState_t QueryGoToBranchOriginSM ( void )
 {
    return(CurrentState);
+}
+
+GoToBranchOriginState_t QueryGoToBranchOriginPrevSM (void)
+{
+    return(PrevState);
 }
 
 static ES_Event_t DuringBranchOne(ES_Event_t Event)

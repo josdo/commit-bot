@@ -114,13 +114,22 @@ void StartPushCommitSM( ES_Event_t CurrentEvent )
 {
     if (ES_ENTRY_HISTORY != CurrentEvent.EventType)
     {
-        GoToBranchOriginState_t CurrentBranch;
-        
-        if(CurrentBranch == BRANCH_THREE)
+        puts("here1");
+        GoToBranchOriginState_t CurrentBranch = QueryGoToBranchOriginSM();
+        GoToBranchOriginState_t PrevBrnach = QueryGoToBranchOriginPrevSM();
+        if (CurrentBranch == PrevBrnach)
+        {
+            CurrentState = ROTATE_TO_FACE_BRANCH;
+        }
+        else if(CurrentBranch == BRANCH_THREE)
         {
             CurrentState = BACK_UP_A_BIT;
         }
         else if(CurrentBranch == BRANCH_TWO)
+        {
+            CurrentState = FORWARD_A_BIT;
+        }
+        else if(CurrentBranch == BRANCH_ONE)
         {
             CurrentState = FORWARD_A_BIT;
         }
@@ -165,7 +174,7 @@ static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event)
     {
         setMotorSpeed(LEFT_MOTOR, BACKWARD, 30);
         setMotorSpeed(RIGHT_MOTOR, FORWARD, 30);
-        ES_Timer_InitTimer(TURN_90_TIMER, 1475);
+        ES_Timer_InitTimer(TURN_90_TIMER, 1300);
     }
     
     else if (Event.EventType == ES_EXIT)

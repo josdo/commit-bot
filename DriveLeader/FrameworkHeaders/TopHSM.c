@@ -8,6 +8,8 @@
 #include "GoToBranchOriginSM.h"
 #include "CalibrationSM.h"
 #include "ComeBackSM.h"
+#include "PIC32PortHAL.h"
+
 
 static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
@@ -28,6 +30,8 @@ bool InitTopHSM ( uint8_t Priority )
 //  InitTapeSensor();
 //  InitBeaconSensor();
   // InitDCMotor();
+  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_15);
+  PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_12);
   disablePIControl();
   MyPriority = Priority;  // save our priority
 
@@ -145,7 +149,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        case PUSH_COMMIT:
        {
            CurrentEvent = DuringPushCommit(CurrentEvent);
-           
+           DB_printf("here = %d", CurrentEvent);
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
