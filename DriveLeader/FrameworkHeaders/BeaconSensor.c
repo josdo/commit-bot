@@ -157,27 +157,27 @@ WhichBeacon_t getBeaconName(BeaconSensor_t whichSensor)
     
     if (200 < Period && Period < 380)
     {
-        short_range_period = 0;
+//        short_range_period = 0;
         return BeaconA;
     }
     else if (430 < Period && Period < 570)
     {
-        short_range_period = 0;
+//        short_range_period = 0;
         return BeaconB;
     }
     else if (610 < Period && Period < 790)
     {
-        short_range_period = 0;
+//        short_range_period = 0;
         return BeaconC;
     }
     else if (900 < Period && Period < 1300)
     {
-        short_range_period = 0;
+//        short_range_period = 0;
         return BeaconD;
     }
     else
     {
-        short_range_period = 0;
+//        short_range_period = 0;
         return NoBeacon;
     }
 }
