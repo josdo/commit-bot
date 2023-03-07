@@ -22,8 +22,10 @@ static ES_Event_t DuringBranchOne (ES_Event_t Event);
 static ES_Event_t DuringBranchTwo (ES_Event_t Event);
 static ES_Event_t DuringBranchThree (ES_Event_t Event);
 
-#define QueryTime 1000
+#define QueryTime 100
 uint32_t distance;
+const uint32_t dist_from_one_to_two = 76;
+const uint32_t dist_from_three_to_two = 76;
 
 
 
@@ -82,12 +84,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-//                        else if(CurrentEvent.EventParam == 'd')
-//                        {
-//                            ES_Event_t NewEvent;
-//                            NewEvent.EventType = ES_FINISH;
-//                            PostTopHSM(NewEvent);
-//                        }
                     }
                     break;
                     
@@ -146,16 +142,10 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
-//                        else if(CurrentEvent.EventParam == 'd')
-//                        {
-//                            ES_Event_t NewEvent;
-//                            NewEvent.EventType = ES_FINISH;
-//                            PostTopHSM(NewEvent);
-//                        }
                     }
                     break;
                     
-                    case ES_REACHED_MIDDLE:
+                    case ES_TRANSLATED:
                     {
                         
                         NewEvent.EventType = ES_FINISH;
@@ -306,13 +296,11 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     {
         puts("Entering branch 2\r\n");
         if(CurrentState > PrevState){
-            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
+            drive(FORWARD, dist_from_one_to_two);
         }
         if(CurrentState < PrevState)
         {
-            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            drive(BACKWARD, dist_from_three_to_two);
         }
     }
     else if (Event.EventType == ES_EXIT)

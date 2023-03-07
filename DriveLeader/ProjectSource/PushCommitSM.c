@@ -5,6 +5,7 @@
 #include "DistanceSensor.h"
 #include "PushCommitSM.h"
 #include "GoToBranchOriginSM.h"
+#include "dbprintf.h"
 
 static PushCommitSMState_t CurrentState;
 static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event);
@@ -65,22 +66,6 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                 {
                     case ES_ROTATED:
                     {
-                        NextState = STOP_PUSH_COMMIT;
-                        MakeTransition = true;
-                    }
-                }
-            }
-        }
-        break;
-        
-        case STOP_PUSH_COMMIT:
-        {
-            if(CurrentEvent.EventType != ES_NO_EVENT)
-            {
-                switch(CurrentEvent.EventType)
-                {
-                    case ES_TIMEOUT:
-                    {
                         NextState = MOVE_FORWARD;
                         MakeTransition = true;
                     }
@@ -114,26 +99,26 @@ void StartPushCommitSM( ES_Event_t CurrentEvent )
 {
     if (ES_ENTRY_HISTORY != CurrentEvent.EventType)
     {
-        puts("here1");
         GoToBranchOriginState_t CurrentBranch = QueryGoToBranchOriginSM();
-        GoToBranchOriginState_t PrevBrnach = QueryGoToBranchOriginPrevSM();
-//        if (CurrentBranch == PrevBrnach)
-//        {
-//            puts("_-_-_-_-_\r\n");
-//            CurrentState = ROTATE_TO_FACE_BRANCH;
-//        }
-        if(CurrentBranch == BRANCH_THREE)
+        GoToBranchOriginState_t PrevBranch = QueryGoToBranchOriginPrevSM();
+       if (CurrentBranch == PrevBranch)
+       {
+           CurrentState = ROTATE_TO_FACE_BRANCH;
+       }
+
+        else if(CurrentBranch == BRANCH_THREE)
         {
             CurrentState = BACK_UP_A_BIT;
         }
         else if(CurrentBranch == BRANCH_TWO)
         {
-            CurrentState = FORWARD_A_BIT;
+            CurrentState = ROTATE_TO_FACE_BRANCH;
         }
         else if(CurrentBranch == BRANCH_ONE)
         {
             CurrentState = FORWARD_A_BIT;
         }
+
     }
     RunPushCommitSM(CurrentEvent);
 }
@@ -178,12 +163,9 @@ static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event)
     
     else if (Event.EventType == ES_EXIT)
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
-        
     }
     return ReturnEvent;
 }
@@ -216,8 +198,7 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 100);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 100);
+        drive(FORWARD, 138);
     }
     
     else if (Event.EventType == ES_EXIT)

@@ -152,7 +152,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        case PUSH_COMMIT:
        {
            CurrentEvent = DuringPushCommit(CurrentEvent);
-           DB_printf("here = %d", CurrentEvent);
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
