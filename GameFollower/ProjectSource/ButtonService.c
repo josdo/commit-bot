@@ -30,7 +30,7 @@ bool CheckButtonEvents(){
     
     CurrentButtonState = PORTBbits.RB10;     // read button
     
-    if( (CurrentButtonState!=LastButtonState)  ){        // if new state
+    if( ((CurrentButtonState!=LastButtonState) && (CurrentButtonState == 0))  ){        // if new state
         returnVal = true;
         BranchType_t whichBranch = GetBranch();
         
