@@ -375,7 +375,7 @@ bool Check4ThirdBranch(void)
   bool doneWithDebounce = currTime - lastTime > debounce_ms;
   if (goingIntoBranchThree && stateChanged && switchPressed && doneWithDebounce)
   {
-        ES_Event_t ThisEvent = {ES_REACHED_ONE, 0};
+        ES_Event_t ThisEvent = {ES_REACHED_THIRD, 0};
         PostTopHSM(ThisEvent);
         ReturnVal = true;
         lastTime = currTime;
