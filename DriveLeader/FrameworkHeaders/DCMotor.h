@@ -37,6 +37,7 @@ void drive(Directions_t direction, uint32_t dist_cm);
 
 bool reachedDesiredLPulses(void);
 bool reachedDesiredRPulses(void);
+bool reachedBothDesiredPulses(void);
 
 #endif /* TemplateService_H */
 

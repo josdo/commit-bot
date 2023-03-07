@@ -44,6 +44,7 @@ static bool counting_Lpulses = false;
 static bool counting_Rpulses = false;
 static bool reached_Lpulses = false;
 static bool reached_Rpulses = false;
+static ES_EventType_t reached_event = ES_NO_EVENT;
 
 static void initEncoderISRs(void);
 static void setPWM(void);
@@ -363,21 +364,25 @@ void drive(Directions_t direction, uint32_t dist_cm)
   {
     setDesiredSpeed(LEFT_MOTOR, FORWARD, speed);
     setDesiredSpeed(RIGHT_MOTOR, BACKWARD, speed);
+    reached_event = ES_ROTATED;
   }
   else if (CCW == direction)
   {
     setDesiredSpeed(LEFT_MOTOR, BACKWARD, speed);
     setDesiredSpeed(RIGHT_MOTOR, FORWARD, speed);
+    reached_event = ES_ROTATED;
   }
   else if (FORWARD == direction)
   {
     setDesiredSpeed(LEFT_MOTOR, FORWARD, speed);
     setDesiredSpeed(RIGHT_MOTOR, FORWARD, speed);
+    reached_event = ES_TRANSLATED;
   }
   else if (BACKWARD == direction)
   {
     setDesiredSpeed(LEFT_MOTOR, BACKWARD, speed);
     setDesiredSpeed(RIGHT_MOTOR, BACKWARD, speed);
+    reached_event = ES_TRANSLATED;
   }
   else
   {
@@ -482,8 +487,9 @@ bool reachedBothDesiredPulses(void)
   {
     reached_Lpulses = false;
     reached_Rpulses = false;
-    ES_Event_t ThisEvent = {ES_ROTATED};
+    ES_Event_t ThisEvent = {reached_event};
     PostTopHSM(ThisEvent);
+    reached_event = ES_NO_EVENT;
     return true;
   }
   return false;
