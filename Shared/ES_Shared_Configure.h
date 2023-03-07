@@ -50,8 +50,8 @@ typedef enum
   ES_ROTATED,
   ES_TRANSLATED,
   ES_FOUND_TAPE,
-  NUM_ES_EVENTS,
-
+  ES_REACHED_WALL,
+  NUM_ES_EVENTS
 }ES_EventType_t;
 
 typedef enum{

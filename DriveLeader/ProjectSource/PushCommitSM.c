@@ -4,6 +4,7 @@
 #include "BeaconSensor.h"
 #include "DistanceSensor.h"
 #include "PushCommitSM.h"
+#include "TopHSM.h"
 #include "GoToBranchOriginSM.h"
 #include "dbprintf.h"
 
@@ -13,6 +14,8 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event);
 static ES_Event_t DuringBackUpABit(ES_Event_t Event);
 static ES_Event_t DuringForwardABit(ES_Event_t Event);
 
+static const uint32_t drive_forward_speed = 100;
+static const uint32_t a_bit_cm = 7;
 
 ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
 {
@@ -30,7 +33,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
             {
                 switch(CurrentEvent.EventType)
                 {
-                    case ES_TIMEOUT:
+                    case ES_TRANSLATED:
                     {
                         NextState = ROTATE_TO_FACE_BRANCH;
                         MakeTransition = true;
@@ -47,7 +50,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
             {
                 switch(CurrentEvent.EventType)
                 {
-                    case ES_TIMEOUT:
+                    case ES_TRANSLATED:
                     {
                         NextState = ROTATE_TO_FACE_BRANCH;
                         MakeTransition = true;
@@ -66,6 +69,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                 {
                     case ES_ROTATED:
                     {
+                        DB_printf("PushCommitSM: Finished rotating to face branch\r\n");
                         NextState = MOVE_FORWARD;
                         MakeTransition = true;
                     }
@@ -77,6 +81,18 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
         case MOVE_FORWARD:
         {
             CurrentEvent = DuringMoveForward(CurrentEvent);
+            if(CurrentEvent.EventType != ES_NO_EVENT)
+            {
+                switch(CurrentEvent.EventType)
+                {
+                    case ES_TRANSLATED:
+                    {
+                        ES_Event_t NewEvent;
+                        NewEvent.EventType = ES_FINISH;
+                        PostTopHSM(NewEvent);
+                    }
+                }
+            }
         }
     }
     
@@ -135,19 +151,13 @@ static ES_Event_t DuringBackUpABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setDesiredSpeed(LEFT_MOTOR, BACKWARD, 30);
-        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
-        ES_Timer_InitTimer(STOP_TIMER, 1200);
+      drive (BACKWARD, a_bit_cm);
     }
-    
     else if (Event.EventType == ES_EXIT)
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
-        
     }
     return ReturnEvent;
 }
@@ -176,14 +186,10 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 30);
-        ES_Timer_InitTimer(STOP_TIMER, 500);
+      drive (FORWARD, a_bit_cm);
     }
      else if (Event.EventType == ES_EXIT)
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
@@ -198,7 +204,8 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        drive(FORWARD, 138);
+      DB_printf("PushCommitSM: Drive forward\r\n");
+      drive(FORWARD, 138);
     }
     
     else if (Event.EventType == ES_EXIT)

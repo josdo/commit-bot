@@ -11,6 +11,7 @@
 // typedefs for the states
 // State definitions for use with the query function
 typedef enum { REVERSE_TO_WALL, 
+        MOVE_FORWARD_A_BIT,
         ROTATE_IN_REPO, 
 } ComeBackState_t ;
 
@@ -20,6 +21,6 @@ typedef enum { REVERSE_TO_WALL,
 ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent );
 void StartComeBackSM ( ES_Event_t CurrentEvent );
 ComeBackState_t QueryComeBackSM ( void );
-
+bool Check4Wall(void);
 #endif /*SHMTemplate_H */
 

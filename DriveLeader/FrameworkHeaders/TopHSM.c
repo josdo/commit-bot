@@ -16,6 +16,7 @@ static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
 static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
 static ES_Event_t DuringPushCommit( ES_Event_t Event );
+static ES_Event_t DuringComeBack(ES_Event_t Event);
 static MasterState_t CurrentState;
 // with the introduction of Gen2, we need a module level Priority var as well
 static uint8_t MyPriority;
@@ -161,13 +162,17 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    {
                        if (CurrentEvent.EventParam == 'z')
                        {
-                            puts("FOLLOW_TAPE\r\n");
-            
                             MakeTransition = true;
                             NextState = COME_BACK;
                        }
                    }
-                   break;        
+                   break;   
+
+                   case ES_FINISH:
+                   {
+                        MakeTransition = true;
+                        NextState = COME_BACK;
+                   }
                 }
            }
            
@@ -177,6 +182,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
        
        case COME_BACK:
        {
+           CurrentEvent = DuringComeBack(CurrentEvent);
            if (CurrentEvent.EventType != ES_NO_EVENT)
            {
                switch(CurrentEvent.EventType)
@@ -199,7 +205,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                        puts("\t now 10cm from the wall\r\n");
                        
                        MakeTransition = true;
-                       NextState = ROTATE_IN_REPO;
+                       NextState = GO_TO_BRANCH_ORIGIN;
                    } 
                    break;
                }
@@ -346,13 +352,11 @@ static ES_Event_t DuringComeBack(ES_Event_t Event){
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     { 
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);          //
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);
+        StartComeBackSM(Event);
     }
     else if ( Event.EventType == ES_EXIT )
     {
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);          //
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
+        RunComeBackSM(Event);
     }
     else
     {

@@ -27,8 +27,6 @@ uint32_t distance;
 const uint32_t dist_from_one_to_two = 76;
 const uint32_t dist_from_three_to_two = 76;
 
-
-
 ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 {
     bool MakeTransition = false;/* are we making a state transition? */
@@ -37,14 +35,11 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
     ES_Event_t ReturnEvent = CurrentEvent; 
     ES_Event_t QueryEvent;
     QueryEvent.EventType = ES_NO_EVENT;
-    DB_printf("Curr Event: %d\r\n", CurrentEvent);
-    DB_printf("Prev Branch: %d\r\n", PrevState+1);
     switch(CurrentState)
     {
         case  BRANCH_ONE:
         {  
             CurrentEvent = DuringBranchOne(CurrentEvent);
-//            puts("In Branch 1\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 ES_Event_t NewEvent;
@@ -54,7 +49,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     {
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
-//                            puts("Query the follower\r\n");
                             PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
@@ -66,21 +60,21 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 1\r\n");
+                            puts("\tGo to branch 1 from branch 1\r\n");
                             NewEvent.EventType = ES_FINISH;
                             PostTopHSM(NewEvent);
                         }
                         else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 2\r\n");
+                            puts("\tGo to branch 2 from branch 1\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_TWO;
                         }
                         else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 3\r\n");
+                            puts("\tGo to branch 3 from branch 1\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
@@ -101,7 +95,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
         case BRANCH_TWO:
         {
             CurrentEvent = DuringBranchTwo(CurrentEvent);
-//            puts("In branch 2\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 ES_Event_t NewEvent;
@@ -124,21 +117,21 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 1\r\n");
+                            puts("\tGo to branch 1 from branch 2\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_ONE;
                         }
                         else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 2\r\n");
+                            puts("\tGo to branch 2 from branch 2\r\n");
                             NewEvent.EventType = ES_FINISH;
                             PostTopHSM(NewEvent);
                         }
                         else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 3\r\n");
+                            puts("\tGo to branch 3 from branch 2\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_THREE;
                         }
@@ -160,7 +153,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
         case BRANCH_THREE:
         {
             CurrentEvent = DuringBranchThree(CurrentEvent);
-//            puts("In branch 3\r\n");
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 ES_Event_t NewEvent;
@@ -183,21 +175,21 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == Branch1)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 1\r\n");
+                            puts("\tGo to branch 1 from branch 3\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_ONE;
                         }
                         else if(CurrentEvent.EventParam == Branch2)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 2\r\n");
+                            puts("\tGo to branch 2 from branch 3\r\n");
                             MakeTransition = true;
                             NextState = BRANCH_TWO;
                         }
                         else if(CurrentEvent.EventParam == Branch3)
                         {
                             ES_Timer_StopTimer(QUERY_TIMER);
-                            puts("\tGo to branch 3\r\n");
+                            puts("\tGo to branch 3 from branch 3\r\n");
                             NewEvent.EventType = ES_FINISH;
                             PostTopHSM(NewEvent);
                         }
@@ -238,12 +230,10 @@ void StartGoToBranchOriginSM( ES_Event_t CurrentEvent )
         PrevState = BRANCH_ONE;
     }
     
-    DB_printf("starting gotobranchorigin with currentstate = %d\r\n", 
+    DB_printf("GoToBranchOrigin: starting from branch %d\r\n", 
                 CurrentState+1);
     
     // Front limit switch R12
-    
-    
     ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
     RunGoToBranchOriginSM(CurrentEvent);
 }

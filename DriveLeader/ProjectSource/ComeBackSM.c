@@ -1,5 +1,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
+#include "dbprintf.h"
+#include "TopHSM.h"
 
 #include "ComeBackSM.h"
 #include "DCMotor.h"
@@ -7,30 +9,15 @@
 #define ENTRY_STATE REVERSE_TO_WALL
 #define TURN_90 1000
 
+static const uint32_t reverse_speed = 50;
+
 static ES_Event_t DuringReverseToWall( ES_Event_t Event);
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event);
-
+static ES_Event_t DuringMoveForwardABit( ES_Event_t Event);
 
 static ComeBackState_t CurrentState;
+static const uint32_t a_bit_cm = 20;
 
-/*------------------------------ Module Code ------------------------------*/
-/****************************************************************************
- Function
-    RunTemplateSM
-
- Parameters
-   ES_Event_t: the event to process
-
- Returns
-   ES_Event_t: an event to return
-
- Description
-   add your description here
- Notes
-   uses nested switch/case to implement the machine.
- Author
-   J. Edward Carryer, 2/11/05, 10:45AM
-****************************************************************************/
 ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
 {
    bool MakeTransition = false;/* are we making a state transition? */
@@ -47,41 +34,53 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
          {
             switch (CurrentEvent.EventType)
             {
-               case ES_FINISH : //If event is event one
-                  // Execute action function for state one : event one
-                  NextState = ROTATE_IN_REPO;
+               case ES_REACHED_WALL : //If event is event one
+               {
+                  NextState = MOVE_FORWARD_A_BIT;
                   MakeTransition = true; //mark that we are taking a transition
-                  // if transitioning to a state with history change kind of entry
-                  EntryEventKind.EventType = ES_ENTRY;
-                  // optionally, consume or re-map this event for the upper
-                  // level state machine
-                  ReturnEvent.EventType = ES_NO_EVENT;
-                  break;
-                // repeat cases as required for relevant events
+               }
+               break;
             }
          }
        break;
-       
+
+       case MOVE_FORWARD_A_BIT:
+       {
+            DB_printf("ComeBackSM: got MOVE_FORWARD_A_BIT\r\n");
+            CurrentEvent = DuringMoveForwardABit(CurrentEvent);
+            if ( CurrentEvent.EventType != ES_NO_EVENT )
+            {
+                switch (CurrentEvent.EventType)
+                {
+                    case ES_TRANSLATED:
+                    {
+                      DB_printf("ComeBackSM: got ES_TRANSLATED\r\n");
+                        NextState = ROTATE_IN_REPO;
+                        MakeTransition = true;
+                    }
+                    break;
+                }
+            }
+       }
+       break;
+
        case ROTATE_IN_REPO: {
            CurrentEvent = DuringRotateInRepo(CurrentEvent);
            
            if (CurrentEvent.EventType != ES_NO_EVENT){
                switch (CurrentEvent.EventType){
-                   case ES_TIMEOUT: {
-                       if (TURN_90_TIMER == CurrentEvent.EventParam){
-                           puts("90 deg turn timer finished\r\n");
-                           setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                           setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                       }
-                   }
-                   break;
+                  case ES_ROTATED: {
+                        ES_Event_t NewEvent;
+                        NewEvent.EventType = ES_FINISH;
+                        PostTopHSM(NewEvent);
+                  }
+                  break;
                }
            }
        }
        break;
-      // repeat state pattern as required for other states
     }
-    //   If we are making a state transition
+
     if (MakeTransition == true)
     {
        //   Execute exit function for current state
@@ -96,23 +95,7 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
      }
      return(ReturnEvent);
 }
-/****************************************************************************
- Function
-     StartTemplateSM
 
- Parameters
-     None
-
- Returns
-     None
-
- Description
-     Does any required initialization for this state machine
- Notes
-
- Author
-     J. Edward Carryer, 2/18/99, 10:38AM
-****************************************************************************/
 void StartComeBackSM ( ES_Event_t CurrentEvent )
 {
    // to implement entry to a history state or directly to a substate
@@ -127,31 +110,10 @@ void StartComeBackSM ( ES_Event_t CurrentEvent )
    RunComeBackSM(CurrentEvent);
 }
 
-/****************************************************************************
- Function
-     QueryTemplateSM
-
- Parameters
-     None
-
- Returns
-     TemplateState_t The current state of the Template state machine
-
- Description
-     returns the current state of the Template state machine
- Notes
-
- Author
-     J. Edward Carryer, 2/11/05, 10:38AM
-****************************************************************************/
 ComeBackState_t QueryComeBackSM ( void )
 {
    return(CurrentState);
 }
-
-/***************************************************************************
- private functions
- ***************************************************************************/
 
 static ES_Event_t DuringReverseToWall( ES_Event_t Event)
 {
@@ -161,14 +123,13 @@ static ES_Event_t DuringReverseToWall( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 50);        // start reversing
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);         // start reversing
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, reverse_speed);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, reverse_speed);
     }
     else if ( Event.EventType == ES_EXIT )
     {
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);         // stop motors
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);          // stop motors
-      
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 0);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, 0);
     }else
     // do the 'during' function for this state
     {
@@ -183,6 +144,27 @@ static ES_Event_t DuringReverseToWall( ES_Event_t Event)
     // to remap the current event, or ReturnEvent if you do want to allow it.
     return(ReturnEvent);
 }
+
+static ES_Event_t DuringMoveForwardABit( ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event; 
+    if ( (Event.EventType == ES_ENTRY) ||
+         (Event.EventType == ES_ENTRY_HISTORY) )
+    {
+        DB_printf("ComeBackSM: drive forward in DuringMoveForwardABit\r\n");
+        drive(FORWARD, a_bit_cm);
+    }
+    else if ( Event.EventType == ES_EXIT )
+    {
+    }
+    else
+    {
+    }
+
+}
+
+
+
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event; // assume no re-mapping or consumption
@@ -191,17 +173,10 @@ static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 50);        // right backwards
-        setMotorSpeed(LEFT_MOTOR, BACKWARD, 50);        // left forwards
-        
-        ES_Timer_InitTimer(TURN_90_TIMER, TURN_90);     // for now turn by time
-        puts("Start 90 deg turn timer\r\n");
+      rotate90(CW);
     }
     else if ( Event.EventType == ES_EXIT )
     {
-        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);         // stop motors
-        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);          // stop motors
-      
     }else
     // do the 'during' function for this state
     {
@@ -217,3 +192,30 @@ static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
     return(ReturnEvent);
 }
 
+#define backSwitchPort PORTBbits.RB15
+static bool lastSwitchState = 0;
+
+bool Check4Wall(void)
+{
+  static uint32_t lastTime = 0;
+  bool ReturnVal = false;
+
+  bool currSwitchState = backSwitchPort;
+  uint32_t currTime = ES_Timer_GetTime();
+  bool stateChanged = (currSwitchState != lastSwitchState);
+  bool beyondCooldown = (currTime - lastTime > 200);
+  if(CurrentState == REVERSE_TO_WALL)
+  {
+    if (stateChanged && beyondCooldown) { //  && currSwitchState == 1
+      DB_printf("Reached wall\r\n");
+
+      ES_Event_t ThisEvent = {ES_REACHED_WALL};
+      PostTopHSM(ThisEvent);
+
+      ReturnVal = true;
+      lastSwitchState = currSwitchState;
+      lastTime = currTime;
+    }
+  }
+  return ReturnVal;
+}

@@ -349,7 +349,7 @@ void drive(Directions_t direction, uint32_t dist_cm)
 {
   // TODO: tune pulses per cm
   static const uint32_t pulses_per_cm = 6;
-  static const uint32_t speed = 20;
+  static const uint32_t speed = 100;
 
   uint32_t num_pulses = pulses_per_cm * dist_cm;
 
@@ -487,6 +487,8 @@ bool reachedBothDesiredPulses(void)
   {
     reached_Lpulses = false;
     reached_Rpulses = false;
+    DB_printf("Reached both desired pulses\r\n");
+    DB_printf("Reached event is %d\r\n", reached_event);
     ES_Event_t ThisEvent = {reached_event};
     PostTopHSM(ThisEvent);
     reached_event = ES_NO_EVENT;
