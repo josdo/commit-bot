@@ -219,17 +219,11 @@ void enablePIControl(void)
 {
   IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
   IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
-  // TODO: stop motors or don't?
-  setMotorSpeed(LEFT_MOTOR, Ldirection_desired, 0);
-  setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
 }
 
 void disablePIControl(void)
 {
   IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
-  // TODO: stop motors or don't?
-  setMotorSpeed(LEFT_MOTOR, Ldirection_desired, 0);
-  setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
 }
 
 /* Chooses the speed setpoint for the given motor. If speed == 0, stops
@@ -237,11 +231,18 @@ void disablePIControl(void)
    and directly setting the motor duty cycle to 0. */
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
 {
-  // To stop immediately, disable PI control. Clear Lperiod and Rperiod since
-  // the PIControllerISR will be off and won't be able to.
+  /* To stop immediately, disable PI control and commands 0% duty cycle to the motor specified.
+     If the other motor is still trying to reach its desired pulses, its
+     PI control will be off, but its duty cycle will remain what the last PI control command was. 
+     Also clear Lperiod and Rperiod since the PIControllerISR will be off and won't be able to.
+     */
   if (speed == 0)
   {
-    disablePIControl(); // also stops the motors
+    disablePIControl();
+    if (motor == LEFT_MOTOR)
+      setMotorSpeed(LEFT_MOTOR, Ldirection_desired, 0);
+    else
+      setMotorSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
   }
   // Otherwise, enable PI control so the desired speed can be reached.
   else
@@ -390,8 +391,10 @@ void drive(Directions_t direction, uint32_t dist_cm)
   }
   counting_Lpulses = true;
   counting_Rpulses = true;
+  __builtin_disable_interrupts();
   reached_Lpulses = false;
   reached_Rpulses = false;
+  __builtin_enable_interrupts();
 }
 
 /* Rotate 90 degrees. */
@@ -441,8 +444,11 @@ bool reachedDesiredLPulses(void)
   if (hasReached)
   {
     setDesiredSpeed(LEFT_MOTOR, Ldirection_desired, 0);
+    __builtin_disable_interrupts();
     counting_Lpulses = false;
     reached_Lpulses = true;
+    __builtin_enable_interrupts();
+
     DB_printf("Desired %u Lpulses, stopped at %u Lpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
@@ -469,8 +475,12 @@ bool reachedDesiredRPulses(void)
   if (hasReached)
   {
     setDesiredSpeed(RIGHT_MOTOR, Rdirection_desired, 0);
+
+    __builtin_disable_interrupts();
     counting_Rpulses = false;
     reached_Rpulses = true;
+    __builtin_enable_interrupts();
+
     DB_printf("Desired %u Rpulses, stopped at %u Rpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
@@ -483,18 +493,22 @@ bool reachedDesiredRPulses(void)
 
 bool reachedBothDesiredPulses(void)
 {
+  __builtin_disable_interrupts();
   if (reached_Lpulses && reached_Rpulses)
   {
     reached_Lpulses = false;
     reached_Rpulses = false;
-    DB_printf("Reached both desired pulses\r\n");
-    DB_printf("Reached event is %d\r\n", reached_event);
+    __builtin_enable_interrupts();
     ES_Event_t ThisEvent = {reached_event};
     PostTopHSM(ThisEvent);
     reached_event = ES_NO_EVENT;
     return true;
   }
-  return false;
+  else
+  {
+    __builtin_enable_interrupts();
+    return false;
+  }
 }
 
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void)

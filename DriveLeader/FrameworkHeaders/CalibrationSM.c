@@ -20,6 +20,16 @@ static const uint8_t NUM_PULSE = 3;
 static uint8_t countB = 0;
 static uint8_t countC = 0;
 
+static uint16_t stop_ms = 200;
+
+#ifdef DEBUG_ON
+static uint32_t a_bit_cm = 20;
+static uint32_t backup_speed = 50;
+#else
+static uint32_t a_bit_cm = 10;
+static uint32_t backup_speed = 20;
+#endif
+
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
 {
     bool MakeTransition = false;/* are we making a state transition? */
@@ -59,7 +69,6 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                             NextState = STOP;
                             MakeTransition = true;
                             
-                            ///////////////////////////
                             switch(BeaconName)
                             {
                                 case BeaconB:
@@ -74,7 +83,6 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                                     PostTopHSM(BeaconEvent);
                                 break;
                             }
-                            ///////////////////////////
                         }
                     }
                     break;
@@ -87,17 +95,10 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
         
         case STOP:
         {
-            ES_Timer_InitTimer(STOP_TIMER,1000);
-            switch(CurrentEvent.EventType)
+            if (ES_TIMEOUT == CurrentEvent.EventType && CurrentEvent.EventParam == STOP_TIMER)
             {
-                case ES_TIMEOUT:
-                {
-                    setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
-                    setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
-                    NextState = BACK_UP;
-                    MakeTransition = true;
-                }
-            
+                NextState = BACK_UP;
+                MakeTransition = true;
             }
         }
         break;
@@ -110,13 +111,8 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                 {
                     case ES_DONE_BACK_UP:
                     {
-//                        setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-//                        setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                        puts("Done Backing up\r\n");
                         NextState = FORWARD_UNTIL_BEACON;
                         MakeTransition = true;
-                        
-                        
                     }
                     break;
                 }
@@ -143,17 +139,11 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         
                     }
                     break;
-                    case ES_TIMEOUT:
+                    case ES_TRANSLATED:
                     {
-                        if (CurrentEvent.EventParam == STOP_TIMER)
-                        {
-                            setMotorSpeed(LEFT_MOTOR, FORWARD, 0);
-                            setMotorSpeed(RIGHT_MOTOR, FORWARD, 0);
-                            puts("Saw tape again!");
-                            ES_Event_t NewEvent;
-                            NewEvent.EventType = ES_FINISH;
-                            PostTopHSM(NewEvent);
-                        }
+                      ES_Event_t NewEvent;
+                      NewEvent.EventType = ES_FINISH;
+                      PostTopHSM(NewEvent);
                         
                     }
                     break;
@@ -200,29 +190,14 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        // implement any entry actions required for this state machine
-        
-        // after that start any lower level machines that run in this state
-        //StartLowerLevelSM( Event );
-        // repeat the StartxxxSM() functions for concurrent state machines
-        // on the lower level
-        // turn CW until local beacon is found
-//        setMotorSpeed(LEFT_MOTOR, FORWARD, 25);
-//        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
         setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
         setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
-        puts("Started Rotating\r\n");
     }
     else if (Event.EventType == ES_EXIT)
     {
-        // on exit, give the lower levels a chance to clean up first
-        //RunLowerLevelSM(Event);
-        // repeat for any concurrently running state machines
-        // now do any local exit functionality
-        ES_Timer_InitTimer(STOP_TIMER, 1200);
+        ES_Timer_InitTimer(STOP_TIMER, stop_ms);
         setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
-        puts("Stop Rotating\r\n");
     }
     else
     {
@@ -243,31 +218,18 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-//        setMotorSpeed(LEFT_MOTOR, BACKWARD, 25);
-//        setMotorSpeed(RIGHT_MOTOR, BACKWARD, 25);
-        setDesiredSpeed(LEFT_MOTOR, BACKWARD, 30);
-        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, backup_speed);
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, backup_speed);
         puts("Moving Back\r\n");
-//        ES_Timer_InitTimer(STOP_TIMER, 2000);
     }
     else if (Event.EventType == ES_EXIT)
     {
-        // on exit, give the lower levels a chance to clean up first
-        //RunLowerLevelSM(Event);
-        // repeat for any concurrently running state machines
-        // now do any local exit functionality
         setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Moving\r\n");
     }
     else
     {
-        // run any lower level state machine
-        // ReturnEvent = RunLowerLevelSM(Event);
-      
-        // repeat for any concurrent lower level machines
-      
-        // do any activity that is repeated as long as we are in this state
     }
     return ReturnEvent;
 }
@@ -278,18 +240,13 @@ static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 30);
-        ES_Timer_InitTimer(STOP_TIMER, 1500);
+      drive(FORWARD, a_bit_cm);
     }
     else if (Event.EventType == ES_EXIT)
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
-        setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
     else
     {
-        
     }
     return ReturnEvent;
 }
@@ -329,22 +286,6 @@ bool Check4CornerBeacons(void)
     }
     return false;
 }
-
-//bool check4Tape(void)
-//{
-//    if(CurrentState == FORWARD_UNTIL_BEACON)
-//    {
-//        ES_Event_t ThisEvent;
-//        if (isOnTape(MiddleTapeSensor))
-//        {
-//            ThisEvent.EventType   = ES_FOUND_TAPE;
-//            PostTopHSM(ThisEvent);
-//            return true;
-//        }
-//    }
-//    
-//    return false;
-//}
 
 #define buttonBack PORTBbits.RB15
 bool lastBackButtonState = 0;

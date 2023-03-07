@@ -67,6 +67,7 @@
       <itemPath>ProjectHeaders/GoToBranchOriginSM.h</itemPath>
       <itemPath>ProjectHeaders/ComeBackSM.h</itemPath>
       <itemPath>ProjectHeaders/PushCommitSM.h</itemPath>
+      <itemPath>ProjectHeaders/Timer5.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -106,6 +107,7 @@
       <itemPath>ProjectSource/ComeBackSM.c</itemPath>
       <itemPath>ProjectSource/FollowTapeSM.c</itemPath>
       <itemPath>ProjectSource/PushCommitSM.c</itemPath>
+      <itemPath>ProjectSource/Timer5.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

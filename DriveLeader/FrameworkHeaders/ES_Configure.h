@@ -26,6 +26,8 @@
 
 #include "../../Shared/ES_Shared_Configure.h"
 
+#define DEBUG_ON
+
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of
 // services that the framework will handle. Reasonable values are 8 and 16
@@ -283,9 +285,9 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, check4MiddleBranch, Check4ThirdBranch, \
+#define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, Check4FirstBranch, Check4ThirdBranch, \
                          Check4InitialDistance, reachedDesiredLPulses, reachedDesiredRPulses, \
-                         reachedBothDesiredPulses, Check4Wall
+                         reachedBothDesiredPulses, Check4Wall, check4GameTimer
 //Check4CornerBeacons, Check4InitialDistance
 
 /****************************************************************************/

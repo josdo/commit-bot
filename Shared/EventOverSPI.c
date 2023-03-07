@@ -146,7 +146,7 @@ void __ISR(_SPI_1_VECTOR, IPL6SOFT) ISR_EventOverSPI(void)
 
     ES_PostAll(e);
     SPIOperate_SPI1_Send16(QUERY_WORD);
-    DB_printf("Event: %d\r\n", e.EventType);
+    DB_printf("EventOverSPI: got event %d from follower\r\n", e.EventType);
   }
   else
   {

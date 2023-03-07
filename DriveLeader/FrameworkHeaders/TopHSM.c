@@ -10,17 +10,25 @@
 #include "CalibrationSM.h"
 #include "ComeBackSM.h"
 #include "PIC32PortHAL.h"
+#include "Timer5.h"
 
+static MasterState_t CurrentState;
+static uint8_t MyPriority;
+#define follower_query_timer 20
+#define CASE_GAME_OVER \
+        case ES_GAME_END:  \
+        {                                   \
+            MakeTransition = true;          \
+            NextState = IDLE;               \
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);  \
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0); \
+        } break;
 
 static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
 static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
 static ES_Event_t DuringPushCommit( ES_Event_t Event );
 static ES_Event_t DuringComeBack(ES_Event_t Event);
-static MasterState_t CurrentState;
-// with the introduction of Gen2, we need a module level Priority var as well
-static uint8_t MyPriority;
-#define follower_query_timer 20
 
 bool InitTopHSM ( uint8_t Priority )
 {
@@ -28,6 +36,8 @@ bool InitTopHSM ( uint8_t Priority )
   
   InitDCMotor(true);
   InitEventOverSPI(true);
+  InitTimer5();
+
 //  InitDistanceSensor();
 //  InitTapeSensor();
 //  InitBeaconSensor();
@@ -36,7 +46,6 @@ bool InitTopHSM ( uint8_t Priority )
   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_15);
   PortSetup_ConfigureDigitalInputs(_Port_B, _Pin_12);
   
-  disablePIControl();
   MyPriority = Priority;  // save our priority
 
   ThisEvent.EventType = ES_ENTRY;
@@ -78,7 +87,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                             ES_Event_t NewEvent;
                             NewEvent.EventType = ES_NO_EVENT;
                             PostEventOverSPI(NewEvent);
-//                            puts("Query the follower\r\n");
                             ES_Timer_InitTimer(QUERY_FOLLOWER_TIMER, follower_query_timer);
                        }
                    }
@@ -87,13 +95,12 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    case ES_BUTTON_PRESS:
                    {
                        ES_Timer_StopTimer(QUERY_FOLLOWER_TIMER);
-                       DB_printf("Received Event: %d\r\n", CurrentEvent.EventType);
-                       DB_printf("Button press Event: %d\r\n", ES_BUTTON_PRESS);
-                        puts("Button is pressed\r\n");
+                       DB_printf("TopHSM: got button press (event type %d)\r\n", CurrentEvent.EventType);
                         MakeTransition = true;
                         NextState = CALIBRATION;
                    }      
                    break;
+                   CASE_GAME_OVER
                }
            }
        }
@@ -114,7 +121,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    break;
                    case ES_FOUND_BEACON_C:
                    {
-                       DB_printf("Beacon c: %u\r\n", CurrentEvent);
                        PostEventOverSPI(CurrentEvent);
                    }
                    break;
@@ -124,6 +130,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                         MakeTransition = true;
                         NextState = GO_TO_BRANCH_ORIGIN;
                    }
+                   break;
+                   CASE_GAME_OVER
                }
            } 
        }
@@ -144,7 +152,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                         NextState = PUSH_COMMIT;
                    }
                    break;
-                   
+                   CASE_GAME_OVER
                }
            }
        }
@@ -173,10 +181,10 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                         MakeTransition = true;
                         NextState = COME_BACK;
                    }
+                   break;
+                   CASE_GAME_OVER
                 }
            }
-           
-           
        }
        break;
        
@@ -203,11 +211,12 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    case ES_FINISH: {
                        puts("Done backing up from branch\r\n");
                        puts("\t now 10cm from the wall\r\n");
-                       
+                       EntryEventKind.EventType = ES_ENTRY_HISTORY;
                        MakeTransition = true;
                        NextState = GO_TO_BRANCH_ORIGIN;
                    } 
                    break;
+                   CASE_GAME_OVER
                }
            }
        }
@@ -269,6 +278,7 @@ static ES_Event_t DuringCalibration( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
+        startGameTimer();
         // implement any entry actions required for this state machine
         
         // after that start any lower level machines that run in this state

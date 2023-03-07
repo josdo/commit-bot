@@ -23,9 +23,12 @@ static ES_Event_t DuringBranchTwo (ES_Event_t Event);
 static ES_Event_t DuringBranchThree (ES_Event_t Event);
 
 #define QueryTime 100
-uint32_t distance;
 const uint32_t dist_from_one_to_two = 76;
 const uint32_t dist_from_three_to_two = 76;
+
+static const debounce_ms = 200;
+#define backSwitchState PORTBbits.RB15
+#define frontSwitchState PORTBbits.RB12
 
 ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
 {
@@ -104,7 +107,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     {
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
-                            puts("Query the follower\r\n");
                             PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
@@ -254,7 +256,7 @@ static ES_Event_t DuringBranchOne(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        puts("Entering branch 1\r\n");
+        puts("GoToBranchOrigin: Entering branch 1\r\n");
         if(CurrentState > PrevState){
             setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
             setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
@@ -269,7 +271,7 @@ static ES_Event_t DuringBranchOne(ES_Event_t Event)
     {
         PrevState = BRANCH_ONE;
         ES_Timer_StopTimer(QUERY_TIMER);
-        puts("Exit branch 1\r\n");
+        puts("GoToBranchOrigin: Exit branch 1\r\n");
     }
     else
     {
@@ -284,7 +286,7 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        puts("Entering branch 2\r\n");
+        puts("GoToBranchOrigin: Entering branch 2\r\n");
         if(CurrentState > PrevState){
             drive(FORWARD, dist_from_one_to_two);
         }
@@ -297,7 +299,7 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     {
         PrevState = BRANCH_TWO;
         ES_Timer_StopTimer(QUERY_TIMER);
-        puts("Exit branch 2\r\n");
+        puts("GoToBranchOrigin: Exit branch 2\r\n");
     }
     else
     {
@@ -312,9 +314,8 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        puts("Entering branch 3\r\n");
+        puts("GoToBranchOrigin: Entering branch 3\r\n");
         if(CurrentState > PrevState){\
-            puts("GM\r\n");
             setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
             setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
         }
@@ -328,7 +329,7 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
     {
         PrevState = BRANCH_THREE;
         ES_Timer_StopTimer(QUERY_TIMER);
-        puts("Exit branch 3\r\n");
+        puts("GoToBranchOrigin: Exit branch 3\r\n");
     }
     else
     {
@@ -337,81 +338,50 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
     return ReturnEvent;
 }
 
-
-
-
-#define buttonState1 PORTBbits.RB15
-bool lastButtonState1 = 0;
-
-uint32_t prevTime1 = 0;
-
 bool Check4FirstBranch(void)
 {
-    bool ReturnVal = false;
-//    puts("a\r\n");
-    bool val = buttonState1;
-    uint32_t currTime = ES_Timer_GetTime();
-    if(CurrentState == BRANCH_ONE && (PrevState == BRANCH_TWO || PrevState == BRANCH_THREE))
-    {
-        ES_Event_t ThisEvent;
-        if ((val != lastButtonState1) && (currTime - prevTime1 > 200)) {
-            if (val == 1) {
-                puts("Reached 1");
-                ThisEvent.EventType   = ES_REACHED_ONE;
-                PostTopHSM(ThisEvent);
-                ReturnVal = true;
-            }
-            lastButtonState1 = val;
-            prevTime1 = currTime;
-            
-      }
-      
-      
-    }
-    return ReturnVal;
+  static bool lastSwitchState = 0;
+  static uint32_t lastTime = 0;
+
+  bool ReturnVal = false;
+  bool currSwitchState = backSwitchState;
+  uint32_t currTime = ES_Timer_GetTime();
+  bool goingIntoBranchOne = CurrentState == BRANCH_ONE && (PrevState == BRANCH_TWO || PrevState == BRANCH_THREE);
+  bool stateChanged = currSwitchState != lastSwitchState;
+  bool switchPressed = currSwitchState == 1;
+  bool doneWithDebounce = currTime - lastTime > debounce_ms;
+  if (goingIntoBranchOne && stateChanged && switchPressed && doneWithDebounce)
+  {
+        ES_Event_t ThisEvent = {ES_REACHED_ONE, 0};
+        lastSwitchState = 0;           // reset rear limit switch for the future
+        PostTopHSM(ThisEvent);
+        ReturnVal = true;
+        lastSwitchState = currSwitchState;
+        lastTime = currTime;
+  }
+  return ReturnVal;
 }
-
-bool check4MiddleBranch(void)
-{
-    if(CurrentState == BRANCH_TWO)
-    {
-        distance = getDistance();
-        ES_Event_t ThisEvent;
-        if ((distance > 30 && distance < 50) && isOnTape(MiddleTapeSensor))
-        {
-            ThisEvent.EventType   = ES_REACHED_MIDDLE;
-            PostTopHSM(ThisEvent);
-            return true;
-        }
-    }
-    
-    return false;
-}
-
-#define buttonState3 PORTBbits.RB12
-bool lastButtonState3 = 0;
-
-uint32_t prevTime3 = 0;
 
 bool Check4ThirdBranch(void)
 {
-    bool ReturnVal = false;
-//    puts("a\r\n");
-    bool val = buttonState3;
-    uint32_t currTime = ES_Timer_GetTime();
-    if(CurrentState == BRANCH_THREE)
-    {
-        ES_Event_t ThisEvent;
-        if ((val != lastButtonState3) && (currTime - prevTime3 > 200)) {
-            if (val == 1) {
-                puts("Reached 3");
-                ThisEvent.EventType   = ES_REACHED_THIRD;
-                PostTopHSM(ThisEvent);
-                ReturnVal = true;
-            }
-            lastButtonState3 = val;
-            prevTime3 = currTime;           
-      }
-    }
-    return ReturnVal;
+  static bool lastSwitchState = 0;
+  static uint32_t lastTime = 0;
+
+  bool ReturnVal = false;
+  bool currSwitchState = frontSwitchState;
+  uint32_t currTime = ES_Timer_GetTime();
+  bool goingIntoBranchThree = CurrentState == BRANCH_THREE && (PrevState == BRANCH_TWO || PrevState == BRANCH_ONE);
+  bool stateChanged = currSwitchState != lastSwitchState;
+  bool switchPressed = currSwitchState == 1;
+  bool doneWithDebounce = currTime - lastTime > debounce_ms;
+  if (goingIntoBranchThree && stateChanged && switchPressed && doneWithDebounce)
+  {
+        ES_Event_t ThisEvent = {ES_REACHED_ONE, 0};
+        lastSwitchState = 0;           // reset rear limit switch for the future
+        PostTopHSM(ThisEvent);
+        ReturnVal = true;
+        lastSwitchState = currSwitchState;
+        lastTime = currTime;
+  }
+  return ReturnVal;
 }

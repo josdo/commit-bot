@@ -14,8 +14,13 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event);
 static ES_Event_t DuringBackUpABit(ES_Event_t Event);
 static ES_Event_t DuringForwardABit(ES_Event_t Event);
 
+#ifdef DEBUG_ON
 static const uint32_t drive_forward_speed = 100;
+static const uint32_t a_bit_cm = 10;
+#else
+static const uint32_t drive_forward_speed = 50;
 static const uint32_t a_bit_cm = 7;
+#endif
 
 ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
 {

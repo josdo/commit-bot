@@ -9,14 +9,20 @@
 #define ENTRY_STATE REVERSE_TO_WALL
 #define TURN_90 1000
 
-static const uint32_t reverse_speed = 50;
 
 static ES_Event_t DuringReverseToWall( ES_Event_t Event);
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event);
 static ES_Event_t DuringMoveForwardABit( ES_Event_t Event);
 
 static ComeBackState_t CurrentState;
+
+#ifdef DEBUG_ON
 static const uint32_t a_bit_cm = 20;
+static const uint32_t reverse_speed = 100;
+#else
+static const uint32_t a_bit_cm = 15;
+static const uint32_t reverse_speed = 50;
+#endif
 
 ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
 {
@@ -70,6 +76,7 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
            if (CurrentEvent.EventType != ES_NO_EVENT){
                switch (CurrentEvent.EventType){
                   case ES_ROTATED: {
+                    DB_printf("ComeBackSM: got ES_ROTATED\r\n");
                         ES_Event_t NewEvent;
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
@@ -131,17 +138,8 @@ static ES_Event_t DuringReverseToWall( ES_Event_t Event)
         setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 0);
         setDesiredSpeed(LEFT_MOTOR, BACKWARD, 0);
     }else
-    // do the 'during' function for this state
     {
-        // run any lower level state machine
-        // ReturnEvent = RunLowerLevelSM(Event);
-      
-        // repeat for any concurrent lower level machines
-      
-        // do any activity that is repeated as long as we are in this state
     }
-    // return either Event, if you don't want to allow the lower level machine
-    // to remap the current event, or ReturnEvent if you do want to allow it.
     return(ReturnEvent);
 }
 
@@ -160,10 +158,8 @@ static ES_Event_t DuringMoveForwardABit( ES_Event_t Event)
     else
     {
     }
-
+    return (ReturnEvent);
 }
-
-
 
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
 {
@@ -178,17 +174,8 @@ static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
     else if ( Event.EventType == ES_EXIT )
     {
     }else
-    // do the 'during' function for this state
     {
-        // run any lower level state machine
-        // ReturnEvent = RunLowerLevelSM(Event);
-      
-        // repeat for any concurrent lower level machines
-      
-        // do any activity that is repeated as long as we are in this state
     }
-    // return either Event, if you don't want to allow the lower level machine
-    // to remap the current event, or ReturnEvent if you do want to allow it.
     return(ReturnEvent);
 }
 
@@ -207,8 +194,6 @@ bool Check4Wall(void)
   if(CurrentState == REVERSE_TO_WALL)
   {
     if (stateChanged && beyondCooldown) { //  && currSwitchState == 1
-      DB_printf("Reached wall\r\n");
-
       ES_Event_t ThisEvent = {ES_REACHED_WALL};
       PostTopHSM(ThisEvent);
 

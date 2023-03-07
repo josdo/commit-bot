@@ -11,6 +11,8 @@
       "speeddialservice.h": "c",
       "eventcheckwrapper.h": "c",
       "motorstepservice.h": "c",
-      "templateservice.h": "c"
+      "templateservice.h": "c",
+      "tophsm.h": "c",
+      "dbprintf.h": "c"
     }
 }
