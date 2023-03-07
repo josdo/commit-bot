@@ -26,7 +26,7 @@ static ES_Event_t DuringBranchThree (ES_Event_t Event);
 const uint32_t dist_from_one_to_two = 76;
 const uint32_t dist_from_three_to_two = 76;
 
-static const debounce_ms = 200;
+static const uint32_t debounce_ms = 200;
 #define backSwitchState PORTBbits.RB15
 #define frontSwitchState PORTBbits.RB12
 
@@ -353,12 +353,11 @@ bool Check4FirstBranch(void)
   if (goingIntoBranchOne && stateChanged && switchPressed && doneWithDebounce)
   {
         ES_Event_t ThisEvent = {ES_REACHED_ONE, 0};
-        lastSwitchState = 0;           // reset rear limit switch for the future
         PostTopHSM(ThisEvent);
         ReturnVal = true;
-        lastSwitchState = currSwitchState;
         lastTime = currTime;
   }
+  lastSwitchState = currSwitchState;
   return ReturnVal;
 }
 
@@ -377,11 +376,10 @@ bool Check4ThirdBranch(void)
   if (goingIntoBranchThree && stateChanged && switchPressed && doneWithDebounce)
   {
         ES_Event_t ThisEvent = {ES_REACHED_ONE, 0};
-        lastSwitchState = 0;           // reset rear limit switch for the future
         PostTopHSM(ThisEvent);
         ReturnVal = true;
-        lastSwitchState = currSwitchState;
         lastTime = currTime;
   }
+  lastSwitchState = currSwitchState;
   return ReturnVal;
 }

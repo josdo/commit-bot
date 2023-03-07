@@ -8,5 +8,4 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent);
 void StartCalibrationSM( ES_Event_t CurrentEvent );
 CalibrationSMState_t QueryCalibrationSM ( void );
 bool Check4CornerBeacons(void);
-bool check4Tape(void);
 #endif

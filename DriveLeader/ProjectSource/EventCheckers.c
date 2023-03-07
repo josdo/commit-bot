@@ -124,39 +124,3 @@ bool Check4Keystroke(void)
   }
   return false;
 }
-
-
-//bool Check4CornerBeacons(void)
-//{
-//    if(QueryCalibrationSM() == ROTATE_TO_ALIGN )
-//    {
-//        ES_Event_t ThisEvent;
-//        WhichBeacon_t BeaconName = getBeaconName(ShortRangeBeaconSensor);
-////        DB_printf("Beacon name : %d", BeaconName);
-//        if (BeaconName == BeaconB || BeaconName == BeaconC){
-//            ThisEvent.EventType   = ES_FOUND_BEACON;
-//            ThisEvent.EventParam  = getBeconSensorFreq(ShortRangeBeaconSensor);
-//            PostTopHSM(ThisEvent);
-//            puts("here!");
-//            return true;
-//        }
-//        
-//    }
-//    return false;
-//}
-//
-//
-//bool Check4InitialDistance(void)
-//{
-//    if(QueryCalibrationSM() == BACK_UP)
-//    {
-//        ES_Event_t ThisEvent;
-//        if (getDistance() < 100)
-//        {
-//            ThisEvent.EventType   = ES_DONE_BACK_UP;
-//            ES_PostAll(ThisEvent);
-//            return true;
-//        }
-//    }
-//    return false;
-//}

@@ -6,9 +6,6 @@
 #include "ComeBackSM.h"
 #include "DCMotor.h"
 
-#define ENTRY_STATE REVERSE_TO_WALL
-#define TURN_90 1000
-
 
 static ES_Event_t DuringReverseToWall( ES_Event_t Event);
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event);
@@ -111,7 +108,7 @@ void StartComeBackSM ( ES_Event_t CurrentEvent )
    // is started
    if ( ES_ENTRY_HISTORY != CurrentEvent.EventType )
    {
-        CurrentState = ENTRY_STATE;
+        CurrentState = REVERSE_TO_WALL;
    }
    // call the entry function (if any) for the ENTRY_STATE
    RunComeBackSM(CurrentEvent);
@@ -180,10 +177,10 @@ static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
 }
 
 #define backSwitchPort PORTBbits.RB15
-static bool lastSwitchState = 0;
 
 bool Check4Wall(void)
 {
+  static bool lastSwitchState = 0;
   static uint32_t lastTime = 0;
   bool ReturnVal = false;
 
@@ -193,14 +190,14 @@ bool Check4Wall(void)
   bool beyondCooldown = (currTime - lastTime > 200);
   if(CurrentState == REVERSE_TO_WALL)
   {
-    if (stateChanged && beyondCooldown) { //  && currSwitchState == 1
+    if (stateChanged && beyondCooldown && (currSwitchState == 1)) {
       ES_Event_t ThisEvent = {ES_REACHED_WALL};
       PostTopHSM(ThisEvent);
-
       ReturnVal = true;
-      lastSwitchState = currSwitchState;
       lastTime = currTime;
     }
   }
+  lastSwitchState = currSwitchState;
+
   return ReturnVal;
 }
