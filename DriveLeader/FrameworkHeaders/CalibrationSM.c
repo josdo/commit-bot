@@ -25,9 +25,13 @@ static uint16_t stop_ms = 200;
 #ifdef DEBUG_ON
 static uint32_t a_bit_cm = 20;
 static uint32_t backup_speed = 50;
+static uint32_t forward_speed = 50;
+static uint32_t rotate_speed = 50;
 #else
-static uint32_t a_bit_cm = 10;
+static uint32_t a_bit_cm = 15;
 static uint32_t backup_speed = 20;
+static uint32_t forward_speed = 40;
+static uint32_t rotate_speed = 20;
 #endif
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
@@ -190,8 +194,8 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        setDesiredSpeed(LEFT_MOTOR, FORWARD, 30);
-        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 30);
+        setDesiredSpeed(LEFT_MOTOR, FORWARD, rotate_speed);
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, rotate_speed);
     }
     else if (Event.EventType == ES_EXIT)
     {
@@ -240,7 +244,7 @@ static ES_Event_t DuringForwardUntilBeacon(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-      drive(FORWARD, a_bit_cm);
+      drive(FORWARD, a_bit_cm, forward_speed);
     }
     else if (Event.EventType == ES_EXIT)
     {
@@ -303,7 +307,6 @@ bool Check4InitialDistance(void)
         ES_Event_t ThisEvent;
         if ((val != lastBackButtonState) && (currTime - prevTime > 200)) {
             if (val == 1) {
-                puts("---------------------\r\n");
                 ThisEvent.EventType   = ES_DONE_BACK_UP;
                 PostTopHSM(ThisEvent);
                 ReturnVal = true;

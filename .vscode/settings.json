@@ -13,6 +13,7 @@
       "motorstepservice.h": "c",
       "templateservice.h": "c",
       "tophsm.h": "c",
-      "dbprintf.h": "c"
+      "dbprintf.h": "c",
+      "beaconsensor.h": "c"
     }
 }

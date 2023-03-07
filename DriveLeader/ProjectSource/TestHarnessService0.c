@@ -247,18 +247,18 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       else if ('r' == ThisEvent.EventParam)
       {
         DB_printf("Rotate CW\r\n");
-        rotate90(CW);
+        rotate90(CW, 40);
       }
 
       else if ('n' == ThisEvent.EventParam)
       {
         DB_printf("Drive %u cm forwards\r\n", n_key_cm);
-        drive(FORWARD, n_key_cm);
+        drive(FORWARD, n_key_cm, 20);
       }
       else if ('b' == ThisEvent.EventParam)
       {
         DB_printf("Drive %u cm backwards\r\n", n_key_cm);
-        drive(BACKWARD, n_key_cm);
+        drive(BACKWARD, n_key_cm, 20);
       }
       
     }

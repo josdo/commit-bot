@@ -15,11 +15,17 @@ static ComeBackState_t CurrentState;
 
 #ifdef DEBUG_ON
 static const uint32_t a_bit_cm = 20;
+static const uint32_t a_bit_speed = 50;
+static const uint32_t rotate_speed = 50;
 static const uint32_t reverse_speed = 100;
 #else
 static const uint32_t a_bit_cm = 15;
-static const uint32_t reverse_speed = 50;
+static const uint32_t a_bit_speed = 40;
+static const uint32_t rotate_speed = 20;
+static const uint32_t reverse_speed = 40;
 #endif
+
+static uint32_t debounce_time = 200;
 
 ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
 {
@@ -147,7 +153,7 @@ static ES_Event_t DuringMoveForwardABit( ES_Event_t Event)
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
         DB_printf("ComeBackSM: drive forward in DuringMoveForwardABit\r\n");
-        drive(FORWARD, a_bit_cm);
+        drive(FORWARD, a_bit_cm, a_bit_speed);
     }
     else if ( Event.EventType == ES_EXIT )
     {
@@ -166,7 +172,7 @@ static ES_Event_t DuringRotateInRepo( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-      rotate90(CW);
+      rotate90(CW, rotate_speed);
     }
     else if ( Event.EventType == ES_EXIT )
     {
@@ -187,7 +193,7 @@ bool Check4Wall(void)
   bool currSwitchState = backSwitchPort;
   uint32_t currTime = ES_Timer_GetTime();
   bool stateChanged = (currSwitchState != lastSwitchState);
-  bool beyondCooldown = (currTime - lastTime > 200);
+  bool beyondCooldown = (currTime - lastTime > debounce_time);
   if(CurrentState == REVERSE_TO_WALL)
   {
     if (stateChanged && beyondCooldown && (currSwitchState == 1)) {

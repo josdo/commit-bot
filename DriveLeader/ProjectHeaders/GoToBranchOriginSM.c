@@ -26,7 +26,14 @@ static ES_Event_t DuringBranchThree (ES_Event_t Event);
 const uint32_t dist_from_one_to_two = 76;
 const uint32_t dist_from_three_to_two = 76;
 
+#ifdef DEBUG_ON
+const uint32_t translation_speed = 100;
+#else
+const uint32_t translation_speed = 40;
+#endif
+
 static const uint32_t debounce_ms = 200;
+
 #define backSwitchState PORTBbits.RB15
 #define frontSwitchState PORTBbits.RB12
 
@@ -164,7 +171,6 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent)
                     {
                         if (CurrentEvent.EventParam == QUERY_TIMER)
                         {
-                            puts("Query the follower\r\n");
                             PostEventOverSPI(QueryEvent);
                             ES_Timer_InitTimer(QUERY_TIMER, QueryTime);
                         }
@@ -250,6 +256,7 @@ GoToBranchOriginState_t QueryGoToBranchOriginPrevSM (void)
     return(PrevState);
 }
 
+/* Drive until limit switch hit. */
 static ES_Event_t DuringBranchOne(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
@@ -258,13 +265,13 @@ static ES_Event_t DuringBranchOne(ES_Event_t Event)
     {
         puts("GoToBranchOrigin: Entering branch 1\r\n");
         if(CurrentState > PrevState){
-            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, translation_speed);
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, translation_speed);
         }
         if(CurrentState < PrevState)
         {
-            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, BACKWARD, translation_speed);
+            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, translation_speed);
         }
     }
     else if (Event.EventType == ES_EXIT)
@@ -280,6 +287,7 @@ static ES_Event_t DuringBranchOne(ES_Event_t Event)
     return ReturnEvent;
 }
 
+/* Drive a certain distance to middle branch. */
 static ES_Event_t DuringBranchTwo(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
@@ -288,11 +296,11 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     {
         puts("GoToBranchOrigin: Entering branch 2\r\n");
         if(CurrentState > PrevState){
-            drive(FORWARD, dist_from_one_to_two);
+            drive(FORWARD, dist_from_one_to_two, translation_speed);
         }
         if(CurrentState < PrevState)
         {
-            drive(BACKWARD, dist_from_three_to_two);
+            drive(BACKWARD, dist_from_three_to_two, translation_speed);
         }
     }
     else if (Event.EventType == ES_EXIT)
@@ -308,6 +316,7 @@ static ES_Event_t DuringBranchTwo(ES_Event_t Event)
     return ReturnEvent;
 }
 
+/* Drive until limit switch hit. */
 static ES_Event_t DuringBranchThree(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
@@ -316,13 +325,13 @@ static ES_Event_t DuringBranchThree(ES_Event_t Event)
     {
         puts("GoToBranchOrigin: Entering branch 3\r\n");
         if(CurrentState > PrevState){\
-            setDesiredSpeed(LEFT_MOTOR, FORWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, FORWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, FORWARD, translation_speed);
+            setDesiredSpeed(RIGHT_MOTOR, FORWARD, translation_speed);
         }
         if(CurrentState < PrevState)
         {
-            setDesiredSpeed(LEFT_MOTOR, BACKWARD, 50);
-            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, 50);
+            setDesiredSpeed(LEFT_MOTOR, BACKWARD, translation_speed);
+            setDesiredSpeed(RIGHT_MOTOR, BACKWARD, translation_speed);
         }
     }
     else if (Event.EventType == ES_EXIT)

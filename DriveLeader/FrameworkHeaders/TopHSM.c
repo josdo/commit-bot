@@ -209,8 +209,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    break;
                    
                    case ES_FINISH: {
-                       puts("Done backing up from branch\r\n");
-                       puts("\t now 10cm from the wall\r\n");
                        EntryEventKind.EventType = ES_ENTRY_HISTORY;
                        MakeTransition = true;
                        NextState = GO_TO_BRANCH_ORIGIN;

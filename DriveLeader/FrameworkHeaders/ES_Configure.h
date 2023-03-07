@@ -26,7 +26,7 @@
 
 #include "../../Shared/ES_Shared_Configure.h"
 
-#define DEBUG_ON
+// #define DEBUG_ON
 
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of

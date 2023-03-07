@@ -31,8 +31,8 @@ void setMotorSpeed(Motors_t whichMotor, Directions_t whichDirection, uint16_t du
 // Sets desired speed
 void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed);
 
-void rotate90(Directions_t direction);
-void drive(Directions_t direction, uint32_t dist_cm);
+void rotate90(Directions_t direction, uint32_t speed);
+void drive(Directions_t direction, uint32_t dist_cm, uint32_t speed);
 
 
 bool reachedDesiredLPulses(void);

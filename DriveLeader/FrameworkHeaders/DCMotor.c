@@ -346,11 +346,9 @@ uint32_t getRolloverTicks(void)
    which the event checkers are responsible for disabling. (With these bools enabled,
    any commanded duty cycle or speed will be ignored and the motors will stop after
    the desired number of pulses is reached.) */
-void drive(Directions_t direction, uint32_t dist_cm)
+void drive(Directions_t direction, uint32_t dist_cm, uint32_t speed)
 {
-  // TODO: tune pulses per cm
   static const uint32_t pulses_per_cm = 6;
-  static const uint32_t speed = 100;
 
   uint32_t num_pulses = pulses_per_cm * dist_cm;
 
@@ -398,10 +396,10 @@ void drive(Directions_t direction, uint32_t dist_cm)
 }
 
 /* Rotate 90 degrees. */
-void rotate90(Directions_t direction)
+void rotate90(Directions_t direction, uint32_t speed)
 {
   // Assuming 76cm circumference, 90 degrees is 19cm.
-  drive(direction, 19);
+  drive(direction, 19, speed);
 }
 
 /* Return true if this classifies as a noisy interrupt. */
