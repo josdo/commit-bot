@@ -35,6 +35,15 @@ static uint32_t Rdirection_desired = 0;
 static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
 
+/* PI control updates */
+static float kP = .1;
+static float kI = 0.005; // 100ms ramp to +20rpm, more variation
+// static float kI = 0.001; // 500ms ramp to +20rpm
+static float Lcurr_sum_e = 0;
+static float Llast_sum_e = 0;
+static float Rcurr_sum_e = 0;
+static float Rlast_sum_e = 0;
+
 /* Rotation and translation */
 static uint32_t Lpulses_desired = 0;
 static uint32_t Rpulses_desired = 0;
@@ -215,15 +224,26 @@ static void initPIController(void)
   T4CONbits.ON = 1;
 }
 
+/* Enable control update interrupts. */
 void enablePIControl(void)
 {
   IEC0SET = _IEC0_T4IE_MASK; // Enable timer 4 interrupts
   IFS0CLR = _IFS0_T4IF_MASK; // reset interrupt flag
 }
 
+/* Disable control update interrupts. */
 void disablePIControl(void)
 {
   IEC0CLR = _IEC0_T4IE_MASK; // Disable timer 4 interrupts
+}
+
+/* Clear error history. */
+void clearPIErrorHistory(void)
+{
+  Lcurr_sum_e = 0;
+  Llast_sum_e = 0;
+  Rcurr_sum_e = 0;
+  Rlast_sum_e = 0;
 }
 
 /* Chooses the speed setpoint for the given motor. If speed == 0, stops
@@ -249,6 +269,8 @@ void setDesiredSpeed(Motors_t motor, Directions_t direction, uint32_t speed)
   {
     enablePIControl(); // also stops the motors
   }
+
+  clearPIErrorHistory();
 
   if (motor == LEFT_MOTOR)
   {
@@ -562,14 +584,6 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IPL7SOFT) ISR_LeftEncoder(void)
 // Updates velocity control, i.e. duty cycle applied
 void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
 {
-  static float kP = .1;
-  static float kI = 0.005; // 100ms ramp to +20rpm, more variation
-  // static float kI = 0.001; // 500ms ramp to +20rpm
-  static float Lcurr_sum_e = 0;
-  static float Llast_sum_e = 0;
-  static float Rcurr_sum_e = 0;
-  static float Rlast_sum_e = 0;
-
   float Le = Lspeed_desired - getMotorSpeed(LEFT_MOTOR);
   Llast_sum_e = Lcurr_sum_e;
   Lcurr_sum_e += Le;
