@@ -24,7 +24,7 @@ static const uint32_t rotate_speed = 40;
 static const uint32_t forward_speed = 40;
 static const uint32_t forward_cm = 130;
 static const uint32_t a_bit_speed = 20;
-static const uint32_t a_bit_cm = 7;
+static const uint32_t a_bit_cm = 15;
 static const uint32_t rotate_speed = 20;
 #endif
 
@@ -128,6 +128,8 @@ void StartPushCommitSM( ES_Event_t CurrentEvent )
     {
         GoToBranchOriginState_t CurrentBranch = QueryGoToBranchOriginSM();
         GoToBranchOriginState_t PrevBranch = QueryGoToBranchOriginPrevSM();
+        DB_printf("PushCommitSM: Previous Branch : %d\r\n", PrevBranch);
+        DB_printf("PushCommitSM: Current Branch : %d\r\n", CurrentBranch);
        if (CurrentBranch == PrevBranch)
        {
            CurrentState = ROTATE_TO_FACE_BRANCH;
@@ -197,6 +199,7 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
+        DB_printf("PushCommitSM: Forward a bit\r\n");
       drive(FORWARD, a_bit_cm, a_bit_speed);
     }
      else if (Event.EventType == ES_EXIT)
@@ -214,7 +217,9 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
+        DB_printf("PushCommitSM: Backward a bit\r\n");
       drive(FORWARD, forward_cm, forward_speed);
+      
     }
     
     else if (Event.EventType == ES_EXIT)
