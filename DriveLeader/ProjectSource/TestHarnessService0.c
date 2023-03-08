@@ -91,7 +91,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-            DB_printf("Distance Slider Value: %d\r\n", getDistanceSliderValue());
+            // DB_printf("Distance Slider Value: %d\r\n", getDistanceSliderValue());
 //           DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));

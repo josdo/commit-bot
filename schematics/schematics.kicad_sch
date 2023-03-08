@@ -1963,10 +1963,10 @@
     (property "Datasheet" "" (id 3) (at 130.81 73.66 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f97))
-    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f97))
-    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f97))
-    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f97))
+    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f9a))
+    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f9a))
+    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f9a))
+    (pin "" (uuid 154db47e-e29e-4792-9fd8-126f78ec6f9a))
   )
 
   (symbol (lib_id "ME218_BaseLib:PIC32MX170F256B") (at 213.36 54.61 0) (unit 1)
@@ -2442,11 +2442,11 @@
     (property "Datasheet" "" (id 3) (at 67.31 171.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139a))
-    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139a))
-    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139a))
-    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139a))
-    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139a))
+    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139e))
+    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139e))
+    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139e))
+    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139e))
+    (pin "" (uuid e053a698-0c19-47b1-a7ef-30888151139e))
   )
 
   (symbol (lib_id "Custom_Library:Slide_SW") (at 66.04 146.05 0) (unit 1)
@@ -2460,11 +2460,11 @@
     (property "Datasheet" "" (id 3) (at 67.31 143.51 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e1))
-    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e1))
-    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e1))
-    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e1))
-    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e1))
+    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e5))
+    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e5))
+    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e5))
+    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e5))
+    (pin "" (uuid 6412fb2f-0c62-484c-9b96-090b13d698e5))
   )
 
   (sheet (at 218.44 96.52) (size 55.88 30.48)
@@ -2593,6 +2593,9 @@
     )
     (path "/d503cb8b-9526-47ec-9c44-5889eaafd3a9/c0ea7a8b-ef92-400e-bced-1704742ee998/0703aa9b-63c3-4bb6-8480-7741c58586f5"
       (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
+    )
+    (path "/d503cb8b-9526-47ec-9c44-5889eaafd3a9/0a075d5f-0a46-4785-90a1-8519d19960ea"
+      (reference "#PWR?") (unit 1) (value "+3V3") (footprint "")
     )
     (path "/13072d45-7636-40e2-bd9a-ba70d392b8c0"
       (reference "#PWR?") (unit 1) (value "GND") (footprint "")
@@ -2815,6 +2818,9 @@
     )
     (path "/d503cb8b-9526-47ec-9c44-5889eaafd3a9/c0ea7a8b-ef92-400e-bced-1704742ee998/12faef23-e9ed-4c79-a155-c73da8f789e5"
       (reference "R?") (unit 1) (value "3k3") (footprint "")
+    )
+    (path "/d503cb8b-9526-47ec-9c44-5889eaafd3a9/1f0d5348-02ff-4028-adbe-0eb4df753210"
+      (reference "R?") (unit 1) (value "150") (footprint "")
     )
     (path "/d503cb8b-9526-47ec-9c44-5889eaafd3a9/c0ea7a8b-ef92-400e-bced-1704742ee998/25e9f118-5432-4934-ae26-2dd5f79b41c0"
       (reference "R?") (unit 1) (value "10k") (footprint "")
