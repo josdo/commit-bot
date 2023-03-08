@@ -36,9 +36,17 @@ static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
 
 /* PI control updates */
-static float kP = .1;
-static float kI = 0.005; // 100ms ramp to +20rpm, more variation
-// static float kI = 0.001; // 500ms ramp to +20rpm
+static uint32_t low_speed_threshold = 50;
+static float fastLkP = 2;   // 2.5, 3
+static float fastLkI = 0.02;  // .02, .01
+static float fastRkP = 1;   // 1.2
+static float fastRkI = 0.03;  // .03, .01
+
+static float slowLkP = 0.1;
+static float slowLkI = 0.005;
+static float slowRkP = 0.1;
+static float slowRkI = 0.005;
+
 static float Lcurr_sum_e = 0;
 static float Llast_sum_e = 0;
 static float Rcurr_sum_e = 0;
@@ -556,6 +564,16 @@ bool reachedBothDesiredPulses(void)
   }
 }
 
+bool is_low_Lspeed(void)
+{
+  return Lspeed_desired < low_speed_threshold;
+}
+
+bool is_low_Rspeed(void)
+{
+  return Rspeed_desired < low_speed_threshold;
+}
+
 void __ISR(_INPUT_CAPTURE_1_VECTOR, IPL7SOFT) ISR_RightEncoder(void)
 {
   static uint16_t thisTime = 0; // current timer value
@@ -621,7 +639,7 @@ void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
   if (IFS0bits.T4IF)
   {
     // Left motor
-    float Lcandidate_dc = kP * Le + kI * Lcurr_sum_e;
+    float Lcandidate_dc = is_low_Lspeed() ? slowLkP * Le + slowLkI * Lcurr_sum_e : fastLkP * Le + fastLkI * Lcurr_sum_e;
     uint32_t Lfinal_dc;
     if (Lcandidate_dc > 100 || Lcandidate_dc < 0)
     {
@@ -635,7 +653,7 @@ void __ISR(_TIMER_4_VECTOR, IPL6SOFT) PIControllerISR(void)
     setMotorSpeed(LEFT_MOTOR, Ldirection_desired, Lfinal_dc);
 
     // Right motor
-    float Rcandidate_dc = kP * Re + kI * Rcurr_sum_e;
+    float Rcandidate_dc = is_low_Rspeed() ? slowRkP * Re + slowRkI * Rcurr_sum_e : fastRkP * Re + fastRkI * Rcurr_sum_e;
     uint32_t Rfinal_dc;
     if (Rcandidate_dc > 100 || Rcandidate_dc < 0)
     {

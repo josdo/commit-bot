@@ -31,7 +31,7 @@ static uint32_t rotate_speed = 50;
 static uint32_t a_bit_cm = 15;
 static uint32_t backup_speed = 20;
 static uint32_t forward_speed = 40;
-static uint32_t rotate_speed = 20;
+static uint32_t rotate_speed = 40;
 #endif
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
