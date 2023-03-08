@@ -55,7 +55,6 @@
       <itemPath>FrameworkHeaders/ButtonService.h</itemPath>
       <itemPath>ProjectHeaders/TapeDetectorService.h</itemPath>
       <itemPath>ProjectHeaders/DistanceSensor.h</itemPath>
-      <itemPath>FrameworkHeaders/TapeSensor.h</itemPath>
       <itemPath>FrameworkHeaders/BeaconSensor.h</itemPath>
       <itemPath>FrameworkHeaders/InitTimer2.h</itemPath>
       <itemPath>FrameworkHeaders/LeaderFSM.h</itemPath>
@@ -69,6 +68,7 @@
       <itemPath>ProjectHeaders/PushCommitSM.h</itemPath>
       <itemPath>ProjectHeaders/Timer5.h</itemPath>
       <itemPath>FrameworkHeaders/AdjustButtons.h</itemPath>
+      <itemPath>ProjectHeaders/DistanceSlider.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -93,8 +93,6 @@
       <itemPath>FrameworkHeaders/OptoSensorService.c</itemPath>
       <itemPath>FrameworkHeaders/ButtonService.c</itemPath>
       <itemPath>ProjectSource/TapeDetectorService.c</itemPath>
-      <itemPath>ProjectSource/DistanceSensor.c</itemPath>
-      <itemPath>FrameworkHeaders/TapeSensor.c</itemPath>
       <itemPath>FrameworkHeaders/BeaconSensor.c</itemPath>
       <itemPath>FrameworkHeaders/InitTimer2.c</itemPath>
       <itemPath>FrameworkHeaders/DCMotor.c</itemPath>
@@ -110,6 +108,7 @@
       <itemPath>ProjectSource/PushCommitSM.c</itemPath>
       <itemPath>ProjectSource/Timer5.c</itemPath>
       <itemPath>FrameworkHeaders/AdjustButtons.c</itemPath>
+      <itemPath>FrameworkHeaders/DistanceSlider.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
