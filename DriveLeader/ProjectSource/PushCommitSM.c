@@ -11,20 +11,26 @@
 
 static PushCommitSMState_t CurrentState;
 static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event);
+static ES_Event_t DuringSlowMoveForward(ES_Event_t Event);
 static ES_Event_t DuringMoveForward(ES_Event_t Event);
 static ES_Event_t DuringBackUpABit(ES_Event_t Event);
 static ES_Event_t DuringForwardABit(ES_Event_t Event);
 
 #ifdef DEBUG_ON
+static const uint32_t slow_forward_speed = 150;
 static const uint32_t forward_speed = 100;
 static const uint32_t a_bit_speed = 50;
 static const uint32_t a_bit_cm = 10;
 static const uint32_t rotate_speed = 40;
 #else
-static const uint32_t forward_speed = 80;
-static const uint32_t a_bit_speed = 20;
+static const uint32_t slow_forward_speed = 50;
+static const uint32_t forward_speed = 150;
+static const uint32_t a_bit_speed = 40;
 static const uint32_t a_bit_cm = 15;
 static const uint32_t rotate_speed = 40;
+
+static const float slow_forward_cm = 15;
+
 #endif
 
 ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
@@ -80,8 +86,26 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                     case ES_ROTATED:
                     {
                         DB_printf("PushCommitSM: Finished rotating to face branch\r\n");
-                        NextState = MOVE_FORWARD;
+                        NextState = SLOW_MOVE_FORWARD;
                         MakeTransition = true;
+                    }
+                }
+            }
+        }
+        break;
+
+        case SLOW_MOVE_FORWARD:
+        {
+            CurrentEvent = DuringSlowMoveForward(CurrentEvent);
+            if(CurrentEvent.EventType != ES_NO_EVENT)
+            {
+                switch(CurrentEvent.EventType)
+                {
+                    case ES_TRANSLATED:
+                    {
+                      DB_printf("PushCommitSM: done SLOWER move forward\r\n");
+                      NextState = MOVE_FORWARD;
+                      MakeTransition = true;
                     }
                 }
             }
@@ -97,6 +121,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                 {
                     case ES_TRANSLATED:
                     {
+                      DB_printf("PushCommitSM: done FASTER move forward\r\n");
                         ES_Event_t NewEvent;
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
@@ -104,6 +129,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                 }
             }
         }
+        break;
     }
     
     if (MakeTransition == true)
@@ -163,7 +189,6 @@ static ES_Event_t DuringBackUpABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        DB_printf("PushCommitSM: Backward a bit\r\n");
       drive(BACKWARD, a_bit_cm, a_bit_speed);
     }
     else if (Event.EventType == ES_EXIT)
@@ -199,7 +224,6 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        DB_printf("PushCommitSM: Forward a bit\r\n");
       drive(FORWARD, a_bit_cm, a_bit_speed);
     }
      else if (Event.EventType == ES_EXIT)
@@ -211,14 +235,32 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     return ReturnEvent;
 }
 
+static ES_Event_t DuringSlowMoveForward(ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event;
+    if ( (Event.EventType == ES_ENTRY) || 
+         (Event.EventType == ES_ENTRY_HISTORY))
+    {
+      drive(FORWARD, slow_forward_cm, slow_forward_speed);
+    }
+    
+    else if (Event.EventType == ES_EXIT)
+    {
+    }
+    else
+    {
+    }
+    return ReturnEvent;
+}
+
+
 static ES_Event_t DuringMoveForward(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-      DB_printf("PushCommitSM: Moving Forward\r\n");
-      drive(FORWARD, getDesiredBranchDistance(), forward_speed);
+      drive(FORWARD, getDesiredBranchDistance() - slow_forward_cm, forward_speed);
       
     }
     

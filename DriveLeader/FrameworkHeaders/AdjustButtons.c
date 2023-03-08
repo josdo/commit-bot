@@ -43,7 +43,7 @@ bool pressedLeftAdjust(void)
     if(stateChanged && isPressed){
         adjust(LEFT_MOTOR, getAdjustDirection(), adjust_cm, adjust_speed);  \
         // ES_Event_t ReturnEvent = {ES_ADJUST_LEFT, getAdjustDirection()};
-        // DB_printf("AdjustButtons: pressedLeftAdjust\r\n");
+        DB_printf("AdjustButtons: pressedLeftAdjust\r\n");
         // PostTopHSM(ReturnEvent);
         return true;
     }
@@ -59,7 +59,7 @@ bool pressedRightAdjust(void)
     if(stateChanged && isPressed){
         adjust(RIGHT_MOTOR, getAdjustDirection(), adjust_cm, adjust_speed);  \
         // ES_Event_t ReturnEvent = {ES_ADJUST_RIGHT, getAdjustDirection()};
-        // DB_printf("AdjustButtons: pressedRightAdjust\r\n");
+        DB_printf("AdjustButtons: pressedRightAdjust\r\n");
         // PostTopHSM(ReturnEvent);
         return true;
     }
