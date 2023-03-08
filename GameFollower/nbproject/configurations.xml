@@ -50,6 +50,9 @@
       <itemPath>ProjectHeaders/TestHarnessService0.h</itemPath>
       <itemPath>ProjectHeaders/TemplateService.h</itemPath>
       <itemPath>ProjectHeaders/BranchSwitch.h</itemPath>
+      <itemPath>ProjectHeaders/ButtonService.h</itemPath>
+      <itemPath>ProjectHeaders/ServoService.h</itemPath>
+      <itemPath>ProjectHeaders/LEDService.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -70,6 +73,9 @@
       <itemPath>ProjectSource/main.c</itemPath>
       <itemPath>ProjectSource/TemplateService.c</itemPath>
       <itemPath>ProjectSource/BranchSwitch.c</itemPath>
+      <itemPath>ProjectSource/ButtonService.c</itemPath>
+      <itemPath>ProjectSource/ServoService.c</itemPath>
+      <itemPath>ProjectSource/LEDService.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -128,6 +134,22 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../Shared/EventOverSPI.c" ex="false" overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
       <C32>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
@@ -158,6 +180,26 @@
       <C32-AR>
         <property key="additional-options-chop-files" value="false"/>
       </C32-AR>
+      <C32-AS>
+        <property key="assembler-symbols" value=""/>
+        <property key="enable-symbols" value="true"/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="oXC32asm-list-to-file" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warning-level" value=""/>
+      </C32-AS>
       <C32-CO>
         <property key="coverage-enable" value=""/>
         <property key="stack-guidance" value="false"/>

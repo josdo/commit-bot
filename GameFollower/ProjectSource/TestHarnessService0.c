@@ -7,9 +7,11 @@
 #include "ES_Port.h"
 #include "terminal.h"
 #include "dbprintf.h"
-#include "../../Shared/EventOverSPI.h"
+//#include "../../Shared/EventOverSPI.h"
 
 #include "BranchSwitch.h"
+#include "LEDService.h"
+#include "ButtonService.h"
 
 // #include "../../Shared/PIC32_SPI_HAL.h"
 // #include <xc.h>
@@ -28,7 +30,9 @@ bool InitTestHarnessService0(uint8_t Priority)
   DB_printf( "\n\r\n");
   DB_printf( "Press any key to post key-stroke events\n\r");
 
-  InitEventOverSPI(false);
+//  InitEventOverSPI(false);
+  
+//  InitButtonService();
 
   ThisEvent.EventType = ES_INIT;
   if (ES_PostToService(MyPriority, ThisEvent) == true)
@@ -57,9 +61,9 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     {
       puts("Service 00:");
       DB_printf("\rES_INIT received in Service %d\r\n", MyPriority);
-       ES_Timer_InitTimer(SWITCH_TIMER, 1000);
+//       ES_Timer_InitTimer(SWITCH_TIMER, 1000);
       
-      InitSwitches();
+//      InitSwitches();
     }
     break;
 
@@ -74,11 +78,11 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     {
         if (SWITCH_TIMER == ThisEvent.EventParam){
             puts("\n");
-            BranchType_t B = GetBranch();
-            BranchDist_t D = GetDist();
-            DB_printf("Branch = %d\r\n", B);
-            DB_printf("Dist = %d\r\n", D);
-            ES_Timer_InitTimer(SWITCH_TIMER, 1000);
+//            BranchType_t B = GetBranch();
+//            BranchDist_t D = GetDist();
+//            DB_printf("Branch = %d\r\n", B);
+//            DB_printf("Dist = %d\r\n", D);
+//            ES_Timer_InitTimer(SWITCH_TIMER, 1000);
         }
 //      ES_Timer_InitTimer(SERVICE0_TIMER, FIVE_SEC);
       // DB_printf("ES_TIMEOUT received from Timer %d in Service %d\r\n",
@@ -91,11 +95,24 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
      DB_printf("\n\r\n\rES_NEW_KEY received with -> %c <- in Service 0\r\n",
          (char)ThisEvent.EventParam);
       
-      if (ThisEvent.EventParam == 'q') {
-        DB_printf("TestHarnessService0: post test event to leader\r\n");
-        ES_Event_t followerEvent = {ES_TEST_TO_LEADER, 234};
-        PostEventOverSPI(followerEvent);
-      }
+      if ('b' == ThisEvent.EventParam){
+              ES_Event_t testEvent = {ES_FOUND_BEACON_B, 0};
+              ES_PostAll(testEvent);
+          }
+          
+          else if ('c' == ThisEvent.EventParam){
+              ES_Event_t testEvent = {ES_FOUND_BEACON_C, 0};
+              ES_PostAll(testEvent);
+          }
+          
+          else if ('f' == ThisEvent.EventParam){
+              ES_Event_t testEvent = {ES_GAME_END, 0};
+              ES_PostAll(testEvent);
+          }
+          else if ('s' == ThisEvent.EventParam){
+              ES_Event_t testEvent = {ES_GAME_START, 0};
+              ES_PostAll(testEvent);
+          }
     }
     break;
   }

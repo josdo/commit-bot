@@ -35,7 +35,7 @@
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 1
+#define NUM_SERVICES 3
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service.
@@ -59,11 +59,11 @@
 // These are the definitions for Service 1
 #if NUM_SERVICES > 1
 // the header file with the public function prototypes
-#define SERV_1_HEADER "DCMotorService.h"
+#define SERV_1_HEADER "LEDService.h"
 // the name of the Init function
-#define SERV_1_INIT InitDCMotorService
+#define SERV_1_INIT InitLEDService
 // the name of the run function
-#define SERV_1_RUN RunDCMotorService
+#define SERV_1_RUN RunLEDService
 // How big should this services Queue be?
 #define SERV_1_QUEUE_SIZE 3
 #endif
@@ -72,11 +72,11 @@
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "OptoSensorService.h"
+#define SERV_2_HEADER "ServoService.h"
 // the name of the Init function
-#define SERV_2_INIT InitOptoSensorService
+#define SERV_2_INIT InitServoService
 // the name of the run function
-#define SERV_2_RUN RunOptoSensorService
+#define SERV_2_RUN RunServoService
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif
@@ -85,11 +85,11 @@
 // These are the definitions for Service 3
 #if NUM_SERVICES > 3
 // the header file with the public function prototypes
-#define SERV_3_HEADER "DisplayEncoderService.h"
+#define SERV_3_HEADER "ServoService.h"
 // the name of the Init function
-#define SERV_3_INIT InitDisplayEncoderService
+#define SERV_3_INIT InitServoService
 // the name of the run function
-#define SERV_3_RUN RunDisplayEncoderService
+#define SERV_3_RUN RunServoService
 // How big should this services Queue be?
 #define SERV_3_QUEUE_SIZE 3
 #endif
@@ -283,7 +283,7 @@
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST Check4Keystroke
+#define EVENT_CHECK_LIST Check4Keystroke, CheckButtonEvents
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
