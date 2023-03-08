@@ -9,17 +9,25 @@
 #include <sys/attribs.h>
 #include "DistanceSlider.h"
 
-uint32_t analog_signal[1];
-
+static uint32_t analog_signal[1];
 static uint32_t AnalogValue = 0;
-// max distance in cm
+
+// Length of branch in cm.
 static uint32_t max_distance = 130; 
 
-// ------------------- Constants for distance
-static const uint16_t DIST_55_VAL = 855;
-static const uint16_t DIST_70_VAL = 680;
-static const uint16_t DIST_85_VAL = 513;
-static const uint16_t DIST_100_VAL = 343;
+/* Percentages down the branch to travel. */
+// analog 850
+static const uint16_t percent1 = 55;
+// analog 670
+static const uint16_t percent2 = 70;
+// analog 510
+static const uint16_t percent3 = 85;
+// analog 340
+static const uint16_t percent4 = 100;
+
+static const uint16_t threshold1_2 = 750;
+static const uint16_t threshold2_3 = 600;
+static const uint16_t threshold3_4 = 400;
 
 void InitDistanceSlider()
 {
@@ -29,32 +37,27 @@ void InitDistanceSlider()
     TRISBbits.TRISB13 = 1;
     
     ADC_ConfigAutoScan(BIT11HI,1);
-    
 }
 
-uint32_t getDistanceSliderValue(void)
+/* Returns desired branch distance to travel in cm.
+   Higher voltage is lower on the toggle switch. */
+uint32_t getDesiredBranchDistance(void)
 {
     ADC_MultiRead(analog_signal);
+
+    if (analog_signal[0] > threshold1_2){
+        AnalogValue = percent1 * max_distance /100;
+    }
+    else if (analog_signal[0] > threshold2_3){
+        AnalogValue = percent2 * max_distance /100;
+    }
+    else if (analog_signal[0] > threshold3_4){
+        AnalogValue = percent3 * max_distance /100;
+    }
+    else {
+        AnalogValue = percent4 * max_distance /100;
+    }
     
-    if (DIST_55_VAL - 10 < analog_signal[0] && 
-            analog_signal[0] < DIST_55_VAL + 10){
-        AnalogValue = 55 * max_distance /100;
-    }
-    else if (DIST_70_VAL - 10 < analog_signal[0] && 
-            analog_signal[0] < DIST_70_VAL + 10){
-        AnalogValue = 70 * max_distance /100;
-    }
-    
-    else if (DIST_85_VAL - 10 < analog_signal[0] && 
-            analog_signal[0] < DIST_85_VAL + 10){
-        AnalogValue = 85 * max_distance /100;
-    }
-    
-    else if (DIST_100_VAL - 10 < analog_signal[0] && 
-            analog_signal[0] < DIST_100_VAL + 10){
-        AnalogValue = 100 * max_distance /100;
-    }
     return AnalogValue;
-    
 }
 

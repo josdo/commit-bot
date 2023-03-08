@@ -15,6 +15,7 @@
 #include "DCMotor.h"
 #include "InitTimer2.h"
 #include "DistanceSlider.h"
+#include <math.h>
 
 
 /*----------------------------- Module Defines ----------------------------*/
@@ -91,7 +92,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
-            // DB_printf("Distance Slider Value: %d\r\n", getDistanceSliderValue());
+            DB_printf("Distance Slider Value: %d\r\n", getDesiredBranchDistance());
 //           DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
@@ -103,7 +104,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
         {
           float rspeed = getMotorSpeed(RIGHT_MOTOR);
           float lspeed = getMotorSpeed(LEFT_MOTOR);
-          DB_printf("Rspeed %d  Lspeed %d\r\n", (uint32_t)rspeed, (uint32_t)lspeed);
+          DB_printf("Rspeed %d  Lspeed %d  Diff %d\r\n", (uint32_t)rspeed, (uint32_t)lspeed, abs(rspeed - lspeed));
           ES_Timer_InitTimer(PRINT_MOTOR_TIMER, motor_timer_period);
         }
         else if (ThisEvent.EventParam == PRINT_ENCODER_TIMER)
