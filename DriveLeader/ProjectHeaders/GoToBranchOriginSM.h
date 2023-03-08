@@ -9,7 +9,7 @@ ES_Event_t RunGoToBranchOriginSM(ES_Event_t CurrentEvent);
 void StartGoToBranchOriginSM( ES_Event_t CurrentEvent );
 GoToBranchOriginState_t QueryGoToBranchOriginSM ( void );
 GoToBranchOriginState_t QueryGoToBranchOriginPrevSM (void);
-
+void SetGoToBranchOriginPrevSM(GoToBranchOriginState_t);
 bool Check4FirstBranch(void);
 bool Check4ThirdBranch(void);
 #endif

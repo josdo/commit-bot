@@ -128,8 +128,8 @@ void StartPushCommitSM( ES_Event_t CurrentEvent )
     {
         GoToBranchOriginState_t CurrentBranch = QueryGoToBranchOriginSM();
         GoToBranchOriginState_t PrevBranch = QueryGoToBranchOriginPrevSM();
-        DB_printf("PushCommitSM: Previous Branch : %d\r\n", PrevBranch);
-        DB_printf("PushCommitSM: Current Branch : %d\r\n", CurrentBranch);
+        DB_printf("PushCommitSM: Previous Branch : %d\r\n", PrevBranch + 1);
+        DB_printf("PushCommitSM: Current Branch : %d\r\n", CurrentBranch + 1);
        if (CurrentBranch == PrevBranch)
        {
            CurrentState = ROTATE_TO_FACE_BRANCH;
@@ -164,6 +164,7 @@ static ES_Event_t DuringBackUpABit(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
+        DB_printf("PushCommitSM: Backward a bit\r\n");
       drive(BACKWARD, a_bit_cm, a_bit_speed);
     }
     else if (Event.EventType == ES_EXIT)
@@ -217,7 +218,7 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        DB_printf("PushCommitSM: Backward a bit\r\n");
+        DB_printf("PushCommitSM: Moving Forward\r\n");
       drive(FORWARD, forward_cm, forward_speed);
       
     }

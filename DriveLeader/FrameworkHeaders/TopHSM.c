@@ -32,6 +32,7 @@ static ES_Event_t DuringComeBack(ES_Event_t Event);
 
 bool InitTopHSM ( uint8_t Priority )
 {
+    puts("A NEW START!!!\r\n");
   ES_Event_t ThisEvent;
   
   InitDCMotor(true);
@@ -126,7 +127,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    break;
                    case ES_FINISH:
                    {    
-                        EntryEventKind.EventType = ES_ENTRY_HISTORY;
+                        EntryEventKind.EventType = ES_ENTRY;
                         MakeTransition = true;
                         NextState = GO_TO_BRANCH_ORIGIN;
                    }
@@ -148,6 +149,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    {
                         setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
                         setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
+                        EntryEventKind.EventType = ES_ENTRY;
                         MakeTransition = true;
                         NextState = PUSH_COMMIT;
                    }
@@ -170,6 +172,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    {
                        if (CurrentEvent.EventParam == 'z')
                        {
+                           EntryEventKind.EventType = ES_ENTRY;
                             MakeTransition = true;
                             NextState = COME_BACK;
                        }
@@ -178,6 +181,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
 
                    case ES_FINISH:
                    {
+                       EntryEventKind.EventType = ES_ENTRY;
                         MakeTransition = true;
                         NextState = COME_BACK;
                    }

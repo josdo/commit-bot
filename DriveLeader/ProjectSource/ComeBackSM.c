@@ -2,7 +2,7 @@
 #include "ES_Framework.h"
 #include "dbprintf.h"
 #include "TopHSM.h"
-
+#include "GoToBranchOriginSM.h"
 #include "ComeBackSM.h"
 #include "DCMotor.h"
 
@@ -10,7 +10,7 @@
 static ES_Event_t DuringReverseToWall( ES_Event_t Event);
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event);
 static ES_Event_t DuringMoveForwardABit( ES_Event_t Event);
-
+GoToBranchOriginState_t CurrentBranch;
 static ComeBackState_t CurrentState;
 
 #ifdef DEBUG_ON
@@ -80,6 +80,9 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
                switch (CurrentEvent.EventType){
                   case ES_ROTATED: {
                     DB_printf("ComeBackSM: got ES_ROTATED\r\n");
+                    
+                    CurrentBranch = QueryGoToBranchOriginSM();
+                    SetGoToBranchOriginPrevSM(CurrentBranch);
                         ES_Event_t NewEvent;
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
@@ -133,6 +136,7 @@ static ES_Event_t DuringReverseToWall( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
+        DB_printf("ComeBackSM: Reversing till wall\r\n");
         setDesiredSpeed(RIGHT_MOTOR, BACKWARD, reverse_speed);
         setDesiredSpeed(LEFT_MOTOR, BACKWARD, reverse_speed);
     }

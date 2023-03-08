@@ -469,7 +469,7 @@ bool reachedDesiredLPulses(void)
     reached_Lpulses = true;
     __builtin_enable_interrupts();
 
-    DB_printf("Desired %u Lpulses, stopped at %u Lpulses\r\n", desired, curr);
+//    DB_printf("Desired %u Lpulses, stopped at %u Lpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
     Lpulses_curr = 0;
@@ -501,7 +501,7 @@ bool reachedDesiredRPulses(void)
     reached_Rpulses = true;
     __builtin_enable_interrupts();
 
-    DB_printf("Desired %u Rpulses, stopped at %u Rpulses\r\n", desired, curr);
+//    DB_printf("Desired %u Rpulses, stopped at %u Rpulses\r\n", desired, curr);
 
     __builtin_disable_interrupts();
     Rpulses_curr = 0;
