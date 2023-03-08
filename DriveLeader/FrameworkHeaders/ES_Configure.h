@@ -287,7 +287,8 @@
 // This is the list of event checking functions
 #define EVENT_CHECK_LIST Check4Keystroke, Check4CornerBeacons, Check4FirstBranch, Check4ThirdBranch, \
                          Check4InitialDistance, reachedDesiredLPulses, reachedDesiredRPulses, \
-                         reachedBothDesiredPulses, Check4Wall, check4GameTimer
+                         reachedBothDesiredPulses, Check4Wall, check4GameTimer, \
+                         pressedLeftAdjust, pressedRightAdjust
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the

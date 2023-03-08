@@ -51,6 +51,10 @@ typedef enum
   ES_TRANSLATED,
   ES_FOUND_TAPE,
   ES_REACHED_WALL,
+  ES_ADJUST_LEFT, // never posted by event checker right now
+  ES_ADJUST_RIGHT, // idem
+  ES_FINISHED_ADJUST_LEFT,
+  ES_FINISHED_ADJUST_RIGHT,
   NUM_ES_EVENTS
 }ES_EventType_t;
 

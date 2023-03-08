@@ -45,6 +45,7 @@ static float Rcurr_sum_e = 0;
 static float Rlast_sum_e = 0;
 
 /* Rotation and translation */
+static const uint32_t pulses_per_cm = 6;
 static uint32_t Lpulses_desired = 0;
 static uint32_t Rpulses_desired = 0;
 static uint32_t Lpulses_curr = 0;
@@ -370,8 +371,6 @@ uint32_t getRolloverTicks(void)
    the desired number of pulses is reached.) */
 void drive(Directions_t direction, uint32_t dist_cm, uint32_t speed)
 {
-  static const uint32_t pulses_per_cm = 6;
-
   uint32_t num_pulses = pulses_per_cm * dist_cm;
 
   __builtin_disable_interrupts();
@@ -415,6 +414,32 @@ void drive(Directions_t direction, uint32_t dist_cm, uint32_t speed)
   reached_Lpulses = false;
   reached_Rpulses = false;
   __builtin_enable_interrupts();
+}
+
+/* Change the desired pulses for just the one motor specified. */
+void adjust(Motors_t motor, Directions_t direction, uint32_t dist_cm, uint32_t speed)
+{
+  uint32_t num_pulses = pulses_per_cm * dist_cm;
+
+  __builtin_disable_interrupts();
+  if (LEFT_MOTOR == motor)
+  {
+    Lpulses_desired = num_pulses;
+    Lpulses_curr = 0;
+    counting_Lpulses = true;
+    reached_Lpulses = false;
+  }
+  else if (RIGHT_MOTOR == motor)
+  {
+    Rpulses_desired = num_pulses;
+    Rpulses_curr = 0;
+    counting_Rpulses = true;
+    reached_Rpulses = false;
+  }
+  __builtin_enable_interrupts();
+
+  setDesiredSpeed(motor, direction, speed);
+  reached_event = LEFT_MOTOR == motor ? ES_FINISHED_ADJUST_LEFT : ES_FINISHED_ADJUST_RIGHT;
 }
 
 /* Rotate 90 degrees. */

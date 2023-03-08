@@ -11,9 +11,14 @@
 #include "ComeBackSM.h"
 #include "PIC32PortHAL.h"
 #include "Timer5.h"
+#include "AdjustButtons.h"
 
 static MasterState_t CurrentState;
 static uint8_t MyPriority;
+
+// static const uint32_t adjust_cm = 5;
+// static const uint32_t adjust_speed = 50;
+
 #define follower_query_timer 20
 #define CASE_GAME_OVER \
         case ES_GAME_END:  \
@@ -23,6 +28,23 @@ static uint8_t MyPriority;
             setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);  \
             setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0); \
         } break;
+
+// /* Adjust the desired speed of only the motor whose button was pressed. */
+// #define CASE_ADJUST_LEFT \
+//         case ES_ADJUST_LEFT:  \
+//         {                                   \
+//             MakeTransition = false;          \
+//             NextState = IDLE;               \
+//             DB_printf("TopHSM: got ES_ADJUST_LEFT\r\n");
+//             adjust(LEFT_MOTOR, CurrentEvent.EventParam, adjust_cm, adjust_speed);  \
+//         } break;
+// #define CASE_ADJUST_RIGHT \
+//         case ES_ADJUST_RIGHT:  \
+//         {                                   \
+//             MakeTransition = false;          \
+//             NextState = IDLE;               \
+//             adjust(RIGHT_MOTOR, CurrentEvent.EventParam, adjust_cm, adjust_speed);  \
+//         } break;
 
 static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
@@ -38,6 +60,7 @@ bool InitTopHSM ( uint8_t Priority )
   InitDCMotor(true);
   InitEventOverSPI(true);
   InitTimer5();
+  InitAdjustButtons();
 
 //  InitDistanceSensor();
 //  InitTapeSensor();
@@ -101,7 +124,26 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                         NextState = CALIBRATION;
                    }      
                    break;
+
+                   case ES_FINISHED_ADJUST_LEFT:
+                   {
+                       DB_printf("TopHSM: finished adjust left, go to branch origin state\r\n");
+                       MakeTransition = true;
+                       NextState = GO_TO_BRANCH_ORIGIN;
+                   }
+                   break;
+
+                   case ES_FINISHED_ADJUST_RIGHT:
+                   {
+                       DB_printf("TopHSM: finished adjust right, go to branch origin state\r\n");
+                       MakeTransition = true;
+                       NextState = GO_TO_BRANCH_ORIGIN;
+                   }
+                   break;
+
                    CASE_GAME_OVER
+                  //  CASE_ADJUST_LEFT
+                  //  CASE_ADJUST_RIGHT
                }
            }
        }
@@ -133,6 +175,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
+                  //  CASE_ADJUST_LEFT
+                  //  CASE_ADJUST_RIGHT
                }
            } 
        }
@@ -155,6 +199,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
+                  //  CASE_ADJUST_LEFT
+                  //  CASE_ADJUST_RIGHT
                }
            }
        }
@@ -187,6 +233,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
+                  //  CASE_ADJUST_LEFT
+                  //  CASE_ADJUST_RIGHT
                 }
            }
        }
@@ -219,6 +267,8 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    } 
                    break;
                    CASE_GAME_OVER
+                  //  CASE_ADJUST_LEFT
+                  //  CASE_ADJUST_RIGHT
                }
            }
        }

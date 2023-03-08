@@ -24,6 +24,7 @@
 #include "DCMotor.h"
 #include "ComeBackSM.h"
 #include "Timer5.h"
+#include "AdjustButtons.h"
 
 //#include "MotorStepService.h"
 
