@@ -29,7 +29,7 @@ const uint32_t dist_from_three_to_two = 76;
 #ifdef DEBUG_ON
 const uint32_t translation_speed = 100;
 #else
-const uint32_t translation_speed = 40;
+const uint32_t translation_speed = 70;
 #endif
 
 static const uint32_t debounce_ms = 200;

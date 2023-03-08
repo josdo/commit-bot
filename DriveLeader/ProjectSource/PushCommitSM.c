@@ -21,11 +21,11 @@ static const uint32_t a_bit_speed = 50;
 static const uint32_t a_bit_cm = 10;
 static const uint32_t rotate_speed = 40;
 #else
-static const uint32_t forward_speed = 40;
+static const uint32_t forward_speed = 80;
 static const uint32_t forward_cm = 130;
 static const uint32_t a_bit_speed = 20;
 static const uint32_t a_bit_cm = 15;
-static const uint32_t rotate_speed = 20;
+static const uint32_t rotate_speed = 40;
 #endif
 
 ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
