@@ -26,7 +26,6 @@ void InitSwitches(void);
 
 // ENUMS ARE DEFINED IN SHARED CONFIG
 BranchType_t GetBranch(void);
-BranchDist_t GetDist(void);
 
 #endif /* TemplateService_H */ 
 

@@ -21,11 +21,13 @@ static const uint32_t rotate_speed = 50;
 static const uint32_t reverse_speed = 100;
 #else
 static const uint32_t a_bit_cm = 10;
-static const uint32_t a_bit_speed = 40;
-static const uint32_t rotate_speed = 40;
+static const uint32_t a_bit_speed = 80;
+static const uint32_t rotate_speed = 60;
+
 static const uint32_t reverse_speed = 150;
+// TODO: 70
+static const uint32_t slow_reverse_speed = 30;
 static const uint32_t slow_reverse_cm = 15;
-static const uint32_t slow_reverse_speed = 50;
 #endif
 
 static uint32_t debounce_time = 200;

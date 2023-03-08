@@ -23,11 +23,12 @@ static const uint32_t a_bit_speed = 50;
 static const uint32_t a_bit_cm = 10;
 static const uint32_t rotate_speed = 40;
 #else
-static const uint32_t slow_forward_speed = 50;
-static const uint32_t forward_speed = 150;
-static const uint32_t a_bit_speed = 40;
+static const uint32_t forward_speed = 175;
+// TODO: 3 stage
+static const uint32_t slow_forward_speed = 75;
+static const uint32_t a_bit_speed = 80;
 static const uint32_t a_bit_cm = 15;
-static const uint32_t rotate_speed = 40;
+static const uint32_t rotate_speed = 80;
 
 static const float slow_forward_cm = 15;
 

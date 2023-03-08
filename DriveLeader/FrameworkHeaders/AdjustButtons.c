@@ -12,7 +12,7 @@
 #define RightAdjustPort PORTBbits.RB9
 #define DirectionAdjustPort PORTAbits.RA3
 
-static const uint32_t adjust_cm = 2;
+static const uint32_t adjust_cm = 1;
 static const uint32_t adjust_speed = 100;
 
 static volatile bool lastLeftState;

@@ -13,7 +13,6 @@ bool InitLEDService(uint8_t Priority)
   
   puts("Init LED service\r\n");
   printf("ES_FOUND_BEACON_C = %u\r\n", ES_FOUND_BEACON_C);
-  puts("fkjkldasf\r\n");
   
   TRISAbits.TRISA2 = 0;             // RA2 output - BLUE
   TRISAbits.TRISA3 = 0;             // RA3 output - RED
@@ -39,8 +38,8 @@ ES_Event_t RunLEDService(ES_Event_t ThisEvent)
 
   // TODO write service code
   switch(ThisEvent.EventType){
-      case ES_FOUND_BEACON_C: {
-          puts("LED found beacon C\r\n");
+      case ES_FOUND_BEACON_B: {
+          puts("LED found beacon B\r\n");
 //          RED = 0;
 //          BLUE = 1;
           
@@ -49,8 +48,8 @@ ES_Event_t RunLEDService(ES_Event_t ThisEvent)
       }
       break;
       
-      case ES_FOUND_BEACON_B: {
-          puts("LED found beacon B\r\n");
+      case ES_FOUND_BEACON_C: {
+          puts("LED found beacon C\r\n");
 //          RED = 1;
 //          BLUE = 0;
           
