@@ -22,7 +22,7 @@ static const uint32_t reverse_speed = 100;
 static const uint32_t a_bit_cm = 15;
 static const uint32_t a_bit_speed = 40;
 static const uint32_t rotate_speed = 20;
-static const uint32_t reverse_speed = 40;
+static const uint32_t reverse_speed = 80;
 #endif
 
 static uint32_t debounce_time = 200;
