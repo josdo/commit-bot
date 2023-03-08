@@ -14,6 +14,7 @@
 #include "BeaconSensor.h"
 #include "DCMotor.h"
 #include "InitTimer2.h"
+#include "DistanceSlider.h"
 
 
 /*----------------------------- Module Defines ----------------------------*/
@@ -36,8 +37,7 @@ bool InitTestHarnessService0(uint8_t Priority)
 
   // initialising everything
   InitTimer2();
-  InitDistanceSensor();
-  InitTapeSensor();
+  InitDistanceSlider();
   InitBeaconSensor();
   InitDCMotor(true);
   DB_printf("Initialized TestHarnessService0, compiled at %s on %s\r\n", __TIME__, __DATE__);
@@ -91,6 +91,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
     case ES_TIMEOUT:
     {
         if(ThisEvent.EventParam == SERVICE0_TIMER){
+            DB_printf("Distance Slider Value: %d\r\n", getDistanceSliderValue());
 //           DB_printf("Distance Period is: %d\r\n", getDistance());
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
 //            DB_printf("Middle Is it on tape: %d\r\n", isOnTape(MiddleTapeSensor));
