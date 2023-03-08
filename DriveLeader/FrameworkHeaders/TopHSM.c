@@ -29,23 +29,6 @@ static uint8_t MyPriority;
             setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0); \
         } break;
 
-// /* Adjust the desired speed of only the motor whose button was pressed. */
-// #define CASE_ADJUST_LEFT \
-//         case ES_ADJUST_LEFT:  \
-//         {                                   \
-//             MakeTransition = false;          \
-//             NextState = IDLE;               \
-//             DB_printf("TopHSM: got ES_ADJUST_LEFT\r\n");
-//             adjust(LEFT_MOTOR, CurrentEvent.EventParam, adjust_cm, adjust_speed);  \
-//         } break;
-// #define CASE_ADJUST_RIGHT \
-//         case ES_ADJUST_RIGHT:  \
-//         {                                   \
-//             MakeTransition = false;          \
-//             NextState = IDLE;               \
-//             adjust(RIGHT_MOTOR, CurrentEvent.EventParam, adjust_cm, adjust_speed);  \
-//         } break;
-
 static ES_Event_t DuringIdle(ES_Event_t Event);
 static ES_Event_t DuringCalibration( ES_Event_t Event);
 static ES_Event_t DuringGo2BranchOrigin( ES_Event_t Event );
@@ -125,25 +108,7 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }      
                    break;
 
-                   case ES_FINISHED_ADJUST_LEFT:
-                   {
-                       DB_printf("TopHSM: finished adjust left, go to branch origin state\r\n");
-                       MakeTransition = true;
-                       NextState = GO_TO_BRANCH_ORIGIN;
-                   }
-                   break;
-
-                   case ES_FINISHED_ADJUST_RIGHT:
-                   {
-                       DB_printf("TopHSM: finished adjust right, go to branch origin state\r\n");
-                       MakeTransition = true;
-                       NextState = GO_TO_BRANCH_ORIGIN;
-                   }
-                   break;
-
                    CASE_GAME_OVER
-                  //  CASE_ADJUST_LEFT
-                  //  CASE_ADJUST_RIGHT
                }
            }
        }
@@ -175,8 +140,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
-                  //  CASE_ADJUST_LEFT
-                  //  CASE_ADJUST_RIGHT
                }
            } 
        }
@@ -199,8 +162,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
-                  //  CASE_ADJUST_LEFT
-                  //  CASE_ADJUST_RIGHT
                }
            }
        }
@@ -233,8 +194,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    }
                    break;
                    CASE_GAME_OVER
-                  //  CASE_ADJUST_LEFT
-                  //  CASE_ADJUST_RIGHT
                 }
            }
        }
@@ -267,8 +226,6 @@ ES_Event_t RunTopHSM( ES_Event_t CurrentEvent )
                    } 
                    break;
                    CASE_GAME_OVER
-                  //  CASE_ADJUST_LEFT
-                  //  CASE_ADJUST_RIGHT
                }
            }
        }

@@ -10,7 +10,6 @@
 #include "DistanceSlider.h"
 
 static uint32_t analog_signal[1];
-static uint32_t AnalogValue = 0;
 
 // Length of branch in cm.
 static uint32_t max_distance = 130; 
@@ -45,19 +44,21 @@ uint32_t getDesiredBranchDistance(void)
 {
     ADC_MultiRead(analog_signal);
 
+    uint32_t desired_distance;
     if (analog_signal[0] > threshold1_2){
-        AnalogValue = percent1 * max_distance /100;
+        desired_distance = percent1 * max_distance /100;
     }
     else if (analog_signal[0] > threshold2_3){
-        AnalogValue = percent2 * max_distance /100;
+        desired_distance = percent2 * max_distance /100;
     }
     else if (analog_signal[0] > threshold3_4){
-        AnalogValue = percent3 * max_distance /100;
+        desired_distance = percent3 * max_distance /100;
     }
     else {
-        AnalogValue = percent4 * max_distance /100;
+        desired_distance = percent4 * max_distance /100;
     }
     
-    return AnalogValue;
+    DB_printf("DistanceSlider: read desired branch distance of %d cm\r\n", desired_distance);
+    return desired_distance;
 }
 

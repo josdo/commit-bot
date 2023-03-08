@@ -7,6 +7,7 @@
 #include "TopHSM.h"
 #include "GoToBranchOriginSM.h"
 #include "dbprintf.h"
+#include "DistanceSlider.h"
 
 static PushCommitSMState_t CurrentState;
 static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event);
@@ -16,13 +17,11 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event);
 
 #ifdef DEBUG_ON
 static const uint32_t forward_speed = 100;
-static const uint32_t forward_cm = 130;
 static const uint32_t a_bit_speed = 50;
 static const uint32_t a_bit_cm = 10;
 static const uint32_t rotate_speed = 40;
 #else
 static const uint32_t forward_speed = 80;
-static const uint32_t forward_cm = 130;
 static const uint32_t a_bit_speed = 20;
 static const uint32_t a_bit_cm = 15;
 static const uint32_t rotate_speed = 40;
@@ -218,8 +217,8 @@ static ES_Event_t DuringMoveForward(ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-        DB_printf("PushCommitSM: Moving Forward\r\n");
-      drive(FORWARD, forward_cm, forward_speed);
+      DB_printf("PushCommitSM: Moving Forward\r\n");
+      drive(FORWARD, getDesiredBranchDistance(), forward_speed);
       
     }
     
