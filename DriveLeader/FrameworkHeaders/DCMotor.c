@@ -38,9 +38,9 @@ static uint32_t Rspeed_desired = 0;
 /* PI control updates */
 static uint32_t low_speed_threshold = 50;
 static float fastLkP = 0.2;   //.2, 2
-static float fastLkI = 0.02;  // .02
-static float fastRkP = 0.2;   //.2, 1
-static float fastRkI = 0.02;  // .03
+static float fastLkI = 0.04;  // .02
+static float fastRkP = 0.15;   //.2, 1
+static float fastRkI = 0.04;  // .03
 
 static float slowLkP = 0.1;
 static float slowLkI = 0.005;
@@ -454,7 +454,8 @@ void adjust(Motors_t motor, Directions_t direction, uint32_t dist_cm, uint32_t s
 void rotate90(Directions_t direction, uint32_t speed)
 {
   // Assuming 76cm circumference, 90 degrees is 19cm.
-  drive(direction, 19, speed);
+  // drive(direction, 19, speed);
+  drive(direction, 18, speed);
 }
 
 /* Return true if this classifies as a noisy interrupt. */

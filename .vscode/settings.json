@@ -17,6 +17,7 @@
       "beaconsensor.h": "c",
       "eventoverspi.h": "c",
       "testharnessservice0.h": "c",
-      "dcmotor.h": "c"
+      "dcmotor.h": "c",
+      "distanceslider.h": "c"
     }
 }

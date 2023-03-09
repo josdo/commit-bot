@@ -11,10 +11,11 @@
 
 static PushCommitSMState_t CurrentState;
 static ES_Event_t DuringRotateToFaceBranch(ES_Event_t Event);
-static ES_Event_t DuringSlowMoveForward(ES_Event_t Event);
-static ES_Event_t DuringMoveForward(ES_Event_t Event);
 static ES_Event_t DuringBackUpABit(ES_Event_t Event);
 static ES_Event_t DuringForwardABit(ES_Event_t Event);
+static ES_Event_t DuringForward1(ES_Event_t Event);
+static ES_Event_t DuringForward2(ES_Event_t Event);
+static ES_Event_t DuringForwardLast(ES_Event_t Event);
 
 #ifdef DEBUG_ON
 static const uint32_t slow_forward_speed = 150;
@@ -23,14 +24,16 @@ static const uint32_t a_bit_speed = 50;
 static const uint32_t a_bit_cm = 10;
 static const uint32_t rotate_speed = 40;
 #else
-static const uint32_t forward_speed = 175;
-// TODO: 3 stage
-static const uint32_t slow_forward_speed = 75;
+
+static const uint32_t forward1_cm = 5;
+static const uint32_t forward1_speed = 75;
+static const uint32_t forward2_cm = 5;
+static const uint32_t forward2_speed = 125;
+static const uint32_t forwardlast_speed = 175;
+
 static const uint32_t a_bit_speed = 80;
 static const uint32_t a_bit_cm = 15;
-static const uint32_t rotate_speed = 80;
-
-static const float slow_forward_cm = 15;
+static const uint32_t rotate_speed = 60;
 
 #endif
 
@@ -87,7 +90,7 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
                     case ES_ROTATED:
                     {
                         DB_printf("PushCommitSM: Finished rotating to face branch\r\n");
-                        NextState = SLOW_MOVE_FORWARD;
+                        NextState = FORWARD1;
                         MakeTransition = true;
                     }
                 }
@@ -95,34 +98,49 @@ ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent)
         }
         break;
 
-        case SLOW_MOVE_FORWARD:
+        case FORWARD1:
         {
-            CurrentEvent = DuringSlowMoveForward(CurrentEvent);
+            CurrentEvent = DuringForward1(CurrentEvent);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch(CurrentEvent.EventType)
                 {
                     case ES_TRANSLATED:
                     {
-                      DB_printf("PushCommitSM: done SLOWER move forward\r\n");
-                      NextState = MOVE_FORWARD;
+                      NextState = FORWARD2;
                       MakeTransition = true;
                     }
                 }
             }
         }
         break;
-        
-        case MOVE_FORWARD:
+
+        case FORWARD2:
         {
-            CurrentEvent = DuringMoveForward(CurrentEvent);
+            CurrentEvent = DuringForward2(CurrentEvent);
             if(CurrentEvent.EventType != ES_NO_EVENT)
             {
                 switch(CurrentEvent.EventType)
                 {
                     case ES_TRANSLATED:
                     {
-                      DB_printf("PushCommitSM: done FASTER move forward\r\n");
+                      NextState = FORWARDLAST;
+                      MakeTransition = true;
+                    }
+                }
+            }
+        }
+        break;
+
+        case FORWARDLAST:
+        {
+            CurrentEvent = DuringForwardLast(CurrentEvent);
+            if(CurrentEvent.EventType != ES_NO_EVENT)
+            {
+                switch(CurrentEvent.EventType)
+                {
+                    case ES_TRANSLATED:
+                    {
                         ES_Event_t NewEvent;
                         NewEvent.EventType = ES_FINISH;
                         PostTopHSM(NewEvent);
@@ -236,15 +254,15 @@ static ES_Event_t DuringForwardABit(ES_Event_t Event)
     return ReturnEvent;
 }
 
-static ES_Event_t DuringSlowMoveForward(ES_Event_t Event)
+
+static ES_Event_t DuringForward1(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-      drive(FORWARD, slow_forward_cm, slow_forward_speed);
+      drive(FORWARD, forward1_cm, forward1_speed);
     }
-    
     else if (Event.EventType == ES_EXIT)
     {
     }
@@ -254,15 +272,30 @@ static ES_Event_t DuringSlowMoveForward(ES_Event_t Event)
     return ReturnEvent;
 }
 
-
-static ES_Event_t DuringMoveForward(ES_Event_t Event)
+static ES_Event_t DuringForward2(ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event;
     if ( (Event.EventType == ES_ENTRY) || 
          (Event.EventType == ES_ENTRY_HISTORY))
     {
-      drive(FORWARD, getDesiredBranchDistance() - slow_forward_cm, forward_speed);
-      
+      drive(FORWARD, forward2_cm, forward2_speed);
+    }
+    else if (Event.EventType == ES_EXIT)
+    {
+    }
+    else
+    {
+    }
+    return ReturnEvent;
+}
+
+static ES_Event_t DuringForwardLast(ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event;
+    if ( (Event.EventType == ES_ENTRY) || 
+         (Event.EventType == ES_ENTRY_HISTORY))
+    {
+      drive(FORWARD, getDesiredBranchDistance() - forward1_cm - forward2_cm, forwardlast_speed);
     }
     
     else if (Event.EventType == ES_EXIT)

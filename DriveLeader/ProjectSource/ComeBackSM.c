@@ -7,10 +7,11 @@
 #include "DCMotor.h"
 
 
-static ES_Event_t DuringReverseToWall( ES_Event_t Event);
 static ES_Event_t DuringRotateInRepo( ES_Event_t Event);
 static ES_Event_t DuringMoveForwardABit( ES_Event_t Event);
-static ES_Event_t DuringSlowReverseToWall( ES_Event_t Event);
+static ES_Event_t DuringReverse1ToWall( ES_Event_t Event);
+static ES_Event_t DuringReverse2ToWall( ES_Event_t Event);
+static ES_Event_t DuringReverseLastToWall( ES_Event_t Event);
 GoToBranchOriginState_t CurrentBranch;
 static ComeBackState_t CurrentState;
 
@@ -18,16 +19,19 @@ static ComeBackState_t CurrentState;
 static const uint32_t a_bit_cm = 20;
 static const uint32_t a_bit_speed = 50;
 static const uint32_t rotate_speed = 50;
-static const uint32_t reverse_speed = 100;
+static const uint32_t reverselast_speed = 100;
 #else
 static const uint32_t a_bit_cm = 10;
 static const uint32_t a_bit_speed = 80;
 static const uint32_t rotate_speed = 60;
 
-static const uint32_t reverse_speed = 150;
-// TODO: 70
-static const uint32_t slow_reverse_speed = 30;
-static const uint32_t slow_reverse_cm = 15;
+static const uint32_t reverse1_speed = 75;
+static const uint32_t reverse1_cm = 5;
+static const uint32_t reverse2_speed = 125;
+static const uint32_t reverse2_cm = 5;
+static const uint32_t reverselast_speed = 175;
+
+static const uint16_t stop_ms = 500;
 #endif
 
 static uint32_t debounce_time = 200;
@@ -41,8 +45,19 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
 
    switch ( CurrentState )
    {
-       case SLOW_REVERSE_TO_WALL :
-           CurrentEvent = DuringSlowReverseToWall(CurrentEvent);
+        case STOP_COME_BACK:
+        {
+            if (ES_TIMEOUT == CurrentEvent.EventType && CurrentEvent.EventParam == COME_BACK_STOP_TIMER)
+            {
+                NextState = REVERSE1_TO_WALL;
+                MakeTransition = true;
+            }
+        }
+        break;
+        
+
+       case REVERSE1_TO_WALL :
+           CurrentEvent = DuringReverse1ToWall(CurrentEvent);
          //process any events
          if ( CurrentEvent.EventType != ES_NO_EVENT ) //If an event is active
          {
@@ -50,7 +65,7 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
             {
                case ES_TRANSLATED : //If event is event one
                {
-                  NextState = REVERSE_TO_WALL;
+                  NextState = REVERSE2_TO_WALL;
                   MakeTransition = true; //mark that we are taking a transition
                }
                break;
@@ -58,8 +73,25 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
          }
        break;
 
-       case REVERSE_TO_WALL :
-           CurrentEvent = DuringReverseToWall(CurrentEvent);
+       case REVERSE2_TO_WALL :
+           CurrentEvent = DuringReverse2ToWall(CurrentEvent);
+         //process any events
+         if ( CurrentEvent.EventType != ES_NO_EVENT ) //If an event is active
+         {
+            switch (CurrentEvent.EventType)
+            {
+               case ES_TRANSLATED : //If event is event one
+               {
+                  NextState = REVERSELAST_TO_WALL;
+                  MakeTransition = true; //mark that we are taking a transition
+               }
+               break;
+            }
+         }
+       break;
+
+       case REVERSELAST_TO_WALL :
+           CurrentEvent = DuringReverseLastToWall(CurrentEvent);
          //process any events
          if ( CurrentEvent.EventType != ES_NO_EVENT ) //If an event is active
          {
@@ -131,6 +163,7 @@ ES_Event_t RunComeBackSM( ES_Event_t CurrentEvent )
      return(ReturnEvent);
 }
 
+/* Stop on entry into ComeBack SM. */
 void StartComeBackSM ( ES_Event_t CurrentEvent )
 {
    // to implement entry to a history state or directly to a substate
@@ -139,7 +172,10 @@ void StartComeBackSM ( ES_Event_t CurrentEvent )
    // is started
    if ( ES_ENTRY_HISTORY != CurrentEvent.EventType )
    {
-        CurrentState = SLOW_REVERSE_TO_WALL;
+      ES_Timer_InitTimer(COME_BACK_STOP_TIMER, stop_ms);
+      CurrentState = STOP_COME_BACK;
+      setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
+      setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
    }
    // call the entry function (if any) for the ENTRY_STATE
    RunComeBackSM(CurrentEvent);
@@ -150,7 +186,7 @@ ComeBackState_t QueryComeBackSM ( void )
    return(CurrentState);
 }
 
-static ES_Event_t DuringSlowReverseToWall( ES_Event_t Event)
+static ES_Event_t DuringReverse1ToWall( ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event; // assume no re-mapping or consumption
 
@@ -158,8 +194,7 @@ static ES_Event_t DuringSlowReverseToWall( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-      DB_printf("ComeBackSM: SLOW reverse till wall\r\n");
-      drive(BACKWARD, slow_reverse_cm, slow_reverse_speed);
+      drive(BACKWARD, reverse1_cm, reverse1_speed);
     }
     else if ( Event.EventType == ES_EXIT )
     {
@@ -168,7 +203,8 @@ static ES_Event_t DuringSlowReverseToWall( ES_Event_t Event)
     }
     return(ReturnEvent);
 }
-static ES_Event_t DuringReverseToWall( ES_Event_t Event)
+
+static ES_Event_t DuringReverse2ToWall( ES_Event_t Event)
 {
     ES_Event_t ReturnEvent = Event; // assume no re-mapping or consumption
 
@@ -176,9 +212,26 @@ static ES_Event_t DuringReverseToWall( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-        DB_printf("ComeBackSM: Reversing till wall\r\n");
-        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, reverse_speed);
-        setDesiredSpeed(LEFT_MOTOR, BACKWARD, reverse_speed);
+      drive(BACKWARD, reverse2_cm, reverse2_speed);
+    }
+    else if ( Event.EventType == ES_EXIT )
+    {
+    }else
+    {
+    }
+    return(ReturnEvent);
+}
+
+static ES_Event_t DuringReverseLastToWall( ES_Event_t Event)
+{
+    ES_Event_t ReturnEvent = Event; // assume no re-mapping or consumption
+
+    // process ES_ENTRY, ES_ENTRY_HISTORY & ES_EXIT events
+    if ( (Event.EventType == ES_ENTRY) ||
+         (Event.EventType == ES_ENTRY_HISTORY) )
+    {
+        setDesiredSpeed(RIGHT_MOTOR, BACKWARD, reverselast_speed);
+        setDesiredSpeed(LEFT_MOTOR, BACKWARD, reverselast_speed);
     }
     else if ( Event.EventType == ES_EXIT )
     {
@@ -196,7 +249,6 @@ static ES_Event_t DuringMoveForwardABit( ES_Event_t Event)
     if ( (Event.EventType == ES_ENTRY) ||
          (Event.EventType == ES_ENTRY_HISTORY) )
     {
-        DB_printf("ComeBackSM: drive forward in DuringMoveForwardABit\r\n");
         drive(FORWARD, a_bit_cm, a_bit_speed);
     }
     else if ( Event.EventType == ES_EXIT )
@@ -238,7 +290,7 @@ bool Check4Wall(void)
   uint32_t currTime = ES_Timer_GetTime();
   bool stateChanged = (currSwitchState != lastSwitchState);
   bool beyondCooldown = (currTime - lastTime > debounce_time);
-  if(CurrentState == REVERSE_TO_WALL)
+  if(CurrentState == REVERSELAST_TO_WALL)
   {
     if (stateChanged && beyondCooldown && (currSwitchState == 1)) {
       ES_Event_t ThisEvent = {ES_REACHED_WALL};

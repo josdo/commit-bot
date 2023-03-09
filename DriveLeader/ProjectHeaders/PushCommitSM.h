@@ -3,10 +3,11 @@
 
 typedef enum {
     BACK_UP_A_BIT,
+    FORWARD_A_BIT,
     ROTATE_TO_FACE_BRANCH,
-    SLOW_MOVE_FORWARD,
-    MOVE_FORWARD,
-    FORWARD_A_BIT
+    FORWARD1,
+    FORWARD2,
+    FORWARDLAST
 } PushCommitSMState_t;
 
 ES_Event_t RunPushCommitSM(ES_Event_t CurrentEvent);

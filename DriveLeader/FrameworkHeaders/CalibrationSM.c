@@ -20,7 +20,7 @@ static const uint8_t NUM_PULSE = 3;
 static uint8_t countB = 0;
 static uint8_t countC = 0;
 
-static uint16_t stop_ms = 200;
+static uint16_t stop_ms = 500;
 
 #ifdef DEBUG_ON
 static uint32_t a_bit_cm = 20;
@@ -30,8 +30,8 @@ static uint32_t rotate_speed = 50;
 #else
 static uint32_t a_bit_cm = 15;
 static uint32_t backup_speed = 80;
-static uint32_t forward_speed = 80;
-static uint32_t rotate_speed = 80;
+static uint32_t forward_speed = 40;
+static uint32_t rotate_speed = 60;
 #endif
 
 ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
@@ -70,7 +70,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                         if (CurrentEvent.EventParam == BeaconB || CurrentEvent.EventParam == BeaconC) 
                         {
                             
-                            NextState = STOP;
+                            NextState = BACK_UP;
                             MakeTransition = true;
                             
                             switch(BeaconName)
@@ -97,16 +97,6 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
         }
         break;
         
-        case STOP:
-        {
-            if (ES_TIMEOUT == CurrentEvent.EventType && CurrentEvent.EventParam == STOP_TIMER)
-            {
-                NextState = BACK_UP;
-                MakeTransition = true;
-            }
-        }
-        break;
-        
         case BACK_UP:
         {   CurrentEvent = DuringBackUp(CurrentEvent);
             if(CurrentEvent.EventType != ES_NO_EVENT)
@@ -115,7 +105,7 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
                 {
                     case ES_DONE_BACK_UP:
                     {
-                        NextState = FORWARD_UNTIL_BEACON;
+                        NextState = STOP;
                         MakeTransition = true;
                     }
                     break;
@@ -123,6 +113,17 @@ ES_Event_t RunCalibrationSM(ES_Event_t CurrentEvent)
             }
         }
         break;
+
+        case STOP:
+        {
+            if (ES_TIMEOUT == CurrentEvent.EventType && CurrentEvent.EventParam == STOP_TIMER)
+            {
+                NextState = FORWARD_UNTIL_BEACON;
+                MakeTransition = true;
+            }
+        }
+        break;
+        
         
         case FORWARD_UNTIL_BEACON:
         {
@@ -199,7 +200,6 @@ static ES_Event_t DuringRotateToAlign(ES_Event_t Event)
     }
     else if (Event.EventType == ES_EXIT)
     {
-        ES_Timer_InitTimer(STOP_TIMER, stop_ms);
         setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
     }
@@ -231,6 +231,7 @@ static ES_Event_t DuringBackUp(ES_Event_t Event)
         setDesiredSpeed(LEFT_MOTOR, FORWARD, 0);
         setDesiredSpeed(RIGHT_MOTOR, FORWARD, 0);
         puts("Stop Moving\r\n");
+        ES_Timer_InitTimer(STOP_TIMER, stop_ms);
     }
     else
     {

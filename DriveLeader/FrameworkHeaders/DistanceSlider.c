@@ -12,11 +12,11 @@
 static uint32_t analog_signal[1];
 
 // Length of branch in cm.
-static uint32_t max_distance = 130; 
+static uint32_t max_distance = 143; 
 
 /* Percentages down the branch to travel. */
 // analog 850
-static const uint16_t percent1 = 55;
+static const uint16_t percent1 = 60;
 // analog 670
 static const uint16_t percent2 = 70;
 // analog 510

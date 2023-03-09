@@ -11,8 +11,10 @@
 // typedefs for the states
 // State definitions for use with the query function
 typedef enum { 
-        SLOW_REVERSE_TO_WALL,
-  REVERSE_TO_WALL, 
+  STOP_COME_BACK,
+  REVERSE1_TO_WALL,
+  REVERSE2_TO_WALL,
+  REVERSELAST_TO_WALL,
         MOVE_FORWARD_A_BIT,
         ROTATE_IN_REPO, 
 } ComeBackState_t ;
