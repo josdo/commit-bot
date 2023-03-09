@@ -36,7 +36,7 @@ void InitEventOverSPI(bool isDriveMaster)
   // SPI setup
   SPI_Module_t Module = SPI_SPI1;
   SPI_SamplePhase_t Phase = SPI_SMP_MID;
-  uint32_t SPI_ClkPeriodIn_ns = 50000; // 50 KHz clock
+  uint32_t SPI_ClkPeriodIn_ns = 25000; // 100 KHz clock
   SPI_PinMap_t SSPin = SPI_RPA0;
   SPI_PinMap_t SDIPin = SPI_RPB8;
   SPI_PinMap_t SDOPin = SPI_RPA1;
