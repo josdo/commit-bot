@@ -178,7 +178,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       {
         // desired_speed = desired_speed == 100 ? 100 : desired_speed + 10;
           // Increase
-          desired_speed += 20;
+          desired_speed += 10;
           setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
           setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
           DB_printf("Increase desired speed to %u\r\n", desired_speed);
@@ -187,7 +187,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       {
           // Decrease
 
-          desired_speed = desired_speed == 0 ? 0 : desired_speed - 20;
+          desired_speed = desired_speed == 0 ? 0 : desired_speed - 10;
           setDesiredSpeed(LEFT_MOTOR, desired_direction, desired_speed);
           setDesiredSpeed(RIGHT_MOTOR, desired_direction, desired_speed);
           DB_printf("Decrease desired speed to %u\r\n", desired_speed);
@@ -249,7 +249,7 @@ ES_Event_t RunTestHarnessService0(ES_Event_t ThisEvent)
       else if ('r' == ThisEvent.EventParam)
       {
         DB_printf("Rotate CW\r\n");
-        rotate90(CW, 40);
+        rotate90(CW, 60);
       }
 
       else if ('n' == ThisEvent.EventParam)

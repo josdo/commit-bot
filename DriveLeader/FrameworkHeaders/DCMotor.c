@@ -36,7 +36,8 @@ static uint32_t Lspeed_desired = 0;
 static uint32_t Rspeed_desired = 0;
 
 /* PI control updates */
-static uint32_t low_speed_threshold = 50;
+// static uint32_t low_speed_threshold = 61;
+static uint32_t low_speed_threshold = 500;
 static float fastLkP = 0.2;   //.2, 2
 static float fastLkI = 0.04;  // .02
 static float fastRkP = 0.15;   //.2, 1
